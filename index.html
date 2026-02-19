@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReqRight — Free Systems Engineering Tool</title>
+<meta name="description" content="Free, open-source INCOSE GtWR v4 compliant requirements engineering tool. 42-rule quality analysis, AI improvement, DOORS ReqIF export. No login required. Your data stays on your machine.">
+<meta name="keywords" content="INCOSE, requirements engineering, systems engineering, GtWR v4, DOORS, ReqIF, ISO 29148, requirements management, quality analysis, free tool">
+<meta property="og:title" content="ReqRight — Free Systems Engineering Tool">
+<meta property="og:description" content="Write Better Requirements — Free educational tool based on INCOSE® GtWR v4. 42 INCOSE rules. AI quality engine. DOORS export. Free forever.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --ink:#0b0e14;--surface:#10141e;--panel:#161c2c;--rule:#1e2640;--ruleHi:#2a3558;
+  --chalk:#e8ecf4;--mid:#8892a8;--dim:#4a5370;
+  --cyan:#00d4ff;--cyanDim:#003d4d;--cyanGlow:rgba(0,212,255,.12);
+  --amber:#ffb020;--amberDlow:rgba(255,176,32,.1);
+  --emerald:#00e68a;--rose:#ff4d6a;
+  --display:'Instrument Serif',Georgia,serif;
+  --body:'Outfit',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+}
+html{scroll-behavior:smooth;}
+body{background:var(--ink);color:var(--chalk);font-family:var(--body);overflow-x:hidden;-webkit-font-smoothing:antialiased;}
+::selection{background:var(--cyan);color:var(--ink);}
+::-webkit-scrollbar{width:4px;}::-webkit-scrollbar-track{background:var(--ink);}::-webkit-scrollbar-thumb{background:var(--rule);border-radius:2px;}
+
+/* ── GRID BACKGROUND ── */
+.grid-bg{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background-image:
+    linear-gradient(var(--rule) 1px, transparent 1px),
+    linear-gradient(90deg, var(--rule) 1px, transparent 1px);
+  background-size:80px 80px;opacity:.15;
+}
+.grid-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 30%,transparent 0%,var(--ink) 70%);}
+
+/* ── NOISE TEXTURE ── */
+.noise{position:fixed;inset:0;pointer-events:none;z-index:1;opacity:.03;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ── SECTIONS ── */
+section{position:relative;z-index:2;}
+.container{max-width:1200px;margin:0 auto;padding:0 40px;}
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes draw{from{stroke-dashoffset:1000}to{stroke-dashoffset:0}}
+@keyframes glow{0%,100%{opacity:.6}50%{opacity:1}}
+@keyframes scan{0%{transform:translateY(-100%)}100%{transform:translateY(100vh)}}
+@keyframes typewriter{from{width:0}to{width:100%}}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+@keyframes rotSlow{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+
+.reveal{opacity:0;transform:translateY(40px);transition:all .8s cubic-bezier(.22,1,.36,1);}
+.reveal.visible{opacity:1;transform:translateY(0);}
+.reveal-d1{transition-delay:.1s;}.reveal-d2{transition-delay:.2s;}.reveal-d3{transition-delay:.3s;}
+.reveal-d4{transition-delay:.4s;}.reveal-d5{transition-delay:.5s;}.reveal-d6{transition-delay:.6s;}
+
+/* ── NAV ── */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:16px 0;transition:all .3s;background:transparent;}
+nav.scrolled{background:rgba(11,14,20,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--rule);}
+nav .container{display:flex;justify-content:space-between;align-items:center;}
+.nav-logo{display:flex;align-items:center;gap:12px;text-decoration:none;color:var(--chalk);}
+.nav-mark{width:40px;height:40px;border:2px solid var(--cyan);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:600;font-size:14px;color:var(--cyan);position:relative;}
+.nav-mark::before{content:'';position:absolute;inset:-4px;border:1px solid var(--cyanGlow);border-radius:10px;}
+.nav-brand{font-family:var(--display);font-size:18px;letter-spacing:-.02em;}
+.nav-links{display:flex;gap:32px;align-items:center;}
+.nav-links a{color:var(--mid);text-decoration:none;font-size:14px;font-weight:500;transition:color .2s;letter-spacing:.01em;}
+.nav-links a:hover{color:var(--chalk);}
+.nav-cta{padding:10px 24px;background:var(--cyan);color:var(--ink);font-size:14px;font-weight:700;border-radius:6px;text-decoration:none;transition:all .2s;border:none;cursor:pointer;font-family:var(--body);}
+.nav-cta:hover{filter:brightness(1.1);transform:translateY(-1px);box-shadow:0 8px 24px rgba(0,212,255,.25);}
+
+/* ── HERO ── */
+.hero{min-height:100vh;display:flex;align-items:center;padding:120px 0 80px;position:relative;overflow:hidden;}
+.hero-deco{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:800px;height:800px;pointer-events:none;}
+.hero-deco svg{width:100%;height:100%;animation:rotSlow 120s linear infinite;}
+.hero-content{position:relative;text-align:center;max-width:900px;margin:0 auto;}
+.hero-eyebrow{display:inline-flex;align-items:center;gap:8px;padding:6px 16px;border:1px solid var(--rule);border-radius:100px;font-size:12px;font-weight:600;color:var(--cyan);letter-spacing:.08em;text-transform:uppercase;margin-bottom:32px;animation:fadeUp .8s ease both;background:rgba(0,212,255,.04);}
+.hero-eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--emerald);animation:glow 2s ease infinite;}
+.hero h1{font-family:var(--display);font-size:clamp(48px,7vw,88px);line-height:1.05;letter-spacing:-.03em;margin-bottom:24px;animation:fadeUp .8s ease .15s both;}
+.hero h1 em{font-style:italic;color:var(--cyan);position:relative;}
+.hero h1 em::after{content:'';position:absolute;bottom:4px;left:0;right:0;height:3px;background:var(--cyan);opacity:.3;border-radius:2px;}
+.hero-sub{font-size:20px;color:var(--mid);line-height:1.6;max-width:640px;margin:0 auto 40px;font-weight:400;animation:fadeUp .8s ease .3s both;}
+.hero-actions{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;animation:fadeUp .8s ease .45s both;}
+.btn-hero{padding:16px 36px;font-size:16px;font-weight:700;border-radius:8px;text-decoration:none;transition:all .2s;display:inline-flex;align-items:center;gap:8px;font-family:var(--body);border:none;cursor:pointer;}
+.btn-hero-pri{background:var(--cyan);color:var(--ink);}
+.btn-hero-pri:hover{filter:brightness(1.1);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,212,255,.3);}
+.btn-hero-sec{background:transparent;color:var(--chalk);border:1px solid var(--ruleHi);}
+.btn-hero-sec:hover{border-color:var(--chalk);background:rgba(255,255,255,.03);}
+.hero-trust{margin-top:64px;animation:fadeUp .8s ease .6s both;}
+.hero-trust p{font-size:12px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:16px;}
+.trust-badges{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;}
+.trust-badge{padding:8px 20px;border:1px solid var(--rule);border-radius:6px;font-family:var(--mono);font-size:11px;color:var(--mid);background:rgba(22,28,44,.5);letter-spacing:.02em;}
+
+/* ── PROBLEM ── */
+.problem{padding:120px 0;border-top:1px solid var(--rule);}
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;}
+.problem-visual{position:relative;}
+.problem-card{background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:24px;margin-bottom:16px;transition:all .4s;}
+.problem-card.bad{border-left:3px solid var(--rose);}
+.problem-card.good{border-left:3px solid var(--emerald);}
+.problem-card .tag{font-family:var(--mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+.problem-card.bad .tag{color:var(--rose);}
+.problem-card.good .tag{color:var(--emerald);}
+.problem-card .text{font-size:14px;line-height:1.7;color:var(--mid);}
+.problem-card .text s{color:var(--dim);text-decoration:line-through;}
+.problem-card .text strong{color:var(--chalk);font-weight:600;}
+.section-label{font-family:var(--mono);font-size:12px;color:var(--cyan);text-transform:uppercase;letter-spacing:.12em;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.section-label::before{content:'';width:24px;height:1px;background:var(--cyan);}
+h2.section-title{font-family:var(--display);font-size:clamp(36px,4vw,52px);line-height:1.15;letter-spacing:-.02em;margin-bottom:20px;}
+.section-desc{font-size:17px;color:var(--mid);line-height:1.7;max-width:520px;}
+
+/* ── FEATURES ── */
+.features{padding:120px 0;border-top:1px solid var(--rule);}
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:56px;}
+.feat-card{background:var(--panel);border:1px solid var(--rule);border-radius:12px;padding:32px;position:relative;overflow:hidden;transition:all .3s;}
+.feat-card:hover{border-color:var(--ruleHi);transform:translateY(-4px);box-shadow:0 20px 60px rgba(0,0,0,.3);}
+.feat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--cyan),transparent);opacity:0;transition:opacity .3s;}
+.feat-card:hover::before{opacity:1;}
+.feat-icon{width:48px;height:48px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:20px;border:1px solid var(--rule);background:var(--surface);}
+.feat-card h3{font-family:var(--display);font-size:22px;margin-bottom:10px;letter-spacing:-.01em;}
+.feat-card p{font-size:14px;color:var(--mid);line-height:1.7;}
+.feat-tag{display:inline-block;margin-top:14px;font-family:var(--mono);font-size:10px;color:var(--cyan);padding:3px 10px;border:1px solid var(--cyanDim);border-radius:4px;text-transform:uppercase;letter-spacing:.06em;}
+
+/* ── HOW IT WORKS ── */
+.how{padding:120px 0;border-top:1px solid var(--rule);}
+.how-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin-top:56px;}
+.step{background:var(--panel);border:1px solid var(--rule);padding:36px 28px;position:relative;}
+.step:first-child{border-radius:12px 0 0 12px;}
+.step:last-child{border-radius:0 12px 12px 0;}
+.step-num{font-family:var(--mono);font-size:48px;font-weight:700;color:var(--rule);line-height:1;margin-bottom:16px;transition:color .3s;}
+.step:hover .step-num{color:var(--cyan);}
+.step h3{font-size:17px;font-weight:700;margin-bottom:8px;letter-spacing:-.01em;}
+.step p{font-size:13px;color:var(--mid);line-height:1.6;}
+.step-arrow{position:absolute;right:-14px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:20px;z-index:1;}
+
+/* ── STANDARDS ── */
+.standards{padding:120px 0;border-top:1px solid var(--rule);}
+.standards-list{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:48px;}
+.std-card{display:flex;gap:20px;padding:24px;background:var(--panel);border:1px solid var(--rule);border-radius:10px;transition:border-color .3s;}
+.std-card:hover{border-color:var(--ruleHi);}
+.std-icon{width:52px;height:52px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0;border:1px solid var(--rule);background:var(--surface);}
+.std-card h3{font-size:15px;font-weight:700;margin-bottom:4px;}
+.std-card p{font-size:13px;color:var(--mid);line-height:1.6;}
+
+/* ── USE CASES ── */
+.usecases{padding:120px 0;border-top:1px solid var(--rule);}
+.uc-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;margin-top:48px;}
+.uc-card{padding:32px;background:var(--panel);border:1px solid var(--rule);border-radius:12px;position:relative;}
+.uc-card::before{content:'"';font-family:var(--display);font-size:80px;color:var(--rule);position:absolute;top:8px;left:24px;line-height:1;}
+.uc-card .uc-text{font-size:15px;color:var(--chalk);line-height:1.7;margin-bottom:20px;position:relative;font-style:italic;padding-top:40px;}
+.uc-card .uc-role{font-family:var(--mono);font-size:11px;color:var(--cyan);text-transform:uppercase;letter-spacing:.08em;}
+
+/* ── PRIVACY ── */
+.privacy{padding:100px 0;border-top:1px solid var(--rule);}
+.privacy-box{background:var(--panel);border:1px solid var(--rule);border-radius:16px;padding:56px;text-align:center;position:relative;overflow:hidden;}
+.privacy-box::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,var(--cyanGlow),transparent 60%);pointer-events:none;}
+.privacy-box h2{font-family:var(--display);font-size:36px;margin-bottom:12px;position:relative;}
+.privacy-box p{font-size:16px;color:var(--mid);line-height:1.7;max-width:600px;margin:0 auto;position:relative;}
+.privacy-features{display:flex;justify-content:center;gap:32px;margin-top:32px;position:relative;}
+.priv-feat{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--chalk);font-weight:500;}
+.priv-feat .icon{color:var(--emerald);font-size:18px;}
+
+/* ── CTA ── */
+.cta{padding:120px 0 80px;text-align:center;}
+.cta h2{font-family:var(--display);font-size:clamp(40px,5vw,64px);line-height:1.1;letter-spacing:-.03em;margin-bottom:16px;}
+.cta h2 em{font-style:italic;color:var(--cyan);}
+.cta p{font-size:18px;color:var(--mid);margin-bottom:40px;max-width:500px;margin-left:auto;margin-right:auto;line-height:1.6;}
+.cta-buttons{display:flex;gap:16px;justify-content:center;flex-wrap:wrap;}
+
+/* ── FOOTER ── */
+footer{padding:40px 0;border-top:1px solid var(--rule);text-align:center;}
+footer p{font-size:12px;color:var(--dim);line-height:1.8;}
+footer a{color:var(--mid);text-decoration:none;}
+footer a:hover{color:var(--cyan);}
+
+/* ── RESPONSIVE ── */
+@media(max-width:900px){
+  .problem-grid{grid-template-columns:1fr;gap:40px;}
+  .features-grid{grid-template-columns:1fr 1fr;}
+  .how-steps{grid-template-columns:1fr 1fr;gap:12px;}
+  .step{border-radius:10px!important;}.step-arrow{display:none;}
+  .uc-grid{grid-template-columns:1fr;}
+  .standards-list{grid-template-columns:1fr;}
+  .privacy-features{flex-direction:column;align-items:center;gap:16px;}
+  .nav-links{display:none;}
+}
+@media(max-width:600px){
+  .container{padding:0 20px;}
+  .features-grid,.how-steps{grid-template-columns:1fr;}
+  .hero-actions{flex-direction:column;align-items:center;}
+  .btn-hero{width:100%;justify-content:center;}
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="noise"></div>
+
+<!-- ═══ NAV ═══ -->
+<nav id="nav">
+  <div class="container">
+    <a href="#" class="nav-logo">
+      <div class="nav-mark">RE</div>
+      <span class="nav-brand">Requirements Workbench</span>
+    </a>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#how">How It Works</a>
+      <a href="#standards">Standards</a>
+      <a href="#privacy">Privacy</a>
+      <a href="https://github.com/ssaleem74/reqright#readme" target="_blank">Documentation</a>
+      <a href="reqright.html" class="nav-cta">Launch Tool →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══ HERO ═══ -->
+<section class="hero">
+  <div class="hero-deco">
+    <svg viewBox="0 0 800 800" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="400" cy="400" r="350" stroke="#1e2640" stroke-width="0.5"/>
+      <circle cx="400" cy="400" r="280" stroke="#1e2640" stroke-width="0.5" stroke-dasharray="4 8"/>
+      <circle cx="400" cy="400" r="200" stroke="#1e2640" stroke-width="0.5"/>
+      <line x1="400" y1="50" x2="400" y2="750" stroke="#1e2640" stroke-width="0.3"/>
+      <line x1="50" y1="400" x2="750" y2="400" stroke="#1e2640" stroke-width="0.3"/>
+      <line x1="140" y1="140" x2="660" y2="660" stroke="#1e2640" stroke-width="0.3"/>
+      <line x1="660" y1="140" x2="140" y2="660" stroke="#1e2640" stroke-width="0.3"/>
+    </svg>
+  </div>
+  <div class="container">
+    <div class="hero-content">
+      <div class="hero-eyebrow"><span class="dot"></span> Free &amp; Open — No Login Required</div>
+      <h1>Write <em>better</em> requirements.</h1>
+      <p class="hero-sub">The free INCOSE GtWR v4 compliant workbench that analyses every requirement against all 42 rules, improves quality with AI, and exports to DOORS — all inside your browser.</p>
+      <div class="hero-actions">
+        <a href="reqright.html" class="btn-hero btn-hero-pri">Launch ReqRight →</a>
+        <a href="https://github.com/ssaleem74/reqright#readme" target="_blank" class="btn-hero btn-hero-sec">📖 Read Tutorial</a>
+      </div>
+      <div class="hero-trust">
+        <p>Built on International Standards</p>
+        <div class="trust-badges">
+          <span class="trust-badge">INCOSE GtWR v4</span>
+          <span class="trust-badge">ISO/IEC/IEEE 29148</span>
+          <span class="trust-badge">ISO/IEC/IEEE 15288</span>
+          <span class="trust-badge">OMG ReqIF</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PROBLEM / SOLUTION ═══ -->
+<section class="problem" id="problem">
+  <div class="container">
+    <div class="problem-grid">
+      <div class="reveal">
+        <div class="section-label">The Problem</div>
+        <h2 class="section-title">Poor requirements cost programmes millions.</h2>
+        <p class="section-desc">Studies consistently show that 40-50% of defects originate in requirements. Vague language, passive voice, untestable statements, and missing traceability propagate through design, build, and test — compounding cost at every stage. Most teams catch these issues too late, or not at all.</p>
+      </div>
+      <div class="problem-visual">
+        <div class="problem-card bad reveal reveal-d1">
+          <div class="tag">✕ Before</div>
+          <div class="text"><s>The system should be able to process data in a fast and reliable manner, where possible, including but not limited to sensor inputs etc.</s></div>
+        </div>
+        <div class="problem-card good reveal reveal-d2">
+          <div class="tag">✓ After — AI Improved</div>
+          <div class="text"><strong>The Data_Processor shall process each sensor input within 200 ± 20 ms with MTBF ≥ 5000 hours.</strong></div>
+        </div>
+        <div style="margin-top:20px;padding:16px 20px;border:1px solid var(--rule);border-radius:8px;background:var(--surface);" class="reveal reveal-d3">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-family:var(--mono);font-size:12px;color:var(--emerald);">Quality Score</span>
+            <span style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--emerald);">94% (A)</span>
+          </div>
+          <div style="height:6px;background:var(--rule);border-radius:3px;overflow:hidden;">
+            <div style="width:94%;height:100%;background:linear-gradient(90deg,var(--cyan),var(--emerald));border-radius:3px;"></div>
+          </div>
+          <div style="font-size:11px;color:var(--mid);margin-top:8px;">R1 ✓ R2 ✓ R5 ✓ R6 ✓ R7 ✓ R8 ✓ R9 ✓ R10 ✓ R14 ✓ R18 ✓ R33 ✓ R34 ✓ — 40/42 rules passed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FEATURES ═══ -->
+<section class="features" id="features">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Capabilities</div>
+      <h2 class="section-title">Everything you need.<br>Nothing you don't.</h2>
+    </div>
+    <div class="features-grid">
+      <div class="feat-card reveal reveal-d1">
+        <div class="feat-icon">⚙</div>
+        <h3>42-Rule Quality Engine</h3>
+        <p>Every requirement is analysed in real-time against all 42 rules from the INCOSE Guide to Writing Requirements v4. Instant feedback on accuracy, concision, ambiguity, singularity, completeness, and more.</p>
+        <span class="feat-tag">Real-time analysis</span>
+      </div>
+      <div class="feat-card reveal reveal-d2">
+        <div class="feat-icon">⚡</div>
+        <h3>AI Improvement</h3>
+        <p>One click transforms vague, passive, untestable requirements into INCOSE-compliant statements. Fixes passive voice, vague terms, escape clauses, superfluous infinitives, absolutes, and abbreviations automatically.</p>
+        <span class="feat-tag">Automated rewriting</span>
+      </div>
+      <div class="feat-card reveal reveal-d3">
+        <div class="feat-icon">↓</div>
+        <h3>DOORS ReqIF Export</h3>
+        <p>Export your complete requirement set as OMG ReqIF XML — fully compatible with IBM DOORS, DOORS Next Generation, and any ReqIF-compliant tool. Also supports CSV and JSON export.</p>
+        <span class="feat-tag">Industry compatible</span>
+      </div>
+      <div class="feat-card reveal reveal-d4">
+        <div class="feat-icon">⊞</div>
+        <h3>Traceability Matrix</h3>
+        <p>Visualise parent-child relationships across four requirement levels: Stakeholder Need → System → Subsystem → Component. Automatically detects orphan requirements missing upward traces.</p>
+        <span class="feat-tag">4-level hierarchy</span>
+      </div>
+      <div class="feat-card reveal reveal-d5">
+        <div class="feat-icon">✓</div>
+        <h3>V&amp;V Planning</h3>
+        <p>Verification method distribution dashboard with automatic extraction of measurable success criteria from requirement text. Supports Test, Analysis, Inspection, and Demonstration methods.</p>
+        <span class="feat-tag">ISO 15288 aligned</span>
+      </div>
+      <div class="feat-card reveal reveal-d6">
+        <div class="feat-icon">↑</div>
+        <h3>Bulk Import</h3>
+        <p>Paste any document and the parser extracts all "shall" statements, auto-classifying by type (Performance, Safety, Interface, etc.) and level. Import from text, CSV, or saved JSON projects.</p>
+        <span class="feat-tag">Smart parsing</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ HOW IT WORKS ═══ -->
+<section class="how" id="how">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Workflow</div>
+      <h2 class="section-title">Four steps. Zero friction.</h2>
+    </div>
+    <div class="how-steps">
+      <div class="step reveal reveal-d1">
+        <div class="step-num">01</div>
+        <h3>Author or Import</h3>
+        <p>Write requirements using INCOSE patterns or bulk-import from existing documents. Auto-detection classifies type and level.</p>
+        <span class="step-arrow">→</span>
+      </div>
+      <div class="step reveal reveal-d2">
+        <div class="step-num">02</div>
+        <h3>Analyse &amp; Improve</h3>
+        <p>Real-time 42-rule quality analysis with scoring. AI fixes violations in one click. Iterate until every requirement passes.</p>
+        <span class="step-arrow">→</span>
+      </div>
+      <div class="step reveal reveal-d3">
+        <div class="step-num">03</div>
+        <h3>Trace &amp; Verify</h3>
+        <p>Build parent-child traceability across levels. Plan verification methods. Identify orphans and gaps before they become costly.</p>
+        <span class="step-arrow">→</span>
+      </div>
+      <div class="step reveal reveal-d4">
+        <div class="step-num">04</div>
+        <h3>Export &amp; Share</h3>
+        <p>Save your project locally as JSON. Export to ReqIF for DOORS, CSV for spreadsheets, or share the JSON with your team.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ STANDARDS ═══ -->
+<section class="standards" id="standards">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Compliance</div>
+      <h2 class="section-title">Built on the standards<br>that matter.</h2>
+    </div>
+    <div class="standards-list">
+      <div class="std-card reveal reveal-d1">
+        <div class="std-icon">📐</div>
+        <div>
+          <h3>INCOSE GtWR v4 (July 2023)</h3>
+          <p>INCOSE-TP-2010-006-04 — All 42 rules across 14 categories implemented as automated checks. 15 essential characteristics (C1–C15) for individual requirements and requirement sets.</p>
+        </div>
+      </div>
+      <div class="std-card reveal reveal-d2">
+        <div class="std-icon">📋</div>
+        <div>
+          <h3>ISO/IEC/IEEE 29148:2018</h3>
+          <p>Systems and software engineering — Life cycle processes — Requirements engineering. Requirement types, attributes, and quality criteria aligned with this international standard.</p>
+        </div>
+      </div>
+      <div class="std-card reveal reveal-d3">
+        <div class="std-icon">🔄</div>
+        <div>
+          <h3>ISO/IEC/IEEE 15288:2023</h3>
+          <p>Systems and software engineering — System life cycle processes. Verification and validation planning aligned with the stakeholder needs and requirements definition process.</p>
+        </div>
+      </div>
+      <div class="std-card reveal reveal-d4">
+        <div class="std-icon">🔗</div>
+        <div>
+          <h3>OMG ReqIF 1.2</h3>
+          <p>Requirements Interchange Format — Export compatible with IBM DOORS, DOORS Next Generation, Siemens Polarion, and other ReqIF-compliant requirements management tools.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ USE CASES ═══ -->
+<section class="usecases">
+  <div class="container">
+    <div class="reveal">
+      <div class="section-label">Who It's For</div>
+      <h2 class="section-title">Systems engineers. Academics.<br>Defence teams. Students.</h2>
+    </div>
+    <div class="uc-grid">
+      <div class="uc-card reveal reveal-d1">
+        <div class="uc-text">Perfect for teaching requirements engineering in the classroom. Students see quality scores improve in real-time as they fix each violation — far more engaging than marking papers manually.</div>
+        <div class="uc-role">University Faculty · SE Education</div>
+      </div>
+      <div class="uc-card reveal reveal-d2">
+        <div class="uc-text">We use it in early-phase projects before committing to DOORS. It catches 80% of quality issues upfront, and the ReqIF export means nothing is wasted when we move to the formal tool.</div>
+        <div class="uc-role">Systems Engineer · Defence Programmes</div>
+      </div>
+      <div class="uc-card reveal reveal-d3">
+        <div class="uc-text">The AI improvement feature is a game-changer for workshop settings. Participants draft requirements, hit the button, and immediately understand what good looks like versus what they wrote.</div>
+        <div class="uc-role">Training Facilitator · Professional Development</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ PRIVACY ═══ -->
+<section class="privacy" id="privacy">
+  <div class="container">
+    <div class="privacy-box reveal">
+      <h2>Your data never leaves your machine.</h2>
+      <p>The entire tool runs in your browser. There is no server, no database, no analytics, no cookies, and no tracking. Requirements are saved as JSON files on your own machine. You are in complete control.</p>
+      <div class="privacy-features">
+        <div class="priv-feat"><span class="icon">✓</span> No server storage</div>
+        <div class="priv-feat"><span class="icon">✓</span> No login required</div>
+        <div class="priv-feat"><span class="icon">✓</span> No tracking or analytics</div>
+        <div class="priv-feat"><span class="icon">✓</span> Works offline</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ CTA ═══ -->
+<section class="cta">
+  <div class="container reveal">
+    <h2>Start writing <em>better</em><br>requirements today.</h2>
+    <p>Free forever. No installation. No account. Just open the tool and start engineering.</p>
+    <div class="cta-buttons">
+      <a href="reqright.html" class="btn-hero btn-hero-pri">Launch ReqRight →</a>
+      <a href="https://github.com/ssaleem74/reqright#readme" target="_blank" class="btn-hero btn-hero-sec">📖 Read Tutorial</a>
+    </div>
+    <div style="margin-top:32px;display:flex;gap:24px;justify-content:center;flex-wrap:wrap;">
+      <a href="test-case-shss.json" download style="color:var(--mid);font-size:14px;text-decoration:none;display:flex;align-items:center;gap:6px;">📥 Download Example Project</a>
+      <a href="quick-reference-card.pdf" target="_blank" style="color:var(--mid);font-size:14px;text-decoration:none;display:flex;align-items:center;gap:6px;">📄 Quick Reference Card (PDF)</a>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ FOOTER ═══ -->
+<footer>
+  <div class="container">
+    <p>
+      ReqRight · Free &amp; Open<br>
+      Based on INCOSE Guide to Writing Requirements v4 (July 2023)<br>
+      ISO/IEC/IEEE 29148 · ISO/IEC/IEEE 15288 · OMG ReqIF 1.2<br><br>
+      <a href="https://github.com/ssaleem74/reqright" target="_blank">GitHub</a> · 
+      <a href="https://github.com/ssaleem74/reqright#readme" target="_blank">Documentation</a> · 
+      <a href="quick-reference-card.pdf" target="_blank">Quick Reference</a> · 
+      <a href="test-case-shss.json" download>Example Project</a>
+      <br><br>
+      <span style="color:var(--dim)">Built for systems engineers, by systems engineers.</span>
+    </p>
+  </div>
+<div style="margin-top:20px;padding-top:16px;border-top:1px solid rgba(255,255,255,0.06);text-align:center;">
+        <div style="margin-bottom:8px;">
+          <a href="DISCLAIMER.md" style="color:#4b5f82;text-decoration:none;margin:0 10px;font-size:12px;">Disclaimer</a>
+          <a href="PRIVACY.md" style="color:#4b5f82;text-decoration:none;margin:0 10px;font-size:12px;">Privacy Policy</a>
+          <a href="LICENSE" style="color:#4b5f82;text-decoration:none;margin:0 10px;font-size:12px;">License (MIT)</a>
+          <a href="CHANGELOG.md" style="color:#4b5f82;text-decoration:none;margin:0 10px;font-size:12px;">Changelog</a>
+        </div>
+        <p style="font-size:10px;color:#4b5f82;margin:4px 0 0 0;line-height:1.6;">
+          ReqRight is an independent educational project. All trademarks are the property of their respective owners.<br/>
+          Not affiliated with or endorsed by INCOSE®, IBM®, or any standards body. See <a href="DISCLAIMER.md" style="color:#4b5f82;">Disclaimer</a> for details.<br/>
+          Version 2.1.0-beta · © 2026 · MIT License
+        </p>
+      </div>
+    </footer>
+
+<script>
+// Scroll-triggered reveals
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Nav scroll effect
+let lastScroll = 0;
+window.addEventListener('scroll', () => {
+  const nav = document.getElementById('nav');
+  nav.classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// Smooth scroll for anchor links
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    e.preventDefault();
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+});
+</script>
+<div style="text-align:center;padding:16px;background:#0a0d12;font-size:10px;color:#4b5f82;">
+      <a href="DISCLAIMER.md" style="color:#4b5f82;margin:0 8px;">Disclaimer</a> ·
+      <a href="PRIVACY.md" style="color:#4b5f82;margin:0 8px;">Privacy</a> ·
+      <a href="LICENSE" style="color:#4b5f82;margin:0 8px;">License (MIT)</a> ·
+      <a href="CHANGELOG.md" style="color:#4b5f82;margin:0 8px;">Changelog</a><br/>
+      <span style="margin-top:4px;display:inline-block;">
+        ReqRight is an independent educational project. All trademarks property of their respective owners.
+        Not affiliated with INCOSE®, IBM®, or any standards body. v2.1.0-beta
+      </span>
+    </div>
+</body>
+</html>
