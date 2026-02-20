@@ -1,0 +1,2569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReqRight — Free Systems Engineering Tool</title>
+<meta name="description" content="ReqRight — Free educational requirements engineering tool based on INCOSE GtWR v4. 42-rule quality analysis, AI improvement, traceability, ReqIF/DOORS export. No login. Your data stays on your machine.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#06080f;--bg2:#0a0f1c;--surface:#0f1628;--surfAlt:#131b30;
+  --card:#141c32;--cardHov:#1a2440;--border:#1c2744;--borderHi:#2a3a60;
+  --text:#e2e8f0;--textMid:#a0aec0;--textDim:#6b7fa0;
+  --accent:#38bdf8;--accentDim:#0c4a6e;--success:#10b981;--successDim:#064e3b;
+  --warn:#f59e0b;--warnDim:#78350f;--danger:#ef4444;--dangerDim:#7f1d1d;
+  --purple:#a78bfa;--purpleDim:#4c1d95;--teal:#2dd4bf;--orange:#fb923c;--pink:#f472b6;
+  --bodyBg:linear-gradient(160deg,var(--bg),var(--bg2),#0d1424);
+}
+/* Light Theme */
+:root.light {
+  --bg:#f8fafc;--bg2:#f1f5f9;--surface:#ffffff;--surfAlt:#f8fafc;
+  --card:#ffffff;--cardHov:#f1f5f9;--border:#e2e8f0;--borderHi:#cbd5e1;
+  --text:#1e293b;--textMid:#3f5275;--textDim:#64748b;
+  --accent:#0284c7;--accentDim:#e0f2fe;--success:#059669;--successDim:#d1fae5;
+  --warn:#d97706;--warnDim:#fef3c7;--danger:#dc2626;--dangerDim:#fee2e2;
+  --purple:#7c3aed;--purpleDim:#ede9fe;--teal:#0d9488;--orange:#ea580c;--pink:#db2777;
+  --bodyBg:linear-gradient(160deg,#f8fafc,#f1f5f9,#e2e8f0);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bodyBg);color:var(--text);font-family:'DM Sans','Segoe UI',system-ui,sans-serif;font-size:14px;line-height:1.6;min-height:100vh;transition:background .3s,color .3s;}
+::-webkit-scrollbar{width:5px;}::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
+.mono{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:.03em;}
+button{font-family:inherit;}
+select option{background:var(--surface);color:var(--text);}
+input:focus,textarea:focus,select:focus{border-color:var(--accent)!important;outline:none;}
+@keyframes slideIn{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+
+.btn{padding:8px 18px;border-radius:8px;border:none;font-size:13px;font-weight:600;cursor:pointer;transition:all .15s;}
+.btn-pri{background:var(--accent);color:var(--bg);}
+.btn-pri:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.btn-sec{background:transparent;border:1px solid var(--border);color:var(--textMid);}
+.btn-sec:hover{border-color:var(--borderHi);background:var(--surface);}
+.btn-danger{background:transparent;border:1px solid #ef444444;color:var(--danger);}
+.btn-ai{background:linear-gradient(135deg,var(--purple),var(--accent));color:#fff;padding:14px 32px;font-size:15px;border-radius:10px;box-shadow:0 4px 20px #a78bfa44;}
+.btn-ai:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.btn-ai:disabled{opacity:.5;cursor:wait;}
+
+.input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 12px;color:var(--text);font-size:14px;transition:border .15s;}
+.label{font-size:12px;color:var(--textMid);font-weight:600;text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:6px;}
+.card{background:var(--card);border-radius:14px;padding:24px;border:1px solid var(--border);}
+.badge{font-size:11px;padding:3px 9px;border-radius:5px;font-weight:600;white-space:nowrap;display:inline-block;}
+
+.header{padding:12px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(15,22,40,.88);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;}
+.nav{display:flex;gap:3px;background:var(--surface);border-radius:10px;padding:3px;border:1px solid var(--border);}
+.nav button{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:500;background:transparent;color:var(--textMid);transition:all .15s;}
+.nav button:hover{background:var(--card);color:var(--text);}
+.nav button.active{font-weight:600;background:var(--accent);color:var(--bg);}
+.nav-sep{width:1px;height:24px;background:var(--border);align-self:center;margin:0 6px;flex-shrink:0;}
+
+.grid-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:28px;}
+.stat-card{position:relative;overflow:hidden;padding:20px;}
+.stat-card .icon{position:absolute;top:-8px;right:-8px;font-size:56px;opacity:.04;}
+.stat-val{font-size:32px;font-weight:700;margin-top:6px;}
+
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;animation:fadeIn .2s ease;}
+.modal{background:var(--card);border-radius:16px;padding:32px;border:1px solid var(--border);box-shadow:0 24px 64px rgba(0,0,0,.6);}
+
+.ai-panel{background:linear-gradient(135deg,#4c1d9544,#0c4a6e44);border-radius:14px;padding:20px;border:1px solid #a78bfa44;margin-bottom:14px;position:relative;overflow:hidden;}
+.ai-panel .bg-icon{position:absolute;top:-20px;right:-20px;font-size:120px;opacity:.04;color:var(--purple);}
+.success-panel{background:#064e3b33;border-radius:14px;padding:16px;border:1px solid #10b98133;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
+
+.toast{position:fixed;top:20px;right:20px;z-index:9999;padding:12px 24px;border-radius:10px;color:#fff;font-size:14px;font-weight:500;box-shadow:0 8px 32px rgba(0,0,0,.5);animation:slideIn .3s ease;display:flex;align-items:center;gap:8px;}
+
+.welcome-overlay{position:fixed;inset:0;z-index:2000;background:rgba(6,8,15,.95);backdrop-filter:blur(30px);display:flex;align-items:center;justify-content:center;animation:fadeIn .4s ease;}
+.welcome-card{max-width:640px;text-align:center;padding:48px;}
+.welcome-logo{width:80px;height:80px;border-radius:20px;background:linear-gradient(135deg,var(--accent),var(--purple));display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:800;margin:0 auto 24px;box-shadow:0 12px 40px #38bdf833;}
+
+.file-drop{border:2px dashed var(--border);border-radius:14px;padding:40px;text-align:center;cursor:pointer;transition:all .2s;}
+.file-drop:hover,.file-drop.dragover{border-color:var(--accent);background:var(--accentDim)22;}
+
+@media(max-width:1024px){.header{flex-wrap:wrap;gap:8px;}.nav{overflow-x:auto;flex-shrink:1;}}
+@media(max-width:768px){.header{padding:10px 16px;}.nav button{padding:7px 12px;font-size:12px;}}
+.risk-card,.dec-card{margin-bottom:12px;transition:border-color .2s;}
+.risk-card:hover,.dec-card:hover{border-color:var(--borderHi);}
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════════════════
+// INCOSE REQUIREMENTS WORKBENCH — COMPLETE STANDALONE APPLICATION
+// GtWR v4 · 42 Rules · AI Quality Engine · ReqIF/DOORS Export
+// ═══════════════════════════════════════════════════════════════════
+
+const RULES=[
+{id:"R1",nm:"Structured Statements",cat:"Accuracy",desc:"Conform to agreed patterns",ck:t=>{const p=/^(When\s|If\s|During\s|The\s|While\s|Upon\s|After\s|Before\s|Given\s)/i.test(t.trim()),s=/\bshall\b/i.test(t);return{pass:p&&s,msg:s?(p?"Good structure":"Start with condition or subject entity"):"Missing 'shall' keyword"}}},
+{id:"R2",nm:"Active Voice",cat:"Accuracy",desc:"Use active voice",ck:t=>{const m=/\b(shall be \w+ed|is \w+ed by|are \w+ed by|was \w+ed|were \w+ed|been \w+ed)\b/i.test(t);return{pass:!m,msg:m?"Passive voice — identify responsible entity":"Active voice OK"}}},
+{id:"R3",nm:"Subject-Verb",cat:"Accuracy",desc:"Subject appropriate to entity",ck:t=>{const m=/^(The user|Users|A user|Operators?)\s+shall\b/i.test(t.trim());return{pass:!m,msg:m?"Obligation on user — rewrite with system as subject":"Subject-verb OK"}}},
+{id:"R4",nm:"Defined Terms",cat:"Accuracy",desc:"All terms in glossary",ck:t=>({pass:true,msg:"Verify terms in glossary",warn:true})},
+{id:"R5",nm:"Definite Articles",cat:"Accuracy",desc:"Use 'the' not 'a/an'",ck:t=>{const m=/\b(a |an )(system|module|component|subsystem|interface|unit|device|sensor|controller|processor|server|display|network)\b/i.test(t);return{pass:!m,msg:m?"Use 'the' for specific entities":"Definite articles OK"}}},
+{id:"R6",nm:"Units of Measure",cat:"Accuracy",desc:"Consistent units",ck:t=>{const n=/\d+\.?\d*/.test(t),u=/\d+\.?\d*\s*(m|km|kg|g|s|ms|µs|Hz|kHz|MHz|GHz|°C|°F|K|V|mV|A|mA|W|kW|dB|dBm|Mbps|Gbps|mm|cm|µm|nm|bar|Pa|kPa|MPa|psi|lbs|ft|in|mi|knots|NM|%|rpm|rad|deg)\b/i.test(t);return{pass:!n||u,msg:n&&!u?"Number without units":"Units OK"}}},
+{id:"R7",nm:"Vague Terms",cat:"Accuracy",desc:"Avoid vague terms",ck:t=>{const vt=["adequate","reasonable","sufficient","appropriate","fast","slow","user-friendly","easy","simple","robust","flexible","scalable","efficient","effective","reliable","safe","secure","quickly","approximately","nearly","roughly","about","good","bad","nice","better","best","worst","minimal","maximal","few","many","several","some","most","often","sometimes","usually","typically","normally","generally","sufficiently","adequately","optimal","improved","enhanced","acceptable","proper","suitable","satisfactory","promptly","timely"];const f=vt.filter(v=>new RegExp("\\b"+v+"\\b","i").test(t));return{pass:f.length===0,msg:f.length>0?'Vague: "'+f.join('", "')+'" — use measurable criteria':"No vague terms"}}},
+{id:"R8",nm:"Escape Clauses",cat:"Accuracy",desc:"Avoid escape clauses",ck:t=>{const ec=["where possible","as appropriate","if necessary","as required","to the extent practicable","where applicable","as needed","if feasible","when practical","as far as possible","unless otherwise specified"];const f=ec.filter(e=>t.toLowerCase().includes(e));return{pass:f.length===0,msg:f.length>0?'Escape: "'+f.join('", "')+'"':"No escape clauses"}}},
+{id:"R9",nm:"Open-Ended",cat:"Accuracy",desc:"Avoid open-ended clauses",ck:t=>{const oe=["including but not limited to","etc.","etc","and so on","and so forth","such as","for example","e.g.","i.e.","among others","and the like"];const f=oe.filter(e=>t.toLowerCase().includes(e));return{pass:f.length===0,msg:f.length>0?'Open-ended: "'+f.join('", "')+'"':"No open-ended clauses"}}},
+{id:"R10",nm:"Superfluous Infinitives",cat:"Concision",desc:"Avoid 'be able to'",ck:t=>{const si=["shall be able to","shall be capable of","shall have the ability to","shall have the capability to","shall provide the ability to"];const f=si.filter(e=>t.toLowerCase().includes(e));return{pass:f.length===0,msg:f.length>0?"Superfluous infinitive — simplify":"No superfluous infinitives"}}},
+{id:"R11",nm:"Separate Clauses",cat:"Concision",desc:"Separate conditions",ck:t=>({pass:true,msg:"Verify separate clauses",warn:true})},
+{id:"R12",nm:"Grammar",cat:"Non-Ambiguity",desc:"Correct grammar",ck:t=>({pass:true,msg:"Manual grammar review",warn:true})},
+{id:"R13",nm:"Spelling",cat:"Non-Ambiguity",desc:"Correct spelling",ck:t=>({pass:true,msg:"Verify spelling",warn:true})},
+{id:"R14",nm:"Punctuation",cat:"Non-Ambiguity",desc:"Correct punctuation",ck:t=>{const p=/\.\s*$/.test(t.trim());return{pass:p,msg:p?"OK":"End with period"}}},
+{id:"R15",nm:"Logical Expressions",cat:"Non-Ambiguity",desc:"Use [X AND Y]",ck:t=>{const h=/\b(and|or)\b/i.test(t),f=/\[(.*?)\s+(AND|OR|XOR)\s+(.*?)\]/i.test(t);return{pass:!h||f,msg:h&&!f?"Use [X AND Y] notation":"OK",warn:h&&!f}}},
+{id:"R16",nm:'Use of "Not"',cat:"Non-Ambiguity",desc:"Avoid 'not'",ck:t=>{const m=/\bshall not\b|\bnot\b/i.test(t);return{pass:!m,msg:m?"Negative — rewrite positively":"Positive phrasing OK"}}},
+{id:"R17",nm:"Oblique /",cat:"Non-Ambiguity",desc:"Avoid '/'",ck:t=>{const c=t.replace(/\d+\.?\d*\s*\w+\/\w+/g,"");return{pass:!/\//.test(c),msg:/\//.test(c)?"'/' — use 'and'/'or'":"OK"}}},
+{id:"R18",nm:"Single Thought",cat:"Singularity",desc:"One thought per req",ck:t=>{const c=(t.match(/\bshall\b/gi)||[]).length;return{pass:c<=1,msg:c>1?c+" 'shall' — split":"Single thought OK"}}},
+{id:"R19",nm:"Combinators",cat:"Singularity",desc:"Avoid clause combinators",ck:t=>{const m=/\b(and shall|or shall|then shall|unless|however|moreover|furthermore|additionally)\b/i.test(t);return{pass:!m,msg:m?"Combinators — split":"OK"}}},
+{id:"R20",nm:"Purpose Phrases",cat:"Singularity",desc:"Avoid 'in order to'",ck:t=>{const m=/\b(in order to|so that|for the purpose of|with the aim of|so as to)\b/i.test(t);return{pass:!m,msg:m?"Purpose phrase — move to rationale":"OK"}}},
+{id:"R21",nm:"Parentheses",cat:"Singularity",desc:"Avoid parenthetical text",ck:t=>{const m=/\([^)]{10,}\)/.test(t);return{pass:!m,msg:m?"Parenthetical — move to rationale":"OK"}}},
+{id:"R22",nm:"Enumeration",cat:"Singularity",desc:"Enumerate explicitly",ck:t=>({pass:true,msg:"Verify enumeration",warn:true})},
+{id:"R23",nm:"Diagrams",cat:"Singularity",desc:"Reference diagrams",ck:t=>({pass:true,msg:"Consider diagrams",warn:true})},
+{id:"R24",nm:"Pronouns",cat:"Completeness",desc:"Avoid pronouns",ck:t=>{const m=/\b(it|its|they|them|their|theirs|this|that|these|those|he|she|his|her|we|our|you|your)\b/i.test(t);return{pass:!m,msg:m?"Pronouns — use entity names":"OK"}}},
+{id:"R25",nm:"Headings",cat:"Completeness",desc:"Self-contained",ck:t=>({pass:true,msg:"Verify self-contained",warn:true})},
+{id:"R26",nm:"Absolutes",cat:"Realism",desc:"Avoid absolutes",ck:t=>{const m=/\b(100\s*%|always|never|all\s+times|every\s+time|zero\s+defects|infinite|unlimited)\b/i.test(t);return{pass:!m,msg:m?"Absolute — use achievable target":"OK"}}},
+{id:"R27",nm:"Explicit Conditions",cat:"Conditions",desc:"State conditions",ck:t=>{const h=/^(When|If|During|Upon|After|Before|While|Given)\b/i.test(t.trim()),n=/\bshall\b/i.test(t)&&!h;return{pass:!n||t.trim().startsWith("The"),msg:n?"Add conditions (When/If...)":"OK",warn:n}}},
+{id:"R28",nm:"Multiple Conditions",cat:"Conditions",desc:"AND/OR conditions",ck:t=>({pass:true,msg:"Verify AND/OR",warn:true})},
+{id:"R29",nm:"Classification",cat:"Uniqueness",desc:"Classify by type",ck:t=>({pass:true,msg:"Verify classified",warn:true})},
+{id:"R30",nm:"Unique Expression",cat:"Uniqueness",desc:"No duplicates",ck:t=>({pass:true,msg:"Verify unique",warn:true})},
+{id:"R31",nm:"Solution Free",cat:"Abstraction",desc:"No implementation",ck:t=>{const m=/\b(shall use|shall implement|shall employ|SQL|MySQL|PostgreSQL|MongoDB|Java|Python|C\+\+|JavaScript|REST\s*API|HTTP|TCP|UDP|AWS|Azure|GCP|Docker|Kubernetes|Linux|Windows|Oracle)\b/i.test(t);return{pass:!m,msg:m?"Implementation detail — what not how":"Solution-free OK"}}},
+{id:"R32",nm:"Quantifiers",cat:"Quantifiers",desc:"Use 'each'",ck:t=>{const m=/\b(all|any|both|every)\b/i.test(t);return{pass:!m,msg:m?"Use 'each' for clarity":"OK"}}},
+{id:"R33",nm:"Tolerances",cat:"Tolerance",desc:"Define ranges",ck:t=>{const sv=/\b(\d+\.?\d*)\s*(m|km|kg|s|ms|Hz|MHz|GHz|°C|V|A|W|dB|Mbps|mm|cm|%)\b/i.test(t),hr=/[±≤≥<>]|\bto\b|\bthrough\b|\bbetween\b|\brange\b/i.test(t);return{pass:!sv||hr,msg:sv&&!hr?"Single value — add ± tolerance":"OK"}}},
+{id:"R34",nm:"Measurable",cat:"Quantification",desc:"Specific targets",ck:t=>{const s=/\bshall\b/i.test(t),m=/\d+/.test(t)||/\b(per|within|at least|no more than|maximum|minimum|greater than|less than)\b/i.test(t);return{pass:!s||m,msg:s&&!m?"Add measurable criteria":"OK",warn:s&&!m}}},
+{id:"R35",nm:"Temporal",cat:"Quantification",desc:"Explicit timing",ck:t=>{const m=/\b(eventually|soon|before long|in due time|at some point|later|promptly|immediately|real-time|real time)\b/i.test(t);return{pass:!m,msg:m?"Vague timing — specify":"OK"}}},
+{id:"R36",nm:"Consistent Terms",cat:"Uniformity",desc:"Consistent usage",ck:t=>({pass:true,msg:"Verify consistency",warn:true})},
+{id:"R37",nm:"Acronyms",cat:"Uniformity",desc:"Define acronyms",ck:t=>{const f=t.match(/\b[A-Z]{2,}\b/g);return{pass:true,msg:f?"Acronyms: "+f.join(", "):"No acronyms",warn:!!f}}},
+{id:"R38",nm:"Abbreviations",cat:"Uniformity",desc:"Avoid abbreviations",ck:t=>{const m=/\b(approx|max|min|temp|freq|vol|amt|qty|req|spec|doc|info|config|auth|admin|msg|tbd|tbc|tba)\b/i.test(t);return{pass:!m,msg:m?"Abbreviation — use full word":"OK"}}},
+{id:"R39",nm:"Style Guide",cat:"Uniformity",desc:"Follow style",ck:t=>({pass:true,msg:"Verify style",warn:true})},
+{id:"R40",nm:"Decimals",cat:"Uniformity",desc:"Consistent decimals",ck:t=>({pass:true,msg:"Verify decimals",warn:true})},
+{id:"R41",nm:"Related Reqs",cat:"Modularity",desc:"Group related",ck:t=>({pass:true,msg:"Verify grouping",warn:true})},
+{id:"R42",nm:"Structured Sets",cat:"Modularity",desc:"Follow template",ck:t=>({pass:true,msg:"Verify structure",warn:true})}
+];
+
+const CATS=[
+{nm:"Accuracy",r:"R1–R9",c:"#3b82f6"},{nm:"Concision",r:"R10–R11",c:"#8b5cf6"},
+{nm:"Non-Ambiguity",r:"R12–R17",c:"#06b6d4"},{nm:"Singularity",r:"R18–R23",c:"#10b981"},
+{nm:"Completeness",r:"R24–R25",c:"#f59e0b"},{nm:"Realism",r:"R26",c:"#ef4444"},
+{nm:"Conditions",r:"R27–R28",c:"#6366f1"},{nm:"Uniqueness",r:"R29–R30",c:"#a855f7"},
+{nm:"Abstraction",r:"R31",c:"#14b8a6"},{nm:"Quantifiers",r:"R32",c:"#eab308"},
+{nm:"Tolerance",r:"R33",c:"#e11d48"},{nm:"Quantification",r:"R34–R35",c:"#2563eb"},
+{nm:"Uniformity",r:"R36–R40",c:"#7c3aed"},{nm:"Modularity",r:"R41–R42",c:"#059669"}
+];
+
+const REQ_TYPES=["Functional","Performance","Interface","Environmental","Safety","Security","Reliability","Maintainability","Availability","Human Factors","Physical","Constraint","Regulatory","Quality","Design","Operational"];
+const V_METHODS=["Test","Analysis","Inspection","Demonstration"];
+const REQ_LEVELS=["Stakeholder Need","System Requirement","Subsystem Requirement","Component Requirement"];
+const PRIORITIES=["Critical","High","Medium","Low"];
+const STATUSES=["Draft","Under Review","Reviewed","Approved","Rejected","Deferred"];
+const PATTERNS=[
+{nm:"Basic",t:"The [entity] shall [action] [object]."},
+{nm:"Conditional",t:"When [condition], the [entity] shall [action] [object]."},
+{nm:"Performance",t:"The [entity] shall [action] [object] within [measure ± tolerance]."},
+{nm:"Cond+Perf",t:"When [condition], the [entity] shall [action] [object] within [measure ± tolerance]."},
+{nm:"While",t:"While [state], the [entity] shall [action] [object] [qualification]."},
+{nm:"Interface",t:"The [entity] shall [send/receive] [data] [to/from] the [external entity] via the [interface]."}
+];
+
+// ─── DECISION LOG CONSTANTS ──────────────────────────────
+const DEC_STATUSES=["Proposed","Approved","Superseded","Rejected","Deferred"];
+const DEC_CATEGORIES=["Architectural","Design","Technology","Process","Interface","Safety","Security","Performance","Trade-off","Requirement","Other"];
+
+// ─── RISK REGISTER CONSTANTS ─────────────────────────────
+const LIKELIHOOD=["1 - Rare","2 - Unlikely","3 - Possible","4 - Likely","5 - Almost Certain"];
+const IMPACT=["1 - Negligible","2 - Minor","3 - Moderate","4 - Major","5 - Severe"];
+const RISK_STATUS=["Open","Mitigated","Accepted","Closed"];
+const RISK_CATEGORIES=["Technical","Schedule","Cost","Resource","External","Safety","Security"];
+
+// ─── ANALYSIS ──────────────────────────────────────────────
+function analyze(text){
+  if(!text||!text.trim())return{score:0,results:[],grade:"N/A",passed:0,failed:0,warnings:0};
+  const results=RULES.map(r=>{const res=r.ck(text);return{...r,...res};});
+  const passed=results.filter(r=>r.pass&&!r.warn).length;
+  const failed=results.filter(r=>!r.pass).length;
+  const warnings=results.filter(r=>r.warn).length;
+  const total=passed+failed;
+  const score=total>0?Math.round(passed/total*100):50;
+  let grade="F";
+  if(score>=95)grade="A+";else if(score>=90)grade="A";else if(score>=85)grade="B+";
+  else if(score>=80)grade="B";else if(score>=75)grade="C+";else if(score>=70)grade="C";else if(score>=60)grade="D";
+  return{score,results,grade,passed,failed,warnings};
+}
+
+// ─── AI REWRITE ──────────────────────────────────────────
+function aiRewrite(text,analysis){
+  if(!text||!text.trim())return text;
+  let t=text.trim();
+  const fails=analysis.results.filter(r=>!r.pass);
+  const has=id=>fails.find(r=>r.id===id);
+
+  if(has("R2")){
+    t=t.replace(/\bshall be processed\b/gi,"shall process");
+    t=t.replace(/\bshall be transmitted\b/gi,"shall transmit");
+    t=t.replace(/\bshall be stored\b/gi,"shall store");
+    t=t.replace(/\bshall be displayed\b/gi,"shall display");
+    t=t.replace(/\bshall be logged\b/gi,"shall log");
+    t=t.replace(/\bshall be validated\b/gi,"shall validate");
+    t=t.replace(/\bshall be encrypted\b/gi,"shall encrypt");
+    t=t.replace(/\bshall be computed\b/gi,"shall compute");
+    t=t.replace(/\bshall be recorded\b/gi,"shall record");
+    t=t.replace(/\bdata shall be encrypted\b/gi,"the Security_Module shall encrypt data");
+    t=t.replace(/\bshall be (\w+)ed\b/gi,(m,v)=>"shall "+v);
+  }
+  if(has("R3")){
+    t=t.replace(/^The user shall\b/i,"The system shall");
+    t=t.replace(/^Users shall\b/i,"The system shall");
+    t=t.replace(/^A user shall\b/i,"The system shall");
+    t=t.replace(/^The operator shall\b/i,"The system shall enable the operator to");
+  }
+  if(has("R5"))t=t.replace(/\b(a|an)\s+(system|module|component|subsystem|interface|unit|device|sensor|controller|processor|server|display|network)\b/gi,(_,a,n)=>"the "+n);
+  if(has("R7")){
+    const reps={fast:"within [X] seconds",slow:"exceeding [X] seconds",adequate:"meeting [criteria]",reasonable:"within [threshold]",sufficient:"at least [X]","user-friendly":"compliant with [standard]",robust:"with [X]% availability",reliable:"with MTBF ≥ [X] hours",secure:"using [encryption standard]",efficient:"within [X] resource budget",effective:"achieving [X]% [metric]",safe:"meeting [safety standard]",scalable:"supporting [X] to [Y] users",quickly:"within [X] ms",approximately:"[X] ± [Y]",usually:"in ≥ [X]% of scenarios",minimal:"≤ [X]",promptly:"within [X] seconds",timely:"within [X] units"};
+    for(const[v,r]of Object.entries(reps))t=t.replace(new RegExp("\\b"+v+"\\b","gi"),r);
+  }
+  if(has("R8"))t=t.replace(/\b(where possible|as appropriate|if necessary|as required|as needed|if feasible|when practical)\b/gi,"[specify condition]");
+  if(has("R9"))t=t.replace(/\b(including but not limited to|etc\.?|and so on|and so forth|among others|and the like)\b/gi,"[list all items]");
+  if(has("R10")){
+    t=t.replace(/\bshall be able to\b/gi,"shall");
+    t=t.replace(/\bshall be capable of\b/gi,"shall");
+    t=t.replace(/\bshall have the ability to\b/gi,"shall");
+    t=t.replace(/\bshall provide the ability to\b/gi,"shall");
+  }
+  if(has("R14")&&!/\.\s*$/.test(t))t=t.replace(/\s*$/,".");
+  if(has("R16")){
+    t=t.replace(/\bshall not exceed\b/gi,"shall be at most");
+    t=t.replace(/\bshall not fail\b/gi,"shall maintain operation");
+    t=t.replace(/\bshall not allow\b/gi,"shall prevent");
+    t=t.replace(/\bshall not consume more than\b/gi,"shall consume at most");
+  }
+  if(has("R20"))t=t.replace(/\s+(in order to|so that|for the purpose of|so as to)\s+.*/gi,".");
+  if(has("R26")){t=t.replace(/\b100\s*%\b/g,"≥ 99.9%");t=t.replace(/\balways\b/gi,"in each operational scenario");t=t.replace(/\bnever\b/gi,"in no defined scenario");}
+  if(has("R35")){
+    t=t.replace(/\bimmediately\b/gi,"within [X] ms");t=t.replace(/\bpromptly\b/gi,"within [X] seconds");
+    t=t.replace(/\breal-time\b/gi,"within [X] ms latency");t=t.replace(/\breal time\b/gi,"within [X] ms latency");
+    t=t.replace(/\bsoon\b/gi,"within [X] time units");t=t.replace(/\beventually\b/gi,"within [X] time units");
+  }
+  if(has("R38")){
+    const am={approx:"approximately",max:"maximum",min:"minimum",temp:"temperature",freq:"frequency",config:"configuration",auth:"authentication",admin:"administrator",msg:"message",info:"information",doc:"document",spec:"specification",req:"requirement"};
+    for(const[a,f]of Object.entries(am))t=t.replace(new RegExp("\\b"+a+"\\b","gi"),f);
+  }
+  return t;
+}
+
+// ─── DOCUMENT PARSER ──────────────────────────────────────
+function parseDoc(text){
+  const lines=text.split("\n").map(l=>l.trim()).filter(l=>l);
+  const reqs=[];
+  for(const line of lines){
+    if(!/\bshall\b/i.test(line))continue;
+    let cleaned=line.replace(/^(REQ|SYS|SUB|CMP|FR|NFR|PR|IR|SR)?[-_]?\s*\d{1,5}[.:)]\s*/i,"").replace(/^[\u2022\u2023\u25E6\u2043\u2219•\-\*]\s*/,"").trim();
+    let type="Functional";
+    if(/\b(performance|speed|throughput|latency|capacity|bandwidth)\b/i.test(cleaned))type="Performance";
+    else if(/\b(interface|protocol|port|connector|signal)\b/i.test(cleaned))type="Interface";
+    else if(/\b(safety|hazard|fault|fail-safe|emergency)\b/i.test(cleaned))type="Safety";
+    else if(/\b(security|authentication|encryption|authorization)\b/i.test(cleaned))type="Security";
+    else if(/\b(reliability|MTBF|MTTR|failure rate)\b/i.test(cleaned))type="Reliability";
+    else if(/\b(environment|temperature|humidity|vibration|shock|EMC)\b/i.test(cleaned))type="Environmental";
+    else if(/\b(weight|size|dimension|mass|form factor)\b/i.test(cleaned))type="Physical";
+    else if(/\b(comply|regulation|standard|MIL-STD|DO-178|IEC|ISO)\b/i.test(cleaned))type="Regulatory";
+    let level="System Requirement";
+    if(/\b(stakeholder|user need|operational need|mission)\b/i.test(cleaned))level="Stakeholder Need";
+    else if(/\b(subsystem|sub-system|LRU|assembly)\b/i.test(cleaned))level="Subsystem Requirement";
+    else if(/\b(component|part|element|CSCI|HWCI)\b/i.test(cleaned))level="Component Requirement";
+    reqs.push({text:cleaned,type,level});
+  }
+  return reqs;
+}
+
+// ─── ReqIF EXPORT ─────────────────────────────────────────
+function escXml(s){return(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");}
+function genReqIF(reqs,proj){
+  const now=new Date().toISOString();
+  const objs=reqs.map(r=>`    <SPEC-OBJECT IDENTIFIER="obj-${r.id}" LAST-CHANGE="${now}"><VALUES>
+      <ATTRIBUTE-VALUE-STRING THE-VALUE="${escXml(r.id)}"><DEFINITION><ATTRIBUTE-DEFINITION-STRING-REF>a-id</ATTRIBUTE-DEFINITION-STRING-REF></DEFINITION></ATTRIBUTE-VALUE-STRING>
+      <ATTRIBUTE-VALUE-STRING THE-VALUE="${escXml(r.text)}"><DEFINITION><ATTRIBUTE-DEFINITION-STRING-REF>a-text</ATTRIBUTE-DEFINITION-STRING-REF></DEFINITION></ATTRIBUTE-VALUE-STRING>
+      <ATTRIBUTE-VALUE-STRING THE-VALUE="${escXml(r.type)}"><DEFINITION><ATTRIBUTE-DEFINITION-STRING-REF>a-type</ATTRIBUTE-DEFINITION-STRING-REF></DEFINITION></ATTRIBUTE-VALUE-STRING>
+      <ATTRIBUTE-VALUE-STRING THE-VALUE="${escXml(r.level)}"><DEFINITION><ATTRIBUTE-DEFINITION-STRING-REF>a-level</ATTRIBUTE-DEFINITION-STRING-REF></DEFINITION></ATTRIBUTE-VALUE-STRING>
+      <ATTRIBUTE-VALUE-STRING THE-VALUE="${escXml(r.priority)}"><DEFINITION><ATTRIBUTE-DEFINITION-STRING-REF>a-pri</ATTRIBUTE-DEFINITION-STRING-REF></DEFINITION></ATTRIBUTE-VALUE-STRING>
+      <ATTRIBUTE-VALUE-STRING THE-VALUE="${escXml(r.status)}"><DEFINITION><ATTRIBUTE-DEFINITION-STRING-REF>a-stat</ATTRIBUTE-DEFINITION-STRING-REF></DEFINITION></ATTRIBUTE-VALUE-STRING>
+      <ATTRIBUTE-VALUE-STRING THE-VALUE="${escXml(r.verification)}"><DEFINITION><ATTRIBUTE-DEFINITION-STRING-REF>a-veri</ATTRIBUTE-DEFINITION-STRING-REF></DEFINITION></ATTRIBUTE-VALUE-STRING>
+      <ATTRIBUTE-VALUE-STRING THE-VALUE="${escXml(r.rationale)}"><DEFINITION><ATTRIBUTE-DEFINITION-STRING-REF>a-rat</ATTRIBUTE-DEFINITION-STRING-REF></DEFINITION></ATTRIBUTE-VALUE-STRING>
+      <ATTRIBUTE-VALUE-STRING THE-VALUE="${analyze(r.text).score}"><DEFINITION><ATTRIBUTE-DEFINITION-STRING-REF>a-qual</ATTRIBUTE-DEFINITION-STRING-REF></DEFINITION></ATTRIBUTE-VALUE-STRING>
+    </VALUES></SPEC-OBJECT>`).join("\n");
+  const attrs=["id","text","type","level","pri","stat","veri","rat","qual"].map(a=>
+    `          <ATTRIBUTE-DEFINITION-STRING IDENTIFIER="a-${a}" LAST-CHANGE="${now}"><TYPE><DATATYPE-DEFINITION-STRING-REF>dt-s</DATATYPE-DEFINITION-STRING-REF></TYPE></ATTRIBUTE-DEFINITION-STRING>`).join("\n");
+  const hier=reqs.map(r=>`      <SPEC-HIERARCHY IDENTIFIER="h-${r.id}"><OBJECT><SPEC-OBJECT-REF>obj-${r.id}</SPEC-OBJECT-REF></OBJECT></SPEC-HIERARCHY>`).join("\n");
+  return`<?xml version="1.0" encoding="UTF-8"?>
+<REQ-IF xmlns="http://www.omg.org/spec/ReqIF/20110401/reqif.xsd">
+  <THE-HEADER><REQ-IF-HEADER IDENTIFIER="hdr"><COMMENT>ReqRight Export</COMMENT><CREATION-TIME>${now}</CREATION-TIME><TITLE>${escXml(proj)}</TITLE></REQ-IF-HEADER></THE-HEADER>
+  <CORE-CONTENT><REQ-IF-CONTENT>
+    <DATATYPES><DATATYPE-DEFINITION-STRING IDENTIFIER="dt-s" MAX-LENGTH="4096" LAST-CHANGE="${now}"/></DATATYPES>
+    <SPEC-TYPES><SPEC-OBJECT-TYPE IDENTIFIER="sot" LAST-CHANGE="${now}"><SPEC-ATTRIBUTES>
+${attrs}
+        </SPEC-ATTRIBUTES></SPEC-OBJECT-TYPE></SPEC-TYPES>
+    <SPEC-OBJECTS>
+${objs}
+    </SPEC-OBJECTS>
+    <SPECIFICATIONS><SPECIFICATION IDENTIFIER="spec-1" LAST-CHANGE="${now}"><CHILDREN>
+${hier}
+    </CHILDREN></SPECIFICATION></SPECIFICATIONS>
+  </REQ-IF-CONTENT></CORE-CONTENT>
+</REQ-IF>`;
+}
+
+// ─── HELPERS ──────────────────────────────────────────────
+let _id=0;
+function gid(p="REQ"){_id++;return p+"-"+String(_id).padStart(4,"0");}
+function mkReq(o={}){return{id:gid(),text:"",type:"Functional",level:"System Requirement",priority:"Medium",verification:"Test",rationale:"",parent:"",status:"Draft",source:"",risk:"Medium",created:new Date().toISOString(),modified:new Date().toISOString(),...o};}
+let _riskId=0;
+function gridRisk(){
+  // Gap-filling: find first available RSK-NNNN
+  const usedNums=S.risks.map(r=>parseInt(r.id.replace(/\D/g,""))||0);
+  let n=1;
+  while(usedNums.includes(n))n++;
+  return"RSK-"+String(n).padStart(4,"0");
+}
+function mkRisk(o={}){return{id:gridRisk(),title:"",description:"",category:"Technical",likelihood:3,impact:3,status:"Open",mitigations:[],owner:"",dueDate:"",notes:"",created:new Date().toISOString(),modified:new Date().toISOString(),...o};}
+function riskScore(l,i){return l*i;}
+function riskLevel(score){if(score>=15)return{level:"Critical",color:"var(--danger)"};if(score>=10)return{level:"High",color:"var(--orange)"};if(score>=5)return{level:"Medium",color:"var(--warn)"};return{level:"Low",color:"var(--success)"};}
+function dl(content,type,fn){const b=new Blob([content],{type});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=fn;a.click();URL.revokeObjectURL(u);}
+
+// ─── THEME TOGGLE ────────────────────────────────────────
+function getTheme(){
+  const saved=localStorage.getItem("incose_theme");
+  if(saved)return saved;
+  // Check system preference
+  if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches)return "light";
+  return "dark";
+}
+function setTheme(theme){
+  localStorage.setItem("incose_theme",theme);
+  if(theme==="light"){
+    document.documentElement.classList.add("light");
+  }else{
+    document.documentElement.classList.remove("light");
+  }
+}
+function toggleTheme(){
+  const current=document.documentElement.classList.contains("light")?"light":"dark";
+  const newTheme=current==="light"?"dark":"light";
+  setTheme(newTheme);
+  render();
+}
+// Apply saved theme on load
+setTheme(getTheme());
+
+// ─── STATE ────────────────────────────────────────────────
+const S={
+  view:"welcome",reqs:[],selId:null,glossary:[{term:"SOI",def:"System of Interest"},{term:"ICD",def:"Interface Control Document"},{term:"V&V",def:"Verification and Validation"},{term:"ConOps",def:"Concept of Operations"}],
+  decisions:[],selDecId:null,
+  risks:[],selRiskId:null,
+  project:"New Systems Engineering Project",filterType:"All",filterLevel:"All",search:"",authorSearch:"",authorFilterType:"All",authorFilterLevel:"All",authorFilterStatus:"All",riskSearch:"",riskFilterCat:"All",riskFilterStat:"All",decSearch:"",decFilterCat:"All",decFilterStat:"All",glossSearch:"",sort:"id",
+  showImport:false,importText:"",showExport:false,showBulkAI:false,aiLoading:null,toast:null,
+  autoSaveKey:"incose_workbench_autosave"
+};
+
+function setState(updates){Object.assign(S,updates);render();}
+
+// ─── UNDO/REDO SYSTEM ──────────────────────────────────────
+const History={
+  undoStack:[],
+  redoStack:[],
+  maxSize:50,
+  
+  // Save current state to undo stack
+  save(){
+    const snapshot={
+      reqs:JSON.parse(JSON.stringify(S.reqs)),
+      glossary:JSON.parse(JSON.stringify(S.glossary)),
+      decisions:JSON.parse(JSON.stringify(S.decisions)),
+      risks:JSON.parse(JSON.stringify(S.risks)),
+      project:S.project,
+      selId:S.selId,
+      selDecId:S.selDecId,
+      selRiskId:S.selRiskId
+    };
+    this.undoStack.push(snapshot);
+    if(this.undoStack.length>this.maxSize)this.undoStack.shift();
+    this.redoStack=[];// Clear redo when new action is taken
+  },
+  
+  // Undo last action
+  undo(){
+    if(this.undoStack.length===0)return false;
+    // Save current state to redo stack
+    const current={
+      reqs:JSON.parse(JSON.stringify(S.reqs)),
+      glossary:JSON.parse(JSON.stringify(S.glossary)),
+      decisions:JSON.parse(JSON.stringify(S.decisions)),
+      risks:JSON.parse(JSON.stringify(S.risks)),
+      project:S.project,
+      selId:S.selId,
+      selDecId:S.selDecId,
+      selRiskId:S.selRiskId
+    };
+    this.redoStack.push(current);
+    
+    // Restore previous state
+    const prev=this.undoStack.pop();
+    S.reqs=prev.reqs;
+    S.glossary=prev.glossary;
+    S.decisions=prev.decisions||[];
+    S.risks=prev.risks||[];
+    S.project=prev.project;
+    S.selId=prev.selId;
+    S.selDecId=prev.selDecId||null;
+    S.selRiskId=prev.selRiskId||null;
+    
+    // Update _id counter
+    if(S.reqs.length>0){
+      _id=Math.max(0,...S.reqs.map(r=>parseInt(r.id.replace(/\D/g,""))||0));
+    }
+    
+    autoSave();
+    return true;
+  },
+  
+  // Redo previously undone action
+  redo(){
+    if(this.redoStack.length===0)return false;
+    // Save current state to undo stack
+    const current={
+      reqs:JSON.parse(JSON.stringify(S.reqs)),
+      glossary:JSON.parse(JSON.stringify(S.glossary)),
+      decisions:JSON.parse(JSON.stringify(S.decisions)),
+      risks:JSON.parse(JSON.stringify(S.risks)),
+      project:S.project,
+      selId:S.selId,
+      selDecId:S.selDecId,
+      selRiskId:S.selRiskId
+    };
+    this.undoStack.push(current);
+    
+    // Restore redo state
+    const next=this.redoStack.pop();
+    S.reqs=next.reqs;
+    S.glossary=next.glossary;
+    S.decisions=next.decisions||[];
+    S.risks=next.risks||[];
+    S.project=next.project;
+    S.selId=next.selId;
+    S.selDecId=next.selDecId||null;
+    S.selRiskId=next.selRiskId||null;
+    
+    // Update _id counter
+    if(S.reqs.length>0){
+      _id=Math.max(0,...S.reqs.map(r=>parseInt(r.id.replace(/\D/g,""))||0));
+    }
+    
+    autoSave();
+    return true;
+  },
+  
+  canUndo(){return this.undoStack.length>0;},
+  canRedo(){return this.redoStack.length>0;}
+};
+
+// ─── KEYBOARD SHORTCUTS ────────────────────────────────────
+document.addEventListener("keydown",e=>{
+  // Don't trigger shortcuts when typing in inputs (except for Alt shortcuts)
+  const tag=document.activeElement?.tagName?.toLowerCase();
+  const isTyping=tag==="input"||tag==="textarea"||tag==="select";
+  
+  // Alt + key shortcuts (work even when typing, to avoid browser conflicts)
+  if(e.altKey&&!e.ctrlKey&&!e.metaKey){
+    if(e.key==="n"||e.key==="N"){
+      e.preventDefault();
+      e.stopPropagation();
+      if(S.view!=="welcome"){addReq();}
+      return false;
+    }else if(e.key==="s"||e.key==="S"){
+      e.preventDefault();
+      e.stopPropagation();
+      if(S.view!=="welcome"){exportJSON();}
+      return false;
+    }else if(e.key==="f"||e.key==="F"){
+      e.preventDefault();
+      e.stopPropagation();
+      if(S.view!=="welcome"){
+        S.view="requirements";
+        render();
+        setTimeout(()=>document.getElementById("search-input")?.focus(),100);
+      }
+      return false;
+    }else if(e.key==="g"||e.key==="G"){
+      e.preventDefault();
+      e.stopPropagation();
+      if(S.view!=="welcome"){S.view="glossary";render();}
+      return false;
+    }else if(e.key==="d"||e.key==="D"){
+      e.preventDefault();
+      e.stopPropagation();
+      if(S.view!=="welcome"){S.view="dashboard";render();}
+      return false;
+    }else if(e.key==="a"||e.key==="A"){
+      e.preventDefault();
+      e.stopPropagation();
+      if(S.view!=="welcome"){S.view="editor";render();}
+      return false;
+    }else if(e.key==="t"||e.key==="T"){
+      e.preventDefault();
+      e.stopPropagation();
+      if(S.view!=="welcome"){S.view="traceability";render();}
+      return false;
+    }else if(e.key==="c"||e.key==="C"){
+      e.preventDefault();
+      e.stopPropagation();
+      if(S.view!=="welcome"){S.view="decisions";render();}
+      return false;
+    }else if(e.key==="r"||e.key==="R"){
+      e.preventDefault();
+      e.stopPropagation();
+      if(S.view!=="welcome"){S.view="risks";render();}
+      return false;
+    }
+  }
+  
+  // Ctrl+Z for Undo, Ctrl+Y or Ctrl+Shift+Z for Redo (only when not typing)
+  if((e.ctrlKey||e.metaKey)&&!e.altKey&&!isTyping){
+    if(e.key==="z"||e.key==="Z"){
+      if(e.shiftKey){
+        // Ctrl+Shift+Z = Redo
+        e.preventDefault();
+        if(S.view!=="welcome"&&History.redo()){
+          toast("Redo","info");
+          render();
+        }
+      }else{
+        // Ctrl+Z = Undo
+        e.preventDefault();
+        if(S.view!=="welcome"&&History.undo()){
+          toast("Undo","info");
+          render();
+        }
+      }
+      return false;
+    }else if(e.key==="y"||e.key==="Y"){
+      // Ctrl+Y = Redo
+      e.preventDefault();
+      if(S.view!=="welcome"&&History.redo()){
+        toast("Redo","info");
+        render();
+      }
+      return false;
+    }
+  }
+  
+  // Arrow keys for requirement navigation (only when not typing)
+  if(!isTyping&&S.view==="editor"&&S.reqs.length>0){
+    const idx=S.reqs.findIndex(r=>r.id===S.selId);
+    if(e.key==="ArrowUp"&&idx>0){
+      e.preventDefault();
+      S.selId=S.reqs[idx-1].id;render();
+    }else if(e.key==="ArrowDown"&&idx<S.reqs.length-1){
+      e.preventDefault();
+      S.selId=S.reqs[idx+1].id;render();
+    }
+  }
+  
+  // Escape to close modals
+  if(e.key==="Escape"){
+    if(S.showExport){S.showExport=false;render();}
+    if(S.showBulkAI){S.showBulkAI=false;render();}
+    if(S.showImport){S.showImport=false;render();}
+  }
+});
+
+// ─── COPY TO CLIPBOARD ─────────────────────────────────────
+function copyToClipboard(text){
+  navigator.clipboard.writeText(text).then(()=>{
+    toast("Copied to clipboard","success");
+  }).catch(()=>{
+    // Fallback for older browsers
+    const ta=document.createElement("textarea");
+    ta.value=text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand("copy");
+    document.body.removeChild(ta);
+    toast("Copied to clipboard","success");
+  });
+}
+
+// ─── AUTO-SAVE TO LOCALSTORAGE ────────────────────────────
+function autoSave(){
+  try{
+    const data={project:S.project,reqs:S.reqs,glossary:S.glossary,decisions:S.decisions,risks:S.risks,savedAt:new Date().toISOString()};
+    localStorage.setItem(S.autoSaveKey,JSON.stringify(data));
+  }catch(e){}
+}
+function autoLoad(){
+  try{
+    const raw=localStorage.getItem(S.autoSaveKey);
+    if(!raw)return false;
+    const data=JSON.parse(raw);
+    if((data.reqs&&data.reqs.length>0)||(data.risks&&data.risks.length>0)||(data.decisions&&data.decisions.length>0)){
+      S.reqs=data.reqs||[];S.project=data.project||S.project;S.glossary=data.glossary||S.glossary;S.decisions=data.decisions||[];S.risks=data.risks||[];
+      _id=Math.max(0,...(data.reqs||[]).map(r=>parseInt(r.id.replace(/\D/g,""))||0));
+      _riskId=Math.max(0,...(data.risks||[]).map(r=>parseInt(r.id.replace(/\D/g,""))||0));
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+function toast(msg,type="info"){S.toast={msg,type};render();setTimeout(()=>{S.toast=null;render();},3000);}
+
+// ─── DEBOUNCE HELPER ──────────────────────────────────────
+let _debounceTimer=null;
+function debounce(fn,ms){clearTimeout(_debounceTimer);_debounceTimer=setTimeout(fn,ms);}
+
+// ─── ACTIONS ──────────────────────────────────────────────
+function addReq(){History.save();const r=mkReq();S.reqs.push(r);S.selId=r.id;S.view="editor";autoSave();toast("Created "+r.id,"success");render();}
+
+// Silent update - updates data and quality panel without full re-render (fixes input focus loss)
+// Note: We use debounced history save for silent updates to avoid saving on every keystroke
+let _historyTimer=null;
+function updateReqSilent(id,u){
+  const r=S.reqs.find(x=>x.id===id);
+  if(r){
+    // Save history only once when user starts typing (debounced)
+    clearTimeout(_historyTimer);
+    _historyTimer=setTimeout(()=>History.save(),1000);
+    Object.assign(r,u,{modified:new Date().toISOString()});
+    autoSave();
+    // Update quality panel only (debounced to avoid lag while typing)
+    debounce(()=>updateQualityPanel(id),150);
+  }
+}
+
+// Full update with re-render (for dropdowns, structural changes)
+function updateReq(id,u){History.save();const r=S.reqs.find(x=>x.id===id);if(r){Object.assign(r,u,{modified:new Date().toISOString()});autoSave();render();}}
+function deleteReq(id){History.save();S.reqs=S.reqs.filter(r=>r.id!==id);if(S.selId===id)S.selId=null;autoSave();toast("Deleted","info");render();}
+function dupReq(id){History.save();const o=S.reqs.find(r=>r.id===id);if(!o)return;const n={...o,id:gid(),status:"Draft",created:new Date().toISOString(),modified:new Date().toISOString()};S.reqs.push(n);autoSave();toast("Duplicated → "+n.id,"success");render();}
+function doAI(id){
+  History.save();
+  const r=S.reqs.find(x=>x.id===id);if(!r||!r.text.trim())return;
+  S.aiLoading=id;render();
+  setTimeout(()=>{
+    const a=analyze(r.text);const improved=aiRewrite(r.text,a);
+    r.text=improved;r.modified=new Date().toISOString();
+    S.aiLoading=null;autoSave();
+    const ns=analyze(improved).score;toast(`AI: ${a.score}% → ${ns}%`,"success");render();
+  },400);
+}
+function bulkAI(){
+  History.save();
+  let c=0;S.reqs.forEach(r=>{if(!r.text.trim())return;const a=analyze(r.text);if(a.score<80){r.text=aiRewrite(r.text,a);r.modified=new Date().toISOString();c++;}});
+  autoSave();toast(`Improved ${c} requirements`,"success");render();
+}
+function doImport(){
+  History.save();
+  const parsed=parseDoc(S.importText);
+  if(!parsed.length){toast("No 'shall' statements found","danger");return;}
+  parsed.forEach(p=>S.reqs.push(mkReq(p)));
+  S.showImport=false;S.importText="";autoSave();toast(`Imported ${parsed.length} requirements`,"success");render();
+}
+
+// ─── DECISION LOG FUNCTIONS ──────────────────────────────
+let _decId=0;
+function gDecId(){
+  // Gap-filling: find first available DEC-NNNN
+  const usedNums=S.decisions.map(d=>parseInt(d.id.replace(/\D/g,""))||0);
+  let n=1;
+  while(usedNums.includes(n))n++;
+  return"DEC-"+String(n).padStart(4,"0");
+}
+function mkDec(o={}){return{id:gDecId(),title:"",decision:"",rationale:"",alternatives:"",category:"Design",status:"Proposed",decisionMaker:"",date:new Date().toISOString().split("T")[0],affectedReqs:[],created:new Date().toISOString(),modified:new Date().toISOString(),...o};}
+function addDec(){History.save();const d=mkDec();S.decisions.push(d);S.selDecId=d.id;S.view="decisions";autoSave();toast("Created "+d.id,"success");render();}
+
+// Silent update for decisions (prevents input focus loss)
+let _decHistoryTimer=null;
+function updateDecSilent(id,u){
+  const d=S.decisions.find(x=>x.id===id);
+  if(d){
+    clearTimeout(_decHistoryTimer);
+    _decHistoryTimer=setTimeout(()=>History.save(),1000);
+    Object.assign(d,u,{modified:new Date().toISOString()});
+    autoSave();
+  }
+}
+// Full update with re-render (for dropdowns, structural changes)
+function updateDec(id,u){History.save();const d=S.decisions.find(x=>x.id===id);if(d){Object.assign(d,u,{modified:new Date().toISOString()});autoSave();render();}}
+function deleteDec(id){History.save();S.decisions=S.decisions.filter(d=>d.id!==id);if(S.selDecId===id)S.selDecId=null;autoSave();toast("Decision deleted","info");render();}
+
+// ─── RISK ACTIONS ────────────────────────────────────────
+function addRisk(){History.save();const r=mkRisk();S.risks.push(r);S.selRiskId=r.id;S.view="risks";autoSave();toast("Created "+r.id,"success");render();}
+
+// Silent update for risks - doesn't re-render (for text inputs)
+let _riskHistoryTimer=null;
+function updateRiskSilent(id,u){
+  const r=S.risks.find(x=>x.id===id);
+  if(r){
+    clearTimeout(_riskHistoryTimer);
+    _riskHistoryTimer=setTimeout(()=>History.save(),1000);
+    Object.assign(r,u,{modified:new Date().toISOString()});
+    autoSave();
+  }
+}
+// Full update with re-render (for dropdowns)
+function updateRisk(id,u){History.save();const r=S.risks.find(x=>x.id===id);if(r){Object.assign(r,u,{modified:new Date().toISOString()});autoSave();render();}}
+function deleteRisk(id){
+  History.save();
+  S.risks=S.risks.filter(r=>r.id!==id);
+  if(S.selRiskId===id)S.selRiskId=null;
+  autoSave();
+  toast("Risk deleted","info");
+  render();
+}
+
+// ─── EXPORTS ──────────────────────────────────────────────
+function exportJSON(){
+  const data={project:S.project,version:"2.2",standard:"INCOSE GtWR v4",exportDate:new Date().toISOString(),
+    requirements:S.reqs.map(r=>({...r,qualityScore:analyze(r.text).score,qualityGrade:analyze(r.text).grade})),decisions:S.decisions,risks:S.risks,glossary:S.glossary};
+  dl(JSON.stringify(data,null,2),"application/json",S.project.replace(/\s/g,"_")+"_requirements.json");
+  toast("Saved project JSON","success");
+}
+function exportCSV(){
+  const h=["ID","Text","Type","Level","Priority","Status","Verification","Rationale","Parent","Source","Risk","Score","Grade"];
+  const rows=S.reqs.map(r=>{const a=analyze(r.text);return[r.id,'"'+(r.text||"").replace(/"/g,'""')+'"',r.type,r.level,r.priority,r.status,r.verification,'"'+(r.rationale||"").replace(/"/g,'""')+'"',r.parent,r.source,r.risk,a.score,a.grade];});
+  dl([h.join(","),...rows.map(r=>r.join(","))].join("\n"),"text/csv",S.project.replace(/\s/g,"_")+".csv");
+  toast("Exported CSV","success");
+}
+function exportReqIF(){dl(genReqIF(S.reqs,S.project),"application/xml",S.project.replace(/\s/g,"_")+".reqif");toast("Exported ReqIF","success");}
+
+function exportPDF(){
+  // Generate HTML report that will be printed to PDF
+  const now=new Date();
+  const dateStr=now.toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
+  const timeStr=now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
+  
+  // Calculate statistics
+  const stats={
+    total:S.reqs.length,
+    byLevel:{},
+    byType:{},
+    byStatus:{},
+    avgScore:0,
+    gradeA:0,gradeB:0,gradeC:0,gradeD:0,gradeF:0
+  };
+  
+  let totalScore=0;
+  S.reqs.forEach(r=>{
+    const a=analyze(r.text);
+    totalScore+=a.score;
+    stats.byLevel[r.level]=(stats.byLevel[r.level]||0)+1;
+    stats.byType[r.type]=(stats.byType[r.type]||0)+1;
+    stats.byStatus[r.status]=(stats.byStatus[r.status]||0)+1;
+    if(a.score>=90)stats.gradeA++;
+    else if(a.score>=80)stats.gradeB++;
+    else if(a.score>=70)stats.gradeC++;
+    else if(a.score>=60)stats.gradeD++;
+    else stats.gradeF++;
+  });
+  stats.avgScore=S.reqs.length>0?Math.round(totalScore/S.reqs.length):0;
+  
+  // Build traceability tree HTML
+  function buildTreeHtml(parentId,level){
+    const children=S.reqs.filter(r=>r.parent===parentId);
+    if(children.length===0)return "";
+    let result="";
+    children.forEach(r=>{
+      const a=analyze(r.text);
+      const txt=escXml((r.text||"").substring(0,80))+((r.text||"").length>80?"...":"");
+      const childHtml=buildTreeHtml(r.id,level+1);
+      result+='<div class="tree-item level-'+level+'">';
+      result+='<span class="tree-id">'+r.id+'</span>';
+      result+='<span class="tree-text">'+txt+'</span>';
+      result+='<span class="tree-meta">'+r.level.replace(" Requirement","")+" · "+a.score+'%</span>';
+      if(childHtml)result+='<div class="tree-children">'+childHtml+'</div>';
+      result+='</div>';
+    });
+    return result;
+  }
+  
+  let treeHtml='<div class="tree">';
+  const stakeholderNeeds=S.reqs.filter(r=>r.level==="Stakeholder Need");
+  const orphans=S.reqs.filter(r=>!r.parent&&r.level!=="Stakeholder Need"&&!S.reqs.some(c=>c.parent===r.id));
+  
+  if(stakeholderNeeds.length>0){
+    treeHtml+='<h4 style="font-size:11px;color:#475569;margin:12px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;">Stakeholder Needs</h4>';
+    stakeholderNeeds.forEach(r=>{
+      const a=analyze(r.text);
+      const txt=escXml((r.text||"").substring(0,80))+((r.text||"").length>80?"...":"");
+      const childHtml=buildTreeHtml(r.id,1);
+      treeHtml+='<div class="tree-item level-0">';
+      treeHtml+='<span class="tree-id">'+r.id+'</span>';
+      treeHtml+='<span class="tree-text">'+txt+'</span>';
+      treeHtml+='<span class="tree-meta">'+a.score+'%</span>';
+      if(childHtml)treeHtml+='<div class="tree-children">'+childHtml+'</div>';
+      treeHtml+='</div>';
+    });
+  }
+  
+  const otherRoots=S.reqs.filter(r=>!r.parent&&r.level!=="Stakeholder Need"&&S.reqs.some(c=>c.parent===r.id));
+  if(otherRoots.length>0){
+    treeHtml+='<h4 style="font-size:11px;color:#475569;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;">Other Root Requirements</h4>';
+    otherRoots.forEach(r=>{
+      const a=analyze(r.text);
+      const txt=escXml((r.text||"").substring(0,80))+((r.text||"").length>80?"...":"");
+      const childHtml=buildTreeHtml(r.id,1);
+      treeHtml+='<div class="tree-item level-0">';
+      treeHtml+='<span class="tree-id">'+r.id+'</span>';
+      treeHtml+='<span class="tree-text">'+txt+'</span>';
+      treeHtml+='<span class="tree-meta">'+r.level.replace(" Requirement","")+" · "+a.score+'%</span>';
+      if(childHtml)treeHtml+='<div class="tree-children">'+childHtml+'</div>';
+      treeHtml+='</div>';
+    });
+  }
+  treeHtml+='</div>';
+  
+  if(orphans.length>0){
+    treeHtml+='<div class="orphan-box"><h4>⚠ Orphan Requirements (no parent, no children)</h4>';
+    treeHtml+='<p style="font-size:10px;color:#92400e;">These requirements are not linked to any hierarchy.</p>';
+    treeHtml+='<div style="margin-top:8px;">';
+    orphans.forEach(r=>{
+      treeHtml+='<span style="display:inline-block;font-family:monospace;font-size:9px;background:#fff;padding:2px 8px;border-radius:4px;margin:2px;">'+r.id+'</span>';
+    });
+    treeHtml+='</div></div>';
+  }
+  
+  // Build HTML document
+  const html=`<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>${S.project} - Requirements Report</title>
+<style>
+@page{size:A4;margin:20mm 15mm;}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:11px;line-height:1.5;color:#1e293b;}
+.page-break{page-break-after:always;}
+.cover{height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:linear-gradient(135deg,#0f172a,#1e3a5f);}
+.cover h1{font-size:32px;color:#fff;margin-bottom:8px;}
+.cover h2{font-size:18px;color:#94a3b8;font-weight:400;margin-bottom:40px;}
+.cover .meta{color:#64748b;font-size:12px;}
+.cover .badge{display:inline-block;background:#38bdf8;color:#0f172a;padding:6px 16px;border-radius:20px;font-weight:600;margin-top:20px;}
+.toc{padding:40px;}
+.toc h2{font-size:20px;border-bottom:2px solid #0284c7;padding-bottom:8px;margin-bottom:20px;}
+.toc-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dotted #e2e8f0;}
+.toc-item span:last-child{color:#64748b;}
+.section{padding:20px 0;}
+.section h2{font-size:18px;color:#0f172a;border-bottom:2px solid #0284c7;padding-bottom:6px;margin-bottom:16px;}
+.section h3{font-size:14px;color:#334155;margin:16px 0 10px;}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:10px;}
+th{background:#f1f5f9;color:#475569;padding:8px 6px;text-align:left;font-weight:600;border:1px solid #e2e8f0;}
+td{padding:6px;border:1px solid #e2e8f0;vertical-align:top;}
+tr:nth-child(even){background:#f8fafc;}
+.score{font-weight:700;text-align:center;}
+.score-a{color:#059669;}
+.score-b{color:#0284c7;}
+.score-c{color:#d97706;}
+.score-d{color:#ea580c;}
+.score-f{color:#dc2626;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0;}
+.stat-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;text-align:center;}
+.stat-box .value{font-size:24px;font-weight:700;color:#0f172a;}
+.stat-box .label{font-size:10px;color:#64748b;text-transform:uppercase;}
+.footer{position:fixed;bottom:10mm;left:15mm;right:15mm;font-size:9px;color:#94a3b8;display:flex;justify-content:space-between;border-top:1px solid #e2e8f0;padding-top:8px;}
+.badge-sm{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:600;}
+.badge-draft{background:#fef3c7;color:#92400e;}
+.badge-reviewed{background:#ede9fe;color:#6d28d9;}
+.badge-approved{background:#d1fae5;color:#047857;}
+</style>
+</head>
+<body>
+
+<!-- Cover Page -->
+<div class="cover">
+<h1>${escXml(S.project)}</h1>
+<h2>Requirements Specification Report</h2>
+<div class="meta">Generated on ${dateStr} at ${timeStr}</div>
+<div class="badge">INCOSE GtWR v4 Compliant</div>
+<div style="margin-top:60px;color:#64748b;font-size:11px;">
+<div>${stats.total} Requirements</div>
+<div>Average Quality Score: ${stats.avgScore}%</div>
+</div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- Table of Contents -->
+<div class="toc">
+<h2>Table of Contents</h2>
+<div class="toc-item"><span>1. Executive Summary</span><span>3</span></div>
+<div class="toc-item"><span>2. Quality Statistics</span><span>3</span></div>
+<div class="toc-item"><span>3. Requirements Register</span><span>4</span></div>
+<div class="toc-item"><span>4. Traceability Matrix</span><span>${Math.ceil(S.reqs.length/25)+4}</span></div>
+<div class="toc-item"><span>5. Glossary</span><span>${Math.ceil(S.reqs.length/25)+5}</span></div>
+${S.risks.length>0?`<div class="toc-item"><span>6. Risk Register</span><span>${Math.ceil(S.reqs.length/25)+6}</span></div>`:""}
+${S.decisions.length>0?`<div class="toc-item"><span>${S.risks.length>0?"7":"6"}. Decision Log</span><span>${Math.ceil(S.reqs.length/25)+(S.risks.length>0?7:6)}</span></div>`:""}
+</div>
+
+<div class="page-break"></div>
+
+<!-- Executive Summary -->
+<div class="section">
+<h2>1. Executive Summary</h2>
+<p>This report documents ${stats.total} requirements for the "${escXml(S.project)}" project, analyzed against the INCOSE Guide to Writing Requirements (GtWR) version 4 standard with 42 quality rules.</p>
+
+<h3>Project Statistics</h3>
+<div class="stat-grid">
+<div class="stat-box"><div class="value">${stats.total}</div><div class="label">Total Requirements</div></div>
+<div class="stat-box"><div class="value">${stats.avgScore}%</div><div class="label">Avg Quality Score</div></div>
+<div class="stat-box"><div class="value">${stats.gradeA+stats.gradeB}</div><div class="label">Pass (≥80%)</div></div>
+<div class="stat-box"><div class="value">${stats.gradeC+stats.gradeD+stats.gradeF}</div><div class="label">Need Review (<80%)</div></div>
+</div>
+
+<h3>Requirements by Level</h3>
+<table>
+<tr><th>Level</th><th>Count</th><th>Percentage</th></tr>
+${Object.entries(stats.byLevel).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td><td>${Math.round(v/stats.total*100)}%</td></tr>`).join("")}
+</table>
+
+<h3>Requirements by Status</h3>
+<table>
+<tr><th>Status</th><th>Count</th><th>Percentage</th></tr>
+${Object.entries(stats.byStatus).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td><td>${Math.round(v/stats.total*100)}%</td></tr>`).join("")}
+</table>
+
+<h3>Quality Distribution</h3>
+<table>
+<tr><th>Grade</th><th>Score Range</th><th>Count</th><th>Percentage</th></tr>
+<tr><td>A (Excellent)</td><td>90-100%</td><td>${stats.gradeA}</td><td>${Math.round(stats.gradeA/stats.total*100)||0}%</td></tr>
+<tr><td>B (Good)</td><td>80-89%</td><td>${stats.gradeB}</td><td>${Math.round(stats.gradeB/stats.total*100)||0}%</td></tr>
+<tr><td>C (Acceptable)</td><td>70-79%</td><td>${stats.gradeC}</td><td>${Math.round(stats.gradeC/stats.total*100)||0}%</td></tr>
+<tr><td>D (Needs Work)</td><td>60-69%</td><td>${stats.gradeD}</td><td>${Math.round(stats.gradeD/stats.total*100)||0}%</td></tr>
+<tr><td>F (Poor)</td><td>0-59%</td><td>${stats.gradeF}</td><td>${Math.round(stats.gradeF/stats.total*100)||0}%</td></tr>
+</table>
+</div>
+
+<div class="page-break"></div>
+
+<!-- Requirements Register -->
+<div class="section">
+<h2>3. Requirements Register</h2>
+<table>
+<tr><th style="width:70px">ID</th><th style="width:45%">Statement</th><th>Type</th><th>Level</th><th>Status</th><th style="width:50px">Score</th></tr>
+${S.reqs.map(r=>{
+  const a=analyze(r.text);
+  const sc=a.score>=90?"a":a.score>=80?"b":a.score>=70?"c":a.score>=60?"d":"f";
+  const st=r.status.toLowerCase();
+  return`<tr>
+<td style="font-family:monospace;font-size:9px;color:#0284c7;font-weight:600">${r.id}</td>
+<td>${escXml(r.text)||"<em style='color:#94a3b8'>(empty)</em>"}</td>
+<td style="font-size:9px">${r.type}</td>
+<td style="font-size:9px">${r.level.replace(" Requirement","")}</td>
+<td><span class="badge-sm badge-${st}">${r.status}</span></td>
+<td class="score score-${sc}">${a.score}%</td>
+</tr>`;
+}).join("")}
+</table>
+</div>
+
+<div class="page-break"></div>
+
+<!-- Traceability -->
+<div class="section">
+<h2>4. Traceability Tree</h2>
+<p style="margin-bottom:16px;color:#64748b;font-size:11px;">Requirements hierarchy showing parent → child derivation relationships.</p>
+
+<style>
+.tree{margin:0;padding:0;}
+.tree-item{position:relative;padding:6px 0 6px 24px;border-left:2px solid #e2e8f0;}
+.tree-item:last-child{border-left-color:transparent;}
+.tree-item::before{content:"";position:absolute;left:-2px;top:14px;width:20px;height:2px;background:#e2e8f0;}
+.tree-item.level-0{border-left:none;padding-left:0;margin-top:12px;}
+.tree-item.level-0::before{display:none;}
+.tree-id{font-family:monospace;font-size:10px;font-weight:600;color:#0284c7;display:inline-block;min-width:70px;}
+.tree-text{font-size:10px;color:#475569;display:inline;}
+.tree-meta{font-size:9px;color:#94a3b8;margin-left:8px;}
+.tree-children{margin-left:20px;}
+.orphan-box{margin-top:24px;padding:12px;background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;}
+.orphan-box h4{font-size:12px;color:#92400e;margin-bottom:8px;}
+</style>
+
+<div id="trace-tree">${treeHtml}</div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- Glossary -->
+<div class="section">
+<h2>5. Glossary</h2>
+<table>
+<tr><th style="width:150px">Term</th><th>Definition</th></tr>
+${S.glossary.map(g=>`<tr><td style="font-weight:600">${escXml(g.term)}</td><td>${escXml(g.def)}</td></tr>`).join("")}
+</table>
+</div>
+
+${S.risks.length>0?`<div class="page-break"></div>
+<div class="section">
+<h2>6. Risk Register</h2>
+<table>
+<tr><th style="width:80px">ID</th><th>Title</th><th style="width:80px">Category</th><th style="width:40px">L</th><th style="width:40px">I</th><th style="width:50px">Score</th><th style="width:70px">Level</th><th style="width:70px">Status</th><th>Mitigations</th><th>Owner</th></tr>
+${S.risks.map(r=>{const sc=riskScore(r.likelihood,r.impact);const rl=riskLevel(sc);return`<tr><td class="mono" style="color:#38bdf8;font-weight:600">${escXml(r.id)}</td><td style="font-weight:600">${escXml(r.title)}</td><td>${escXml(r.category)}</td><td style="text-align:center">${r.likelihood}</td><td style="text-align:center">${r.impact}</td><td style="text-align:center;font-weight:700">${sc}</td><td style="color:${rl.color};font-weight:600">${rl.level}</td><td>${escXml(r.status)}</td><td class="mono" style="font-size:9px">${(r.mitigations||[]).join(", ")}</td><td>${escXml(r.owner||"")}</td></tr>`;}).join("")}
+</table>
+</div>`:""}
+
+${S.decisions.length>0?`<div class="page-break"></div>
+<div class="section">
+<h2>${S.risks.length>0?"7":"6"}. Decision Log</h2>
+<table>
+<tr><th style="width:80px">ID</th><th style="width:80px">Date</th><th>Title</th><th style="width:80px">Category</th><th style="width:80px">Status</th><th>Decision</th><th>Rationale</th><th style="width:100px">Affected Reqs</th></tr>
+${S.decisions.map(d=>`<tr><td class="mono" style="color:#38bdf8;font-weight:600">${escXml(d.id)}</td><td>${escXml(d.date)}</td><td style="font-weight:600">${escXml(d.title)}</td><td>${escXml(d.category)}</td><td>${escXml(d.status)}</td><td>${escXml(d.decision)}</td><td>${escXml(d.rationale)}</td><td class="mono" style="font-size:9px">${(d.affectedReqs||[]).join(", ")}</td></tr>`).join("")}
+</table>
+</div>`:""}
+
+<div class="footer">
+<span>${escXml(S.project)} — Requirements Report</span>
+<span>Generated by ReqRight v2.2.0-beta</span>
+</div>
+
+<div style="text-align:center;padding:8px;background:#0a0d12;font-size:9px;color:#4b5f82;border-top:1px solid #1c2744;">
+      ReqRight v2.2.0-beta · Independent educational project · Based on INCOSE® GtWR v4 ·
+      <a href="DISCLAIMER.md" style="color:#4b5f82">Disclaimer</a> ·
+      <a href="PRIVACY.md" style="color:#4b5f82">Privacy</a> ·
+      <a href="LICENSE" style="color:#4b5f82">License (MIT)</a> ·
+      Not affiliated with or endorsed by INCOSE®, IBM®, or any standards body.
+    </div>
+</body>
+</html>`;
+
+  // Open print dialog
+  const printWindow=window.open("","_blank");
+  printWindow.document.write(html);
+  printWindow.document.close();
+  printWindow.onload=()=>{
+    setTimeout(()=>{
+      printWindow.print();
+    },250);
+  };
+  toast("PDF report opened — use Print to save as PDF","success");
+}
+
+// ─── CSV PARSER ──────────────────────────────────────────
+function parseCSV(text){
+  const lines=text.split(/\r?\n/).filter(l=>l.trim());
+  if(lines.length<2)return{headers:[],rows:[]};
+  
+  // Detect delimiter (comma, tab, semicolon)
+  const firstLine=lines[0];
+  let delimiter=",";
+  if(firstLine.split("\t").length>firstLine.split(",").length)delimiter="\t";
+  else if(firstLine.split(";").length>firstLine.split(",").length)delimiter=";";
+  
+  // Parse with proper quote handling
+  function parseLine(line){
+    const result=[];
+    let current="";
+    let inQuotes=false;
+    for(let i=0;i<line.length;i++){
+      const c=line[i];
+      if(c==='"'){
+        if(inQuotes&&line[i+1]==='"'){current+='"';i++;}
+        else inQuotes=!inQuotes;
+      }else if(c===delimiter&&!inQuotes){
+        result.push(current.trim());
+        current="";
+      }else{
+        current+=c;
+      }
+    }
+    result.push(current.trim());
+    return result;
+  }
+  
+  const headers=parseLine(lines[0]).map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,""));
+  const rows=lines.slice(1).map(l=>parseLine(l)).filter(r=>r.some(c=>c));
+  return{headers,rows,delimiter};
+}
+
+function mapCSVToReqs(headers,rows){
+  // Map common column names to requirement fields
+  const colMap={};
+  const fieldAliases={
+    text:["text","statement","requirement","description","req","content","body"],
+    id:["id","reqid","req-id","requirement id","number","#"],
+    type:["type","category","reqtype","requirement type"],
+    level:["level","tier","reqlevel"],
+    priority:["priority","pri","importance"],
+    status:["status","state"],
+    verification:["verification","verificationmethod","vmethod","v&v"],
+    rationale:["rationale","reason","justification","why"],
+    parent:["parent","parentid","parent id","tracesto","derives from"],
+    source:["source","origin","reference"],
+    risk:["risk","risklevel"]
+  };
+  
+  // Find matching columns
+  headers.forEach((h,i)=>{
+    for(const[field,aliases]of Object.entries(fieldAliases)){
+      if(aliases.some(a=>h.includes(a.replace(/[^a-z0-9]/g,"")))){
+        if(!colMap[field])colMap[field]=i;
+      }
+    }
+  });
+  
+  // Must have text column
+  if(colMap.text===undefined){
+    // Try to find any column with "shall" in the data
+    for(let i=0;i<headers.length;i++){
+      if(rows.some(r=>r[i]&&/\bshall\b/i.test(r[i]))){
+        colMap.text=i;
+        break;
+      }
+    }
+  }
+  
+  if(colMap.text===undefined)return[];
+  
+  // Convert rows to requirements
+  return rows.map(row=>{
+    const req={};
+    if(colMap.text!==undefined)req.text=row[colMap.text]||"";
+    if(colMap.type!==undefined&&row[colMap.type]){
+      const t=row[colMap.type];
+      const match=REQ_TYPES.find(rt=>rt.toLowerCase()===t.toLowerCase());
+      if(match)req.type=match;
+    }
+    if(colMap.level!==undefined&&row[colMap.level]){
+      const l=row[colMap.level];
+      const match=REQ_LEVELS.find(rl=>rl.toLowerCase().includes(l.toLowerCase())||l.toLowerCase().includes(rl.toLowerCase().split(" ")[0]));
+      if(match)req.level=match;
+    }
+    if(colMap.priority!==undefined&&row[colMap.priority]){
+      const p=row[colMap.priority];
+      const match=PRIORITIES.find(pr=>pr.toLowerCase()===p.toLowerCase());
+      if(match)req.priority=match;
+    }
+    if(colMap.status!==undefined&&row[colMap.status]){
+      const s=row[colMap.status];
+      const match=STATUSES.find(st=>st.toLowerCase()===s.toLowerCase());
+      if(match)req.status=match;
+    }
+    if(colMap.verification!==undefined&&row[colMap.verification]){
+      const v=row[colMap.verification];
+      const match=V_METHODS.find(vm=>vm.toLowerCase()===v.toLowerCase());
+      if(match)req.verification=match;
+    }
+    if(colMap.rationale!==undefined)req.rationale=row[colMap.rationale]||"";
+    if(colMap.source!==undefined)req.source=row[colMap.source]||"";
+    return req;
+  }).filter(r=>r.text&&r.text.trim());
+}
+
+function importFile(file,type){
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const content=e.target.result;
+    if(type==="json"){
+      try{
+        const d=JSON.parse(content);
+        if(d.requirements||d.risks||d.decisions){
+          History.save();
+          if(d.requirements)d.requirements.forEach(r=>S.reqs.push(mkReq(r)));
+          if(d.glossary)S.glossary=[...S.glossary,...d.glossary];
+          if(d.decisions)d.decisions.forEach(dc=>{S.decisions.push({...mkDec(),...dc});});
+          if(d.risks){d.risks.forEach(r=>{S.risks.push({...mkRisk(),...r});});_riskId=Math.max(_riskId,...d.risks.map(r=>parseInt(r.id.replace(/\D/g,""))||0));}
+          if(d.project)S.project=d.project;
+          autoSave();
+          let msg="Loaded";
+          if(d.requirements&&d.requirements.length)msg+=" "+d.requirements.length+" requirements";
+          if(d.risks&&d.risks.length)msg+=", "+d.risks.length+" risks";
+          if(d.decisions&&d.decisions.length)msg+=", "+d.decisions.length+" decisions";
+          S.view="dashboard";
+          toast(msg,"success");
+        }else{
+          toast("No requirements, risks, or decisions found in file","danger");
+        }
+      }catch(err){toast("Invalid JSON: "+err.message,"danger");}
+      render();
+    }else if(type==="csv"){
+      // CSV/TSV import
+      const{headers,rows}=parseCSV(content);
+      if(rows.length===0){toast("No data found in file","danger");return;}
+      const reqs=mapCSVToReqs(headers,rows);
+      if(reqs.length===0){toast("No requirements found. Ensure there's a 'Text' or 'Statement' column.","danger");return;}
+      History.save();
+      reqs.forEach(r=>S.reqs.push(mkReq(r)));
+      autoSave();
+      toast(`Imported ${reqs.length} requirements from CSV`,"success");
+      S.view="dashboard";
+      render();
+    }else{
+      // Text document import (existing behavior)
+      S.importText=content;
+      S.showImport=true;
+      render();
+    }
+  };
+  reader.readAsText(file);
+}
+
+// ─── QUALITY PANEL UPDATE (without full re-render) ────────
+function updateQualityPanel(id){
+  const r=S.reqs.find(x=>x.id===id);
+  if(!r)return;
+  const a=analyze(r.text);
+  
+  // Update score display
+  const scoreEl=document.getElementById("quality-score");
+  if(scoreEl){
+    const sc=a.score>=80?"var(--success)":a.score>=60?"var(--warn)":"var(--danger)";
+    scoreEl.textContent=String(a.score);
+    scoreEl.style.color=sc;
+  }
+  
+  // Update grade
+  const gradeEl=document.getElementById("quality-grade");
+  if(gradeEl)gradeEl.textContent="Grade: "+a.grade;
+  
+  // Update summary counts
+  const summaryEl=document.getElementById("quality-summary");
+  if(summaryEl)summaryEl.innerHTML=`<span style="color:var(--success)">✓ ${a.passed}</span><span style="color:var(--danger)">✕ ${a.failed}</span><span style="color:var(--warn)">⚠ ${a.warnings}</span>`;
+  
+  // Update AI panel visibility and content
+  const aiPanel=document.getElementById("ai-panel");
+  const successPanel=document.getElementById("success-panel");
+  
+  if(r.text.trim()&&a.failed>0){
+    if(aiPanel){
+      aiPanel.style.display="block";
+      const aiInfo=aiPanel.querySelector(".ai-info");
+      if(aiInfo)aiInfo.innerHTML=`<div style="font-size:15px;font-weight:700;color:var(--purple);margin-bottom:4px;">⚡ AI Requirement Improver</div><div style="font-size:12px;color:var(--textMid);">${a.failed} INCOSE violation${a.failed!==1?"s":""} detected — AI can fix: ${a.results.filter(x=>!x.pass).map(x=>x.id).join(", ")}</div>`;
+      const aiTags=aiPanel.querySelector(".ai-tags");
+      if(aiTags)aiTags.innerHTML=a.results.filter(x=>!x.pass).map(x=>`<div style="font-size:11px;padding:4px 10px;border-radius:6px;background:var(--danger)15;border:1px solid var(--danger)33;color:var(--danger);font-weight:500;display:inline-block;margin:3px;">${x.id}: ${x.msg.length>50?x.msg.slice(0,50)+"...":x.msg}</div>`).join("");
+    }
+    if(successPanel)successPanel.style.display="none";
+  }else if(r.text.trim()&&a.failed===0){
+    if(aiPanel)aiPanel.style.display="none";
+    if(successPanel){
+      successPanel.style.display="flex";
+      const spText=successPanel.querySelector(".sp-text");
+      if(spText)spText.innerHTML=`<div style="font-size:14px;font-weight:600;color:var(--success);">All automated INCOSE checks passed</div><div style="font-size:12px;color:var(--textMid);margin-top:2px;">Score: ${a.score}% (${a.grade}) — ${a.warnings} rules for manual review</div>`;
+    }
+  }else{
+    if(aiPanel)aiPanel.style.display="none";
+    if(successPanel)successPanel.style.display="none";
+  }
+  
+  // Update rules panel
+  const rulesPanel=document.getElementById("rules-panel");
+  if(rulesPanel){
+    let html='<div style="font-size:12px;font-weight:600;margin-bottom:12px;">Rule Analysis</div>';
+    if(a.results.filter(x=>!x.pass).length===0&&r.text.trim()){
+      html+=`<div style="padding:12px;background:var(--success)11;border-radius:8px;border:1px solid var(--success)33;color:var(--success);font-size:12px;margin-bottom:10px;">✓ All automated checks passed.</div>`;
+    }
+    a.results.filter(x=>!x.pass).forEach(x=>{
+      html+=`<div style="padding:10px;background:var(--danger)0a;border-radius:8px;border:1px solid var(--danger)22;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span class="mono" style="font-size:11px;color:var(--danger);font-weight:600;">${x.id}</span><span class="badge" style="background:var(--danger)22;color:var(--danger);">FAIL</span></div><div style="font-size:11px;font-weight:600;color:var(--text);">${x.nm}</div><div style="font-size:11px;color:var(--textMid);line-height:1.5;margin-top:2px;">${x.msg}</div></div>`;
+    });
+    a.results.filter(x=>x.pass&&x.warn).forEach(x=>{
+      html+=`<div style="padding:8px;background:var(--warn)08;border-radius:8px;border:1px solid var(--warn)22;margin-bottom:6px;"><div style="display:flex;justify-content:space-between;margin-bottom:2px;"><span class="mono" style="font-size:11px;color:var(--warn);font-weight:600;">${x.id} — ${x.nm}</span><span class="badge" style="background:var(--warn)22;color:var(--warn);">REVIEW</span></div><div style="font-size:11px;color:var(--textMid);line-height:1.4;">${x.msg}</div></div>`;
+    });
+    a.results.filter(x=>x.pass&&!x.warn).forEach(x=>{
+      html+=`<div style="padding:6px;margin-bottom:4px;display:flex;align-items:center;gap:6px;"><span class="mono" style="font-size:11px;color:var(--success);">✓ ${x.id}</span><span style="font-size:10px;color:var(--textDim);">— ${x.nm}</span></div>`;
+    });
+    rulesPanel.innerHTML=html;
+  }
+}
+
+// ─── RENDER ENGINE ────────────────────────────────────────
+function h(tag,attrs,...children){
+  const el=document.createElement(tag);
+  if(attrs)for(const[k,v]of Object.entries(attrs)){
+    if(k==="style"&&typeof v==="object"){Object.assign(el.style,v);}
+    else if(k.startsWith("on")){el.addEventListener(k.slice(2).toLowerCase(),v);}
+    else if(k==="className"){el.className=v;}
+    else if(k==="value"&&(tag==="input"||tag==="textarea"||tag==="select")){el.value=v||"";}
+    else if(k==="checked"){el.checked=v;}
+    else if(k==="disabled"){el.disabled=v;}
+    else if(k==="selected"){el.selected=v;}
+    else if(k==="placeholder"){el.placeholder=v;}
+    else if(k==="rows"){el.rows=v;}
+    else if(k==="type"){el.type=v;}
+    else if(k==="accept"){el.accept=v;}
+    else if(k==="title"){el.title=v;}
+    else if(k==="htmlFor"){el.htmlFor=v;}
+    else{el.setAttribute(k,v);}
+  }
+  children.flat(Infinity).forEach(c=>{
+    if(c==null||c===false)return;
+    el.appendChild(typeof c==="string"||typeof c==="number"?document.createTextNode(c):c);
+  });
+  return el;
+}
+
+function render(){
+  // Save focus state before rebuilding DOM
+  const _fId=document.activeElement?.id||"";
+  const _fStart=document.activeElement?.selectionStart;
+  const _fEnd=document.activeElement?.selectionEnd;
+
+  const app=document.getElementById("app");
+  app.innerHTML="";
+
+  const cur=S.reqs.find(r=>r.id===S.selId);
+  const curA=cur?analyze(cur.text):null;
+
+  // Store current analysis in global for panel updates
+  S._curA=curA;
+
+  // Toast
+  if(S.toast){
+    const bg=S.toast.type==="success"?"var(--success)":S.toast.type==="danger"?"var(--danger)":"var(--accent)";
+    app.appendChild(h("div",{className:"toast",style:{background:bg}},
+      S.toast.type==="success"?"✓ ":S.toast.type==="danger"?"✕ ":"ℹ ",S.toast.msg));
+  }
+
+  // ═══ WELCOME SCREEN ═══
+  if(S.view==="welcome"){
+    const hasAutoSave=!!localStorage.getItem(S.autoSaveKey);
+    const overlay=h("div",{className:"welcome-overlay"});
+    const card=h("div",{className:"welcome-card"});
+    card.appendChild(h("div",{className:"welcome-logo"},"RR"));
+    card.appendChild(h("h1",{style:{fontSize:"28px",fontWeight:700,letterSpacing:"-0.03em",marginBottom:"8px"}},"ReqRight"));
+    card.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"14px",marginBottom:"32px",lineHeight:"1.6"}},"Free, open requirements engineering tool based on the INCOSE Guide to Writing Requirements v4. All 42 rules. AI quality improvement. ReqIF/DOORS export. Your data never leaves your machine."));
+
+    // Continue button
+    if(hasAutoSave){
+      const contBtn=h("button",{className:"btn btn-ai",style:{width:"100%",marginBottom:"12px"},onClick:()=>{autoLoad();setState({view:"dashboard"})}},"▶ Continue Previous Session");
+      card.appendChild(contBtn);
+      try{const d=JSON.parse(localStorage.getItem(S.autoSaveKey));
+        card.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"12px",marginBottom:"20px"}},`${d.reqs?.length||0} requirements · Last saved ${new Date(d.savedAt).toLocaleString()}`));
+      }catch(e){}
+    }
+
+    // New project
+    card.appendChild(h("button",{className:"btn btn-pri",style:{width:"100%",marginBottom:"12px",padding:"14px"},onClick:()=>{localStorage.removeItem(S.autoSaveKey);S.reqs=[];S.decisions=[];S.risks=[];S.glossary=[{term:"SOI",def:"System of Interest"},{term:"ICD",def:"Interface Control Document"},{term:"V&V",def:"Verification and Validation"},{term:"ConOps",def:"Concept of Operations"}];S.project="New Systems Engineering Project";setState({view:"dashboard"});}},"+ Start New Project"));
+
+    // Load file
+    const fileLabel=h("label",{className:"file-drop",style:{display:"block",marginBottom:"16px"}});
+    fileLabel.appendChild(h("div",{style:{fontSize:"24px",opacity:".3",marginBottom:"8px"}},"📂"));
+    fileLabel.appendChild(h("div",{style:{color:"var(--textMid)",fontSize:"13px"}},"Load Saved Project (.json) or Import Spreadsheet (.csv)"));
+    const fileInput=h("input",{type:"file",accept:".json,.txt,.csv,.tsv,.md",style:{display:"none"},onChange:e=>{const f=e.target.files[0];if(!f)return;const ext=f.name.split(".").pop().toLowerCase();importFile(f,ext==="json"?"json":(ext==="csv"||ext==="tsv")?"csv":"text");}});
+    fileLabel.appendChild(fileInput);
+    fileLabel.addEventListener("dragover",e=>{e.preventDefault();fileLabel.classList.add("dragover");});
+    fileLabel.addEventListener("dragleave",()=>fileLabel.classList.remove("dragover"));
+    fileLabel.addEventListener("drop",e=>{e.preventDefault();fileLabel.classList.remove("dragover");const f=e.dataTransfer.files[0];if(f){const ext=f.name.split(".").pop().toLowerCase();importFile(f,ext==="json"?"json":(ext==="csv"||ext==="tsv")?"csv":"text");}});
+    card.appendChild(fileLabel);
+
+    // Tutorial link
+    const tutorialLink=h("a",{href:"https://github.com/ssaleem74/reqright#readme",target:"_blank",style:{display:"inline-block",marginBottom:"16px",color:"var(--accent)",fontSize:"13px",textDecoration:"none"}},"📖 Read the Tutorial & User Guide →");
+    card.appendChild(tutorialLink);
+
+    card.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"12px",lineHeight:"1.5"}},"🔒 Privacy-first: All data is processed in your browser. Nothing is uploaded to any server. Save your work as a JSON file to your machine and load it back anytime."));
+    overlay.appendChild(card);
+    app.appendChild(overlay);
+    return;
+  }
+
+  // ═══ IMPORT MODAL ═══
+  if(S.showImport){
+    const overlay=h("div",{className:"modal-overlay",onClick:()=>{S.showImport=false;render();}});
+    const modal=h("div",{className:"modal",style:{width:"720px",maxHeight:"80vh",overflow:"auto"},onClick:e=>e.stopPropagation()});
+    modal.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700,marginBottom:"8px"}},"Import from Document"));
+    modal.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"13px",marginBottom:"16px"}},"Paste document text. All lines containing 'shall' will be extracted and auto-classified."));
+    const ta=h("textarea",{className:"input mono",style:{height:"300px",resize:"vertical",lineHeight:"1.7",fontSize:"12px"},value:S.importText,placeholder:"Paste requirements document here...\n\nExamples:\n• REQ-001: The system shall process data within 500 ms.\n• The Navigation_Module shall compute position within ±10 m.\n• 3.2.1 The subsystem shall interface via RS-422.",onInput:e=>{S.importText=e.target.value;const cnt=(e.target.value.match(/\bshall\b/gi)||[]).length;modal.querySelector(".shall-count").textContent=cnt+" 'shall' statements detected";}});
+    modal.appendChild(ta);
+    const bar=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:"16px"}});
+    bar.appendChild(h("span",{className:"shall-count",style:{fontSize:"13px",color:"var(--textMid)"}},S.importText?(S.importText.match(/\bshall\b/gi)||[]).length+" 'shall' statements detected":""));
+    const btns=h("div",{style:{display:"flex",gap:"8px"}});
+    btns.appendChild(h("button",{className:"btn btn-sec",onClick:()=>{S.showImport=false;render();}},"Cancel"));
+    btns.appendChild(h("button",{className:"btn btn-pri",onClick:doImport},"Import Requirements"));
+    bar.appendChild(btns);modal.appendChild(bar);overlay.appendChild(modal);app.appendChild(overlay);
+  }
+
+  // ═══ BULK AI MODAL ═══
+  if(S.showBulkAI){
+    const overlay=h("div",{className:"modal-overlay",onClick:()=>{S.showBulkAI=false;render();}});
+    const modal=h("div",{className:"modal",style:{width:"900px",maxHeight:"85vh",overflow:"auto"},onClick:e=>e.stopPropagation()});
+    const hdr=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"24px"}});
+    hdr.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700}},"Bulk Quality Analysis"));
+    const hbtns=h("div",{style:{display:"flex",gap:"8px"}});
+    hbtns.appendChild(h("button",{className:"btn btn-ai",style:{padding:"10px 24px",fontSize:"13px"},onClick:()=>{bulkAI();S.showBulkAI=false;}},"⚡ AI Fix All Below 80%"));
+    hbtns.appendChild(h("button",{className:"btn btn-sec",onClick:()=>{S.showBulkAI=false;render();}},"Close"));
+    hdr.appendChild(hbtns);modal.appendChild(hdr);
+
+    let anyFails=false;
+    S.reqs.forEach(r=>{
+      const a=analyze(r.text);const fails=a.results.filter(x=>!x.pass);
+      if(!fails.length)return;anyFails=true;
+      const row=h("div",{style:{background:"var(--surface)",borderRadius:"10px",padding:"16px",border:"1px solid var(--border)",marginBottom:"12px"}});
+      const rh=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"8px"}});
+      const lf=h("div",{style:{display:"flex",alignItems:"center",gap:"12px"}});
+      lf.appendChild(h("span",{className:"mono",style:{fontSize:"12px",color:"var(--accent)",fontWeight:600}},r.id));
+      const sc=a.score>=80?"var(--success)":a.score>=60?"var(--warn)":"var(--danger)";
+      lf.appendChild(h("span",{className:"badge",style:{background:sc+"22",color:sc}},a.score+"% ("+a.grade+")"));
+      rh.appendChild(lf);
+      rh.appendChild(h("button",{className:"btn btn-sec",style:{fontSize:"12px",padding:"4px 12px"},onClick:()=>doAI(r.id)},"⚡ AI Fix"));
+      row.appendChild(rh);
+      row.appendChild(h("p",{style:{fontSize:"13px",color:"var(--text)",marginBottom:"8px",lineHeight:"1.5"}},r.text||"(empty)"));
+      const tags=h("div",{style:{display:"flex",flexWrap:"wrap",gap:"4px"}});
+      fails.forEach(f=>tags.appendChild(h("span",{className:"badge",style:{background:"var(--danger)22",color:"var(--danger)"}},f.id+": "+f.nm)));
+      row.appendChild(tags);modal.appendChild(row);
+    });
+    if(!anyFails)modal.appendChild(h("div",{style:{padding:"32px",textAlign:"center",color:"var(--success)",fontSize:"14px"}},"✓ All requirements pass automated checks."));
+    overlay.appendChild(modal);app.appendChild(overlay);
+  }
+
+  // ═══ HEADER ═══
+  const header=h("header",{className:"header"});
+  const logo=h("div",{style:{display:"flex",alignItems:"center",gap:"14px"}});
+  logo.appendChild(h("div",{style:{width:"38px",height:"38px",borderRadius:"10px",background:"linear-gradient(135deg,var(--accent),var(--purple))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"15px",fontWeight:800}},"RR"));
+  const logoText=h("div",{});
+  logoText.appendChild(h("div",{style:{fontSize:"16px",fontWeight:700,letterSpacing:"-0.02em"}},"ReqRight"));
+  logoText.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",marginTop:"1px"}},"GtWR v4 · 42 Rules · AI Quality · ReqIF Export · Free & Open"));
+  logo.appendChild(logoText);header.appendChild(logo);
+
+  const nav=h("div",{className:"nav"});
+  const reqCount=S.reqs.length;
+  const glossCount=S.glossary.length;
+  const decCount=S.decisions.length;
+  const riskCount=S.risks.length;
+  const lowQualCount=S.reqs.filter(r=>analyze(r.text).score<60).length;
+  const navTabs=[{k:"dashboard",l:"◉ Dashboard",c:null},{k:"editor",l:"✎ Author",c:reqCount},{k:"requirements",l:"☰ Register",c:reqCount},{k:"traceability",l:"⊞ Trace",c:null},{k:"sep"},{k:"risks",l:"⚠ Risks",c:riskCount},{k:"decisions",l:"📋 Decisions",c:decCount},{k:"vv",l:"✓ V&V",c:null},{k:"rules",l:"⚙ Rules",c:null},{k:"glossary",l:"📖 Glossary",c:glossCount}];
+  navTabs.forEach(t=>{
+    if(t.k==="sep"){nav.appendChild(h("div",{className:"nav-sep"}));return;}
+    const btn=h("button",{className:S.view===t.k?"active":"",onClick:()=>setState({view:t.k})});
+    btn.appendChild(document.createTextNode(t.l));
+    if(t.c!==null&&t.c>0){
+      const badge=h("span",{style:{marginLeft:"6px",fontSize:"12px",padding:"1px 6px",borderRadius:"8px",background:S.view===t.k?"rgba(0,0,0,0.3)":"var(--border)",color:S.view===t.k?"#fff":"var(--textDim)",fontWeight:600}},String(t.c));
+      btn.appendChild(badge);
+    }
+    nav.appendChild(btn);
+  });
+  header.appendChild(nav);
+
+  const hActions=h("div",{style:{display:"flex",gap:"6px",alignItems:"center"}});
+  hActions.appendChild(h("button",{className:"btn btn-pri",onClick:addReq},"+ New"));
+
+  // File dropdown (Save/Load/Export consolidated)
+  const fileWrap=h("div",{style:{position:"relative"}});
+  fileWrap.appendChild(h("button",{className:"btn btn-sec",style:{borderColor:"#10b98144",color:"var(--success)"},onClick:()=>{S.showExport=!S.showExport;render();}},"📁 File ▾"));
+  if(S.showExport){
+    const dd=h("div",{style:{position:"absolute",top:"100%",right:0,marginTop:"4px",background:"var(--card)",border:"1px solid var(--border)",borderRadius:"10px",padding:"4px",minWidth:"200px",boxShadow:"0 12px 40px rgba(0,0,0,.5)",zIndex:200}});
+    // Save
+    const saveItem=h("button",{style:{display:"block",width:"100%",padding:"10px 16px",border:"none",background:"transparent",color:"var(--success)",fontSize:"13px",textAlign:"left",cursor:"pointer",borderRadius:"6px",fontFamily:"inherit",fontWeight:600},onClick:()=>{exportJSON();S.showExport=false;render();}},"💾 Save Project");
+    saveItem.addEventListener("mouseenter",()=>saveItem.style.background="var(--surfAlt)");saveItem.addEventListener("mouseleave",()=>saveItem.style.background="transparent");
+    dd.appendChild(saveItem);
+    // Load
+    const loadLabel=h("label",{style:{display:"block",padding:"10px 16px",color:"var(--accent)",fontSize:"13px",cursor:"pointer",borderRadius:"6px",fontWeight:600}});
+    loadLabel.textContent="📂 Load Project";
+    loadLabel.addEventListener("mouseenter",()=>loadLabel.style.background="var(--surfAlt)");loadLabel.addEventListener("mouseleave",()=>loadLabel.style.background="transparent");
+    loadLabel.appendChild(h("input",{type:"file",accept:".json,.txt,.csv,.tsv,.md",style:{display:"none"},onChange:e=>{const f=e.target.files[0];if(f){const ext=f.name.split(".").pop().toLowerCase();importFile(f,ext==="json"?"json":(ext==="csv"||ext==="tsv")?"csv":"text");}e.target.value="";S.showExport=false;}}));
+    dd.appendChild(loadLabel);
+    dd.appendChild(h("div",{style:{borderTop:"1px solid var(--border)",margin:"4px 0"}}));
+    // Exports
+    [{l:"📄 Export PDF Report",fn:exportPDF},{l:"📊 Export CSV",fn:exportCSV},{l:"🔗 Export ReqIF (DOORS)",fn:exportReqIF},{l:"💾 Export JSON Archive",fn:exportJSON}].forEach(({l,fn})=>{
+      const item=h("button",{style:{display:"block",width:"100%",padding:"10px 16px",border:"none",background:"transparent",color:"var(--text)",fontSize:"13px",textAlign:"left",cursor:"pointer",borderRadius:"6px",fontFamily:"inherit"},onClick:()=>{fn();S.showExport=false;render();}},l);
+      item.addEventListener("mouseenter",()=>item.style.background="var(--surfAlt)");item.addEventListener("mouseleave",()=>item.style.background="transparent");
+      dd.appendChild(item);
+    });
+    dd.appendChild(h("div",{style:{borderTop:"1px solid var(--border)",margin:"4px 0"}}));
+    const impLabel=h("label",{style:{display:"block",padding:"10px 16px",color:"var(--text)",fontSize:"13px",cursor:"pointer",borderRadius:"6px"}});
+    impLabel.textContent="↑ Import CSV/Document";
+    impLabel.addEventListener("mouseenter",()=>impLabel.style.background="var(--surfAlt)");impLabel.addEventListener("mouseleave",()=>impLabel.style.background="transparent");
+    impLabel.appendChild(h("input",{type:"file",accept:".txt,.csv,.tsv,.md",style:{display:"none"},onChange:e=>{const f=e.target.files[0];if(f){const ext=f.name.split(".").pop().toLowerCase();importFile(f,(ext==="csv"||ext==="tsv")?"csv":"text");}S.showExport=false;}}));
+    dd.appendChild(impLabel);fileWrap.appendChild(dd);
+  }
+  hActions.appendChild(fileWrap);
+  hActions.appendChild(h("button",{className:"btn btn-sec",style:{borderColor:"#a78bfa44",color:"var(--purple)"},onClick:()=>{S.showBulkAI=true;render();}},"⚡ AI"));
+  
+  // Theme toggle button
+  const isDark=!document.documentElement.classList.contains("light");
+  const themeBtn=h("button",{className:"btn btn-sec",style:{borderColor:"var(--border)",padding:"8px 12px",fontSize:"16px"},onClick:toggleTheme,title:isDark?"Switch to Light Mode":"Switch to Dark Mode"},isDark?"☀️":"🌙");
+  hActions.appendChild(themeBtn);
+  
+  // Help button
+  const helpBtn=h("a",{href:"https://github.com/ssaleem74/reqright#readme",target:"_blank",className:"btn btn-sec",style:{borderColor:"#38bdf844",color:"var(--accent)",textDecoration:"none",display:"inline-flex",alignItems:"center"}},"?");
+  hActions.appendChild(helpBtn);
+  
+  header.appendChild(hActions);
+  app.appendChild(header);
+
+  const main=h("main",{style:{padding:"24px 28px",maxWidth:"1680px",margin:"0 auto"}});
+
+  // ═══ DASHBOARD ═══
+  if(S.view==="dashboard"){
+    const stats={total:S.reqs.length,draft:S.reqs.filter(r=>r.status==="Draft").length,reviewed:S.reqs.filter(r=>r.status==="Reviewed").length,approved:S.reqs.filter(r=>r.status==="Approved").length,
+      low:S.reqs.filter(r=>analyze(r.text).score<60).length,avg:S.reqs.length>0?Math.round(S.reqs.reduce((s,r)=>s+analyze(r.text).score,0)/S.reqs.length):0};
+
+    const pnInput=h("input",{style:{background:"transparent",border:"none",color:"var(--text)",fontSize:"26px",fontWeight:700,letterSpacing:"-0.03em",width:"100%",outline:"none"},value:S.project,onInput:e=>{S.project=e.target.value;autoSave();}});
+    main.appendChild(h("div",{style:{marginBottom:"28px"}},pnInput,h("p",{style:{color:"var(--textDim)",fontSize:"13px",marginTop:"2px"}},"INCOSE GtWR v4 · ISO/IEC/IEEE 29148 · ISO/IEC/IEEE 15288 · Your data stays on your machine")));
+
+    const sg=h("div",{className:"grid-stats"});
+    [{l:"Total",v:stats.total,c:"var(--accent)",i:"☰"},{l:"Draft",v:stats.draft,c:"var(--warn)",i:"✎"},{l:"Reviewed",v:stats.reviewed,c:"var(--purple)",i:"◎"},{l:"Approved",v:stats.approved,c:"var(--success)",i:"✓"},{l:"Low Quality",v:stats.low,c:"var(--danger)",i:"⚠"},{l:"Avg Score",v:stats.avg+"%",c:stats.avg>=80?"var(--success)":stats.avg>=60?"var(--warn)":"var(--danger)",i:"★"}].forEach(s=>{
+      const card=h("div",{className:"card stat-card"});
+      card.appendChild(h("div",{className:"icon",style:{color:s.c}},s.i));
+      card.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",textTransform:"uppercase",letterSpacing:".08em",fontWeight:600}},s.l));
+      card.appendChild(h("div",{className:"mono stat-val",style:{color:s.c}},String(s.v)));
+      sg.appendChild(card);
+    });
+    main.appendChild(sg);
+
+    // Risk + Decision summaries side by side
+    const summaryRow=h("div",{style:{display:"grid",gridTemplateColumns:S.risks.length>0&&S.decisions.length>0?"1fr 1fr":"1fr",gap:"16px",marginBottom:"16px"}});
+
+    // Risk Summary Card
+    if(S.risks.length>0){
+      const riskCard=h("div",{className:"card"});
+      const riskHdr=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px"}});
+      riskHdr.appendChild(h("h3",{style:{fontSize:"14px",fontWeight:600}},"⚠ Risk Summary"));
+      riskHdr.appendChild(h("button",{className:"btn btn-sec",style:{padding:"4px 12px",fontSize:"12px"},onClick:()=>setState({view:"risks"})},"View All →"));
+      riskCard.appendChild(riskHdr);
+      const riskGrid=h("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"10px"}});
+      const criticalRisks=S.risks.filter(r=>riskScore(r.likelihood,r.impact)>=15).length;
+      const highRisks=S.risks.filter(r=>{const s=riskScore(r.likelihood,r.impact);return s>=10&&s<15;}).length;
+      const mediumRisks=S.risks.filter(r=>{const s=riskScore(r.likelihood,r.impact);return s>=5&&s<10;}).length;
+      const lowRisks=S.risks.filter(r=>riskScore(r.likelihood,r.impact)<5).length;
+      [{l:"Critical",c:criticalRisks,clr:"var(--danger)"},{l:"High",c:highRisks,clr:"var(--orange)"},{l:"Medium",c:mediumRisks,clr:"var(--warn)"},{l:"Low",c:lowRisks,clr:"var(--success)"}].forEach(x=>{
+        const box=h("div",{style:{background:x.clr+"15",borderRadius:"8px",padding:"10px",textAlign:"center"}});
+        box.appendChild(h("div",{style:{fontSize:"20px",fontWeight:700,color:x.clr}},String(x.c)));
+        box.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)"}},x.l));
+        riskGrid.appendChild(box);
+      });
+      riskCard.appendChild(riskGrid);
+      summaryRow.appendChild(riskCard);
+    }
+
+    // Decision Log Summary
+    if(S.decisions.length>0){
+      const decCard=h("div",{className:"card"});
+      const decHdr=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px"}});
+      decHdr.appendChild(h("h3",{style:{fontSize:"14px",fontWeight:600}},"📋 Decision Summary"));
+      decHdr.appendChild(h("button",{className:"btn btn-sec",style:{fontSize:"12px",padding:"4px 12px"},onClick:()=>setState({view:"decisions"})},"View All →"));
+      decCard.appendChild(decHdr);
+      const decStats=h("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(80px,1fr))",gap:"8px",marginBottom:"14px"}});
+      const decByStatus={};DEC_STATUSES.forEach(s=>decByStatus[s]=S.decisions.filter(d=>d.status===s).length);
+      const decStatusClr={Proposed:"var(--warn)",Approved:"var(--success)",Superseded:"var(--textDim)",Rejected:"var(--danger)",Deferred:"var(--purple)"};
+      Object.entries(decByStatus).filter(([,c])=>c>0).forEach(([st,cnt])=>{
+        const sc=h("div",{style:{background:"var(--surface)",borderRadius:"8px",padding:"10px",textAlign:"center",border:"1px solid var(--border)"}});
+        sc.appendChild(h("div",{className:"mono",style:{fontSize:"20px",fontWeight:700,color:decStatusClr[st]||"var(--text)"}},String(cnt)));
+        sc.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",textTransform:"uppercase",fontWeight:600,marginTop:"2px"}},st));
+        decStats.appendChild(sc);
+      });
+      decCard.appendChild(decStats);
+      const recent=S.decisions.slice().sort((a,b)=>b.modified.localeCompare(a.modified)).slice(0,3);
+      recent.forEach(d=>{
+        const row=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"8px 12px",background:"var(--surface)",borderRadius:"8px",marginBottom:"4px",cursor:"pointer"},onClick:()=>{S.selDecId=d.id;setState({view:"decisions"});}});
+        row.addEventListener("mouseenter",()=>row.style.background="var(--surfAlt)");row.addEventListener("mouseleave",()=>row.style.background="var(--surface)");
+        const stClr=decStatusClr[d.status]||"var(--textDim)";
+        row.appendChild(h("span",{className:"mono",style:{fontSize:"12px",color:"var(--accent)",fontWeight:700,minWidth:"72px"}},d.id));
+        row.appendChild(h("span",{style:{fontSize:"12px",color:"var(--text)",flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},d.title||"Untitled"));
+        row.appendChild(h("span",{className:"badge",style:{background:stClr+"22",color:stClr}},d.status));
+        decCard.appendChild(row);
+      });
+      summaryRow.appendChild(decCard);
+    }
+    if(S.risks.length>0||S.decisions.length>0)main.appendChild(summaryRow);
+    const pc=h("div",{className:"card"});
+    pc.appendChild(h("h3",{style:{fontSize:"14px",fontWeight:600,marginBottom:"14px"}},"INCOSE Requirement Patterns — Click to create"));
+    const pg=h("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"10px"}});
+    PATTERNS.forEach(p=>{
+      const pi=h("div",{style:{background:"var(--surface)",borderRadius:"10px",padding:"14px",border:"1px solid var(--border)",cursor:"pointer",transition:"all .2s"},onClick:()=>{const r=mkReq({text:p.t});S.reqs.push(r);S.selId=r.id;autoSave();setState({view:"editor"});}});
+      pi.addEventListener("mouseenter",()=>pi.style.borderColor="var(--accent)");pi.addEventListener("mouseleave",()=>pi.style.borderColor="var(--border)");
+      pi.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--accent)",marginBottom:"4px"}},p.nm));
+      pi.appendChild(h("div",{className:"mono",style:{fontSize:"12px",color:"var(--textMid)",lineHeight:"1.6"}},p.t));
+      pg.appendChild(pi);
+    });
+    pc.appendChild(pg);main.appendChild(pc);
+
+    // Save reminder
+    const saveReminder=h("div",{style:{marginTop:"20px",padding:"16px 20px",background:"var(--successDim)33",borderRadius:"12px",border:"1px solid #10b98133",display:"flex",justifyContent:"space-between",alignItems:"center"}});
+    saveReminder.appendChild(h("div",{},
+      h("div",{style:{fontSize:"14px",fontWeight:600,color:"var(--success)"}},"💾 Remember to save your work"),
+      h("div",{style:{fontSize:"12px",color:"var(--textMid)",marginTop:"2px"}},"Click 'Save Project' to download a JSON file. Load it next time to continue. Auto-saved in browser for this session.")));
+    saveReminder.appendChild(h("button",{className:"btn btn-pri",onClick:exportJSON},"💾 Save Project Now"));
+    main.appendChild(saveReminder);
+  }
+
+  // ═══ EDITOR ═══
+  if(S.view==="editor"){
+    const grid=h("div",{style:{display:"grid",gridTemplateColumns:"260px 1fr 360px",gap:"16px"}});
+
+    // ─── LEFT SIDEBAR: Requirement list ───
+    const sidebar=h("div",{style:{background:"var(--card)",borderRadius:"12px",border:"1px solid var(--border)",overflow:"hidden",display:"flex",flexDirection:"column",maxHeight:"calc(100vh - 120px)",position:"sticky",top:"80px"}});
+
+    // Sidebar header: search + add
+    const sbHead=h("div",{style:{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",gap:"6px",alignItems:"center"}});
+    const searchInput=h("input",{id:"author-search-input",className:"input",style:{flex:1,fontSize:"13px",padding:"7px 10px"},placeholder:"🔍 Search...",value:S.authorSearch||"",onInput:e=>{S.authorSearch=e.target.value;render();}});
+    sbHead.appendChild(searchInput);
+    sbHead.appendChild(h("button",{className:"btn btn-pri",style:{padding:"6px 12px",fontSize:"14px",lineHeight:1,flexShrink:0},onClick:addReq,title:"Add requirement"},"+"));
+    sidebar.appendChild(sbHead);
+
+    // Author sidebar filters
+    const sbFilters=h("div",{style:{padding:"6px 12px",borderBottom:"1px solid var(--border)",display:"flex",gap:"4px"}});
+    const aTypeSel=h("select",{id:"author-filter-type",className:"input",style:{flex:1,fontSize:"11px",padding:"4px 6px"},onChange:e=>{S.authorFilterType=e.target.value;render();}});
+    aTypeSel.appendChild(h("option",{value:"All"},"All Types"));
+    REQ_TYPES.forEach(t=>aTypeSel.appendChild(h("option",{value:t},t)));
+    aTypeSel.value=S.authorFilterType;
+    sbFilters.appendChild(aTypeSel);
+    const aLevSel=h("select",{id:"author-filter-level",className:"input",style:{flex:1,fontSize:"11px",padding:"4px 6px"},onChange:e=>{S.authorFilterLevel=e.target.value;render();}});
+    aLevSel.appendChild(h("option",{value:"All"},"All Levels"));
+    REQ_LEVELS.forEach(l=>{const short=l.replace(" Requirement","").replace("Stakeholder ","STK ");aLevSel.appendChild(h("option",{value:l},short));});
+    aLevSel.value=S.authorFilterLevel;
+    sbFilters.appendChild(aLevSel);
+    const aStatSel=h("select",{id:"author-filter-status",className:"input",style:{flex:1,fontSize:"11px",padding:"4px 6px"},onChange:e=>{S.authorFilterStatus=e.target.value;render();}});
+    aStatSel.appendChild(h("option",{value:"All"},"All Status"));
+    STATUSES.forEach(s=>aStatSel.appendChild(h("option",{value:s},s)));
+    aStatSel.value=S.authorFilterStatus;
+    sbFilters.appendChild(aStatSel);
+    sidebar.appendChild(sbFilters);
+
+    // Filter requirements
+    const filteredReqs=S.reqs.filter(r=>{
+      if(S.authorFilterType!=="All"&&r.type!==S.authorFilterType)return false;
+      if(S.authorFilterLevel!=="All"&&r.level!==S.authorFilterLevel)return false;
+      if(S.authorFilterStatus!=="All"&&r.status!==S.authorFilterStatus)return false;
+      if(S.authorSearch){
+        const q=S.authorSearch.toLowerCase();
+        if(!r.id.toLowerCase().includes(q)&&!r.text.toLowerCase().includes(q)&&!r.type.toLowerCase().includes(q))return false;
+      }
+      return true;
+    });
+
+    // Scrollable requirement list
+    const sbList=h("div",{style:{flex:1,overflowY:"auto"}});
+    if(filteredReqs.length===0){
+      sbList.appendChild(h("div",{style:{padding:"24px 12px",textAlign:"center",color:"var(--textDim)",fontSize:"13px"}},S.authorSearch?"No matches":"No requirements yet"));
+    }
+    filteredReqs.forEach(r=>{
+      const a=analyze(r.text);const sc=a.score>=80?"var(--success)":a.score>=60?"var(--warn)":"var(--danger)";
+      const isSel=S.selId===r.id;
+      const item=h("div",{style:{padding:"10px 12px",borderBottom:"1px solid var(--border)",borderLeft:isSel?"3px solid var(--accent)":"3px solid transparent",background:isSel?"var(--accentDim)22":"transparent",cursor:"pointer",transition:"background .1s"},onClick:()=>{S.selId=r.id;render();}});
+      item.addEventListener("mouseenter",()=>{if(!isSel)item.style.background="var(--cardHov)";});
+      item.addEventListener("mouseleave",()=>{item.style.background=isSel?"var(--accentDim)22":"transparent";});
+      const itemTop=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"3px"}});
+      itemTop.appendChild(h("span",{className:"mono",style:{fontSize:"12px",fontWeight:600,color:isSel?"var(--accent)":"var(--textMid)",letterSpacing:".03em"}},r.id));
+      const itemScore=h("div",{style:{display:"flex",alignItems:"center",gap:"5px"}});
+      itemScore.appendChild(h("span",{className:"mono",style:{fontSize:"11px",color:sc,fontWeight:700}},a.score+"%"));
+      itemScore.appendChild(h("span",{style:{width:"7px",height:"7px",borderRadius:"50%",background:sc,display:"inline-block"}}));
+      itemTop.appendChild(itemScore);item.appendChild(itemTop);
+      item.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",lineHeight:"1.4",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},r.text||"(empty)"));
+      sbList.appendChild(item);
+    });
+    sidebar.appendChild(sbList);
+
+    // Sidebar footer
+    const sbFoot=h("div",{style:{padding:"8px 12px",borderTop:"1px solid var(--border)",fontSize:"11px",color:"var(--textDim)",textAlign:"center"}});
+    sbFoot.textContent=filteredReqs.length+" of "+S.reqs.length+" · ↑↓ Navigate";
+    sidebar.appendChild(sbFoot);
+    grid.appendChild(sidebar);
+
+    // ─── CENTER: Editor ───
+    const center=h("div",{});
+
+    if(cur){
+      // Breadcrumb trail
+      const breadcrumb=h("div",{style:{display:"flex",alignItems:"center",gap:"6px",marginBottom:"12px",fontSize:"12px",flexWrap:"wrap"}});
+      const trail=[];
+      let walkId=cur.parent;
+      while(walkId){
+        const p=S.reqs.find(r=>r.id===walkId);
+        if(p){trail.unshift(p);walkId=p.parent;}else break;
+      }
+      if(trail.length>0){
+        trail.forEach((p,i)=>{
+          const crumb=h("span",{style:{color:"var(--accent)",cursor:"pointer",fontFamily:"'JetBrains Mono',monospace",fontWeight:500},onClick:()=>{S.selId=p.id;render();}},p.id);
+          breadcrumb.appendChild(crumb);
+          breadcrumb.appendChild(h("span",{style:{color:"var(--textDim)"}},"→"));
+        });
+      }
+      breadcrumb.appendChild(h("span",{className:"mono",style:{color:"var(--text)",fontWeight:700}},cur.id));
+      // Show children count
+      const childCount=S.reqs.filter(r=>r.parent===cur.id).length;
+      if(childCount>0){
+        breadcrumb.appendChild(h("span",{style:{color:"var(--textDim)"}},"→"));
+        breadcrumb.appendChild(h("span",{style:{color:"var(--teal)",fontSize:"11px"}},childCount+" child"+(childCount!==1?"ren":"")));
+      }
+      if(trail.length>0||childCount>0)center.appendChild(breadcrumb);
+
+      // Editor card
+      const edCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      const edHdr=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px"}});
+      const edLeft=h("div",{style:{display:"flex",alignItems:"center",gap:"10px"}});
+      edLeft.appendChild(h("span",{className:"mono",style:{fontSize:"14px",color:"var(--accent)",fontWeight:600}},cur.id));
+      const stColor=cur.status==="Approved"?"var(--success)":cur.status==="Reviewed"?"var(--purple)":"var(--warn)";
+      edLeft.appendChild(h("span",{className:"badge",style:{background:stColor+"22",color:stColor}},cur.status));
+      edLeft.appendChild(h("span",{className:"badge",style:{background:"var(--textMid)22",color:"var(--textMid)"}},cur.type));
+      edHdr.appendChild(edLeft);
+      const edBtns=h("div",{style:{display:"flex",gap:"6px"}});
+      edBtns.appendChild(h("button",{className:"btn btn-sec",style:{fontSize:"12px",padding:"5px 12px"},onClick:()=>copyToClipboard(cur.id+": "+cur.text)},"📋 Copy"));
+      edBtns.appendChild(h("button",{className:"btn btn-sec",style:{fontSize:"12px",padding:"5px 12px"},onClick:()=>dupReq(cur.id)},"⧉ Dup"));
+      edBtns.appendChild(h("button",{className:"btn btn-danger",style:{fontSize:"12px",padding:"5px 12px"},onClick:()=>deleteReq(cur.id)},"✕"));
+      edHdr.appendChild(edBtns);edCard.appendChild(edHdr);
+
+      edCard.appendChild(h("label",{className:"label"},"Requirement Statement"));
+      const ta=h("textarea",{className:"input",style:{height:"auto",lineHeight:"1.7",resize:"vertical",fontSize:"15px",fontFamily:"'DM Sans',system-ui"},rows:4,value:cur.text,placeholder:'e.g., "When in operational mode, the Navigation_System shall compute position within ±10 m accuracy."',onInput:e=>updateReqSilent(cur.id,{text:e.target.value})});
+      edCard.appendChild(ta);
+
+      const patRow=h("div",{style:{marginTop:"10px"}});
+      patRow.appendChild(h("div",{className:"label",style:{marginBottom:"4px"}},"Apply Pattern"));
+      const patBtns=h("div",{style:{display:"flex",gap:"4px",flexWrap:"wrap"}});
+      PATTERNS.forEach(p=>patBtns.appendChild(h("button",{style:{padding:"4px 10px",borderRadius:"5px",border:"1px solid var(--border)",background:"var(--surface)",color:"var(--textMid)",fontSize:"12px",cursor:"pointer",fontFamily:"inherit",transition:"all .15s"},onClick:()=>{updateReq(cur.id,{text:p.t});}},p.nm)));
+      patRow.appendChild(patBtns);edCard.appendChild(patRow);
+      center.appendChild(edCard);
+
+      // ═══ AI IMPROVE PANEL (PROMINENT) ═══
+      const aiPanel=h("div",{id:"ai-panel",className:"ai-panel",style:{display:cur.text.trim()&&curA&&curA.failed>0?"block":"none"}});
+      aiPanel.appendChild(h("div",{className:"bg-icon"},"⚡"));
+      const aiTop=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}});
+      const aiInfo=h("div",{className:"ai-info"});
+      aiInfo.appendChild(h("div",{style:{fontSize:"15px",fontWeight:700,color:"var(--purple)",marginBottom:"4px"}},"⚡ AI Requirement Improver"));
+      aiInfo.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textMid)"}},curA?(curA.failed+" INCOSE violation"+(curA.failed!==1?"s":"")+" detected — AI can fix: "+curA.results.filter(r=>!r.pass).map(r=>r.id).join(", ")):""));
+      aiTop.appendChild(aiInfo);
+      const aiBtn=h("button",{className:"btn btn-ai",disabled:S.aiLoading===cur.id,onClick:()=>doAI(cur.id)},S.aiLoading===cur.id?"⚡ Improving...":"⚡ AI IMPROVE NOW");
+      aiTop.appendChild(aiBtn);aiPanel.appendChild(aiTop);
+      const aiTags=h("div",{className:"ai-tags",style:{display:"flex",flexWrap:"wrap",gap:"6px"}});
+      if(curA){curA.results.filter(r=>!r.pass).forEach(r=>{
+        aiTags.appendChild(h("div",{style:{fontSize:"12px",padding:"4px 10px",borderRadius:"6px",background:"var(--danger)15",border:"1px solid var(--danger)33",color:"var(--danger)",fontWeight:500}},r.id+": "+(r.msg.length>50?r.msg.slice(0,50)+"...":r.msg)));
+      });}
+      aiPanel.appendChild(aiTags);center.appendChild(aiPanel);
+      
+      const sp=h("div",{id:"success-panel",className:"success-panel",style:{display:cur.text.trim()&&curA&&curA.failed===0?"flex":"none"}});
+      sp.appendChild(h("div",{style:{fontSize:"24px"}},"✓"));
+      const spText=h("div",{className:"sp-text"});
+      spText.appendChild(h("div",{style:{fontSize:"14px",fontWeight:600,color:"var(--success)"}},"All automated INCOSE checks passed"));
+      spText.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textMid)",marginTop:"2px"}},curA?`Score: ${curA.score}% (${curA.grade}) — ${curA.warnings} rules for manual review`:""));
+      sp.appendChild(spText);center.appendChild(sp);
+
+      // Attributes card
+      const attrCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      attrCard.appendChild(h("h3",{style:{fontSize:"13px",fontWeight:600,marginBottom:"14px",color:"var(--accent)"}},"Attributes"));
+      const attrGrid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"14px"}});
+      [{l:"Type",k:"type",o:REQ_TYPES},{l:"Level",k:"level",o:REQ_LEVELS},{l:"Priority",k:"priority",o:PRIORITIES},{l:"Verification",k:"verification",o:V_METHODS},{l:"Status",k:"status",o:STATUSES},{l:"Risk",k:"risk",o:PRIORITIES}].forEach(a=>{
+        const g=h("div",{});g.appendChild(h("label",{className:"label"},a.l));
+        const sel=h("select",{className:"input",value:cur[a.k],onChange:e=>updateReq(cur.id,{[a.k]:e.target.value})});
+        a.o.forEach(o=>{const opt=h("option",{value:o},o);if(cur[a.k]===o)opt.selected=true;sel.appendChild(opt);});
+        g.appendChild(sel);attrGrid.appendChild(g);
+      });
+      attrCard.appendChild(attrGrid);
+
+      const attrRow2=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"14px",marginTop:"14px"}});
+      const pg=h("div",{});pg.appendChild(h("label",{className:"label"},"Parent"));
+      const pSel=h("select",{className:"input",value:cur.parent||"",onChange:e=>updateReq(cur.id,{parent:e.target.value})});
+      pSel.appendChild(h("option",{value:""},"None"));
+      S.reqs.filter(r=>r.id!==cur.id).forEach(r=>{const o=h("option",{value:r.id},r.id+" — "+(r.text||"").slice(0,40));if(cur.parent===r.id)o.selected=true;pSel.appendChild(o);});
+      pg.appendChild(pSel);attrRow2.appendChild(pg);
+      const sg=h("div",{});sg.appendChild(h("label",{className:"label"},"Source"));
+      sg.appendChild(h("input",{className:"input",value:cur.source||"",placeholder:"ConOps §3.2, Interview #4",onInput:e=>updateReqSilent(cur.id,{source:e.target.value})}));
+      attrRow2.appendChild(sg);attrCard.appendChild(attrRow2);
+
+      const ratDiv=h("div",{style:{marginTop:"14px"}});
+      ratDiv.appendChild(h("label",{className:"label"},"Rationale (per R20 — purpose goes here, not in statement)"));
+      ratDiv.appendChild(h("textarea",{className:"input",style:{height:"auto",resize:"vertical",lineHeight:"1.6"},rows:3,value:cur.rationale||"",placeholder:"Why is this requirement necessary?",onInput:e=>updateReqSilent(cur.id,{rationale:e.target.value})}));
+      attrCard.appendChild(ratDiv);center.appendChild(attrCard);
+    }else{
+      // Improved empty state
+      const empty=h("div",{className:"card",style:{textAlign:"center",padding:"64px 32px"}});
+      empty.appendChild(h("div",{style:{fontSize:"48px",opacity:".1",marginBottom:"16px"}},"✎"));
+      empty.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"16px",fontWeight:600,marginBottom:"8px"}},"Select a Requirement"));
+      empty.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"13px",lineHeight:"1.6",marginBottom:"20px",maxWidth:"360px",margin:"0 auto 20px"}},"Choose a requirement from the sidebar to edit, or create a new one to get started. Each requirement is scored against 42 INCOSE® quality rules."));
+      empty.appendChild(h("button",{className:"btn btn-pri",style:{padding:"10px 24px",fontSize:"14px"},onClick:addReq},"+ New Requirement"));
+      center.appendChild(empty);
+    }
+    grid.appendChild(center);
+
+    // ─── RIGHT: Quality panel ───
+    const right=h("div",{});
+    if(cur&&curA){
+      const qp=h("div",{style:{position:"sticky",top:"80px",maxHeight:"calc(100vh - 100px)",display:"flex",flexDirection:"column"}});
+      const scoreCard=h("div",{className:"card",style:{textAlign:"center",marginBottom:"14px",flexShrink:0}});
+      scoreCard.appendChild(h("div",{className:"label",style:{marginBottom:"8px"}},"INCOSE Quality Score"));
+      const sc=curA.score>=80?"var(--success)":curA.score>=60?"var(--warn)":"var(--danger)";
+      scoreCard.appendChild(h("div",{id:"quality-score",className:"mono",style:{fontSize:"56px",fontWeight:700,color:sc,lineHeight:1}},String(curA.score)));
+      scoreCard.appendChild(h("div",{id:"quality-grade",style:{fontSize:"18px",fontWeight:700,color:"var(--textMid)",marginTop:"4px"}},"Grade: "+curA.grade));
+      const scSummary=h("div",{id:"quality-summary",style:{display:"flex",justifyContent:"center",gap:"16px",marginTop:"12px",fontSize:"12px"}});
+      scSummary.appendChild(h("span",{style:{color:"var(--success)"}},"✓ "+curA.passed));
+      scSummary.appendChild(h("span",{style:{color:"var(--danger)"}},"✕ "+curA.failed));
+      scSummary.appendChild(h("span",{style:{color:"var(--warn)"}},"⚠ "+curA.warnings));
+      scoreCard.appendChild(scSummary);qp.appendChild(scoreCard);
+
+      const ruleCard=h("div",{id:"rules-panel",className:"card",style:{flex:1,overflowY:"auto",padding:"16px",minHeight:0}});
+      ruleCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,marginBottom:"12px"}},"Rule Analysis"));
+      if(curA.results.filter(r=>!r.pass).length===0&&cur.text.trim()){
+        const ok=h("div",{style:{padding:"12px",background:"var(--success)11",borderRadius:"8px",border:"1px solid var(--success)33",color:"var(--success)",fontSize:"12px",marginBottom:"10px"}});
+        ok.textContent="✓ All automated checks passed.";ruleCard.appendChild(ok);
+      }
+      curA.results.filter(r=>!r.pass).forEach(r=>{
+        const ri=h("div",{style:{padding:"10px",background:"var(--danger)0a",borderRadius:"8px",border:"1px solid var(--danger)22",marginBottom:"8px"}});
+        const rh=h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"3px"}});
+        rh.appendChild(h("span",{className:"mono",style:{fontSize:"12px",color:"var(--danger)",fontWeight:600}},r.id));
+        rh.appendChild(h("span",{className:"badge",style:{background:"var(--danger)22",color:"var(--danger)"}},"FAIL"));
+        ri.appendChild(rh);ri.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--text)"}},r.nm));
+        ri.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textMid)",lineHeight:"1.5",marginTop:"2px"}},r.msg));
+        ruleCard.appendChild(ri);
+      });
+      curA.results.filter(r=>r.pass&&r.warn).forEach(r=>{
+        const ri=h("div",{style:{padding:"8px",background:"var(--warn)08",borderRadius:"8px",border:"1px solid var(--warn)22",marginBottom:"8px"}});
+        const rh=h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"2px"}});
+        rh.appendChild(h("span",{className:"mono",style:{fontSize:"12px",color:"var(--warn)",fontWeight:600}},r.id+" — "+r.nm));
+        rh.appendChild(h("span",{className:"badge",style:{background:"var(--warn)22",color:"var(--warn)"}},"REVIEW"));
+        ri.appendChild(rh);ri.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textMid)",lineHeight:"1.4"}},r.msg));
+        ruleCard.appendChild(ri);
+      });
+      curA.results.filter(r=>r.pass&&!r.warn).forEach(r=>{
+        ruleCard.appendChild(h("div",{style:{padding:"6px",marginBottom:"4px",display:"flex",alignItems:"center",gap:"6px"}},
+          h("span",{className:"mono",style:{fontSize:"12px",color:"var(--success)"}},"✓ "+r.id),
+          h("span",{style:{fontSize:"12px",color:"var(--textDim)"}},"— "+r.nm)));
+      });
+      qp.appendChild(ruleCard);right.appendChild(qp);
+    }
+    grid.appendChild(right);main.appendChild(grid);
+  }
+
+  // ═══ REGISTER ═══
+  if(S.view==="requirements"){
+    const filtered=S.reqs.filter(r=>{
+      if(S.filterType!=="All"&&r.type!==S.filterType)return false;
+      if(S.filterLevel!=="All"&&r.level!==S.filterLevel)return false;
+      if(S.search&&!r.text.toLowerCase().includes(S.search.toLowerCase())&&!r.id.toLowerCase().includes(S.search.toLowerCase()))return false;
+      return true;
+    }).sort((a,b)=>{
+      if(S.sort==="id")return a.id.localeCompare(b.id);
+      if(S.sort==="score")return analyze(b.text).score-analyze(a.text).score;
+      if(S.sort==="type")return a.type.localeCompare(b.type);
+      if(S.sort==="status")return a.status.localeCompare(b.status);
+      return 0;
+    });
+
+    const hdr=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"20px"}});
+    hdr.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700}},"Requirements Register ("+filtered.length+" of "+S.reqs.length+")"));
+    const filters=h("div",{style:{display:"flex",gap:"6px"}});
+    filters.appendChild(h("input",{id:"search-input",className:"input",style:{width:"180px"},value:S.search,placeholder:"🔍 Search...",onInput:e=>{S.search=e.target.value;render();}}));
+    const fType=h("select",{className:"input",style:{width:"120px"},value:S.filterType,onChange:e=>{S.filterType=e.target.value;render();}});
+    fType.appendChild(h("option",{value:"All"},"All Types"));REQ_TYPES.forEach(t=>fType.appendChild(h("option",{value:t},t)));filters.appendChild(fType);
+    const fLev=h("select",{className:"input",style:{width:"150px"},value:S.filterLevel,onChange:e=>{S.filterLevel=e.target.value;render();}});
+    fLev.appendChild(h("option",{value:"All"},"All Levels"));REQ_LEVELS.forEach(l=>fLev.appendChild(h("option",{value:l},l)));filters.appendChild(fLev);
+    const fSort=h("select",{className:"input",style:{width:"120px"},value:S.sort,onChange:e=>{S.sort=e.target.value;render();}});
+    [{v:"id",l:"By ID"},{v:"score",l:"By Score"},{v:"type",l:"By Type"},{v:"status",l:"By Status"}].forEach(s=>{const o=h("option",{value:s.v},s.l);if(S.sort===s.v)o.selected=true;fSort.appendChild(o);});
+    filters.appendChild(fSort);hdr.appendChild(filters);main.appendChild(hdr);
+
+    if(filtered.length===0){
+      const emptyR=h("div",{className:"card",style:{textAlign:"center",padding:"48px 32px"}});
+      emptyR.appendChild(h("div",{style:{fontSize:"40px",opacity:".1",marginBottom:"12px"}},"☰"));
+      if(S.reqs.length===0){
+        emptyR.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"15px",fontWeight:600,marginBottom:"8px"}},"No Requirements Yet"));
+        emptyR.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"13px",lineHeight:"1.6",marginBottom:"16px"}},"Create your first requirement or load an existing project to see it here."));
+        emptyR.appendChild(h("button",{className:"btn btn-pri",style:{padding:"8px 20px"},onClick:addReq},"+ New Requirement"));
+      }else{
+        emptyR.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"14px"}},"No requirements match your current filters. Try adjusting the search or filter criteria."));
+      }
+      main.appendChild(emptyR);
+    }else{
+      const tbl=h("div",{});
+      // Header
+      const thdr=h("div",{style:{display:"grid",gridTemplateColumns:"80px 1fr 80px 70px 55px 70px 110px",gap:"6px",padding:"10px 14px",background:"var(--surface)",borderRadius:"10px 10px 0 0",border:"1px solid var(--border)",borderBottom:"none",fontSize:"12px",fontWeight:700,color:"var(--textDim)",textTransform:"uppercase",letterSpacing:".06em"}});
+      ["ID","Statement","Type","Level","Score","Status","Actions"].forEach(t=>thdr.appendChild(h("div",{},t)));
+      tbl.appendChild(thdr);
+
+      filtered.forEach((r,idx)=>{
+        const a=analyze(r.text);const sc=a.score>=80?"var(--success)":a.score>=60?"var(--warn)":"var(--danger)";
+        const row=h("div",{style:{display:"grid",gridTemplateColumns:"80px 1fr 80px 70px 55px 70px 110px",gap:"6px",padding:"12px 14px",background:idx%2===0?"var(--card)":"var(--surface)",border:"1px solid var(--border)",borderTop:"none",borderRadius:idx===filtered.length-1?"0 0 10px 10px":"0",fontSize:"12px",alignItems:"center",cursor:"pointer",transition:"background .15s"},onClick:()=>{S.selId=r.id;setState({view:"editor"});}});
+        row.addEventListener("mouseenter",()=>row.style.background="var(--cardHov)");
+        row.addEventListener("mouseleave",()=>row.style.background=idx%2===0?"var(--card)":"var(--surface)");
+        row.appendChild(h("div",{className:"mono",style:{fontSize:"12px",color:"var(--accent)",fontWeight:600}},r.id));
+        row.appendChild(h("div",{style:{color:r.text?"var(--text)":"var(--textDim)",overflow:"hidden",display:"-webkit-box",WebkitLineClamp:"2",WebkitBoxOrient:"vertical",lineHeight:"1.5",fontSize:"13px"}},r.text||"(empty)"));
+        row.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textMid)"}},r.type));
+        row.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textMid)"}},r.level.replace(" Requirement","").replace("Stakeholder ","Stkh ")));
+        row.appendChild(h("div",{className:"mono",style:{fontSize:"12px",color:sc,fontWeight:700}},a.score+"%"));
+        const stC=r.status==="Approved"?"var(--success)":r.status==="Reviewed"?"var(--purple)":"var(--warn)";
+        row.appendChild(h("div",{},h("span",{className:"badge",style:{background:stC+"22",color:stC}},r.status)));
+        const acts=h("div",{style:{display:"flex",gap:"3px"},onClick:e=>e.stopPropagation()});
+        acts.appendChild(h("button",{style:{padding:"3px 6px",borderRadius:"4px",border:"1px solid var(--accent)44",background:"transparent",color:"var(--accent)",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"},title:"Copy to clipboard",onClick:()=>copyToClipboard(r.id+": "+r.text)},"📋"));
+        acts.appendChild(h("button",{style:{padding:"3px 6px",borderRadius:"4px",border:"1px solid var(--purple)44",background:"transparent",color:"var(--purple)",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"},title:"AI Improve",onClick:()=>doAI(r.id)},"⚡"));
+        acts.appendChild(h("button",{style:{padding:"3px 6px",borderRadius:"4px",border:"1px solid var(--border)",background:"transparent",color:"var(--textDim)",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"},title:"Duplicate",onClick:()=>dupReq(r.id)},"⧉"));
+        acts.appendChild(h("button",{style:{padding:"3px 6px",borderRadius:"4px",border:"1px solid #ef444444",background:"transparent",color:"var(--danger)",fontSize:"12px",cursor:"pointer",fontFamily:"inherit"},title:"Delete",onClick:()=>deleteReq(r.id)},"✕"));
+        row.appendChild(acts);tbl.appendChild(row);
+      });
+      main.appendChild(tbl);
+    }
+  }
+
+  // ═══ TRACEABILITY ═══
+  if(S.view==="traceability"){
+    main.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700,marginBottom:"20px"}},"Traceability Matrix"));
+    if(S.reqs.length===0){
+      const emptyT=h("div",{className:"card",style:{textAlign:"center",padding:"48px 32px"}});
+      emptyT.appendChild(h("div",{style:{fontSize:"40px",opacity:".1",marginBottom:"12px"}},"⊞"));
+      emptyT.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"15px",fontWeight:600,marginBottom:"8px"}},"No Traceability Data"));
+      emptyT.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"13px",lineHeight:"1.6",marginBottom:"16px"}},"Add requirements and set parent-child links in the Author view to build your traceability hierarchy."));
+      emptyT.appendChild(h("button",{className:"btn btn-pri",style:{padding:"8px 20px"},onClick:()=>setState({view:"editor"})},"Go to Author →"));
+      main.appendChild(emptyT);
+    }
+    else{
+      // Build tree helper
+      function renderTreeNode(req,depth){
+        const a=analyze(req.text);const sc=a.score>=80?"var(--success)":a.score>=60?"var(--warn)":"var(--danger)";
+        const children=S.reqs.filter(c=>c.parent===req.id);
+        const node=h("div",{style:{marginLeft:depth>0?(depth*24)+"px":"0"}});
+        const row=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"10px 14px",background:depth%2===0?"var(--card)":"var(--surface)",borderRadius:"8px",marginBottom:"4px",cursor:"pointer",border:"1px solid var(--border)",transition:"border-color .15s"},onClick:()=>{S.selId=req.id;setState({view:"editor"});}});
+        row.addEventListener("mouseenter",()=>row.style.borderColor="var(--accent)");
+        row.addEventListener("mouseleave",()=>row.style.borderColor="var(--border)");
+        // Indent indicator
+        if(depth>0){
+          row.insertBefore(h("span",{style:{color:"var(--textDim)",fontSize:"12px",marginRight:"-4px"}},"└"),row.firstChild);
+        }
+        // Tree connector line
+        if(children.length>0){
+          row.appendChild(h("span",{style:{color:"var(--teal)",fontSize:"12px",fontWeight:600}},"▼"));
+        }else{
+          row.appendChild(h("span",{style:{width:"14px",display:"inline-block"}}));
+        }
+        row.appendChild(h("span",{className:"mono",style:{fontSize:"12px",fontWeight:600,color:"var(--accent)",minWidth:"72px"}},req.id));
+        const levelShort=req.level.replace(" Requirement","").replace("Stakeholder ","STK ");
+        row.appendChild(h("span",{className:"badge",style:{background:"var(--accentDim)",color:"var(--accent)",flexShrink:0}},levelShort));
+        row.appendChild(h("span",{style:{flex:1,fontSize:"13px",color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",lineHeight:"1.4"}},req.text||"(empty)"));
+        row.appendChild(h("span",{className:"mono",style:{fontSize:"12px",color:sc,fontWeight:700,flexShrink:0}},a.score+"%"));
+        row.appendChild(h("span",{style:{width:"8px",height:"8px",borderRadius:"50%",background:sc,flexShrink:0}}));
+        node.appendChild(row);
+        children.sort((a,b)=>a.id.localeCompare(b.id)).forEach(child=>{
+          node.appendChild(renderTreeNode(child,depth+1));
+        });
+        return node;
+      }
+
+      // Stats bar
+      const tStats=h("div",{style:{display:"flex",gap:"16px",marginBottom:"20px",flexWrap:"wrap"}});
+      REQ_LEVELS.forEach(level=>{
+        const cnt=S.reqs.filter(r=>r.level===level).length;
+        if(cnt===0)return;
+        const levelShort=level.replace(" Requirement","").replace("Stakeholder ","STK ");
+        tStats.appendChild(h("div",{style:{background:"var(--card)",border:"1px solid var(--border)",borderRadius:"8px",padding:"8px 16px",display:"flex",alignItems:"center",gap:"8px"}},
+          h("span",{className:"mono",style:{fontSize:"18px",fontWeight:700,color:"var(--accent)"}},String(cnt)),
+          h("span",{style:{fontSize:"12px",color:"var(--textMid)"}},levelShort)));
+      });
+      const orphCount=S.reqs.filter(r=>!r.parent&&r.level!=="Stakeholder Need").length;
+      if(orphCount>0){
+        tStats.appendChild(h("div",{style:{background:"var(--danger)11",border:"1px solid var(--danger)33",borderRadius:"8px",padding:"8px 16px",display:"flex",alignItems:"center",gap:"8px"}},
+          h("span",{className:"mono",style:{fontSize:"18px",fontWeight:700,color:"var(--danger)"}},String(orphCount)),
+          h("span",{style:{fontSize:"12px",color:"var(--danger)"}},("Orphan"+(orphCount!==1?"s":"")))));
+      }
+      main.appendChild(tStats);
+
+      // Render tree from roots
+      const treeCard=h("div",{className:"card",style:{padding:"16px"}});
+      treeCard.appendChild(h("div",{style:{fontSize:"13px",fontWeight:600,marginBottom:"12px",display:"flex",alignItems:"center",gap:"8px"}},
+        h("span",{},"Requirement Hierarchy"),
+        h("span",{style:{fontSize:"11px",color:"var(--textDim)",fontWeight:400}},"Click any item to edit in Author view")));
+      // Find roots (no parent, or parent doesn't exist)
+      const roots=S.reqs.filter(r=>!r.parent||!S.reqs.find(p=>p.id===r.parent));
+      // Group roots by level
+      const rootsByLevel={};roots.forEach(r=>{
+        if(!rootsByLevel[r.level])rootsByLevel[r.level]=[];
+        rootsByLevel[r.level].push(r);
+      });
+      REQ_LEVELS.forEach(level=>{
+        if(!rootsByLevel[level]||!rootsByLevel[level].length)return;
+        const levelShort=level.replace(" Requirement","").replace("Stakeholder ","STK ");
+        treeCard.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",fontWeight:600,textTransform:"uppercase",letterSpacing:".06em",padding:"8px 0 4px",borderBottom:"1px solid var(--border)",marginBottom:"8px",marginTop:"8px"}},levelShort+" ("+rootsByLevel[level].length+")"));
+        rootsByLevel[level].sort((a,b)=>a.id.localeCompare(b.id)).forEach(root=>{
+          treeCard.appendChild(renderTreeNode(root,0));
+        });
+      });
+      main.appendChild(treeCard);
+
+      // Orphans warning
+      const orphans=S.reqs.filter(r=>!r.parent&&r.level!=="Stakeholder Need"&&S.reqs.filter(c=>c.parent===r.id).length===0);
+      if(orphans.length){
+        const oc=h("div",{className:"card",style:{background:"var(--danger)08",borderColor:"var(--danger)22",marginTop:"14px"}});
+        oc.appendChild(h("div",{style:{fontSize:"13px",fontWeight:600,color:"var(--danger)",marginBottom:"6px"}},"⚠ Orphan Requirements — no parent and no children ("+orphans.length+")"));
+        const tags=h("div",{style:{display:"flex",flexWrap:"wrap",gap:"6px"}});
+        orphans.forEach(r=>tags.appendChild(h("span",{className:"badge",style:{background:"var(--danger)22",color:"var(--danger)",cursor:"pointer"},onClick:()=>{S.selId=r.id;setState({view:"editor"});}},r.id)));
+        oc.appendChild(tags);main.appendChild(oc);
+      }
+    }
+  }
+
+  // ═══ RISKS ═══
+  if(S.view==="risks"){
+    const grid=h("div",{style:{display:"grid",gridTemplateColumns:"260px 1fr 300px",gap:"16px"}});
+
+    // ─── LEFT SIDEBAR: Risk list ───
+    const sidebar=h("div",{style:{background:"var(--card)",borderRadius:"12px",border:"1px solid var(--border)",overflow:"hidden",display:"flex",flexDirection:"column",maxHeight:"calc(100vh - 120px)",position:"sticky",top:"80px"}});
+    const sbHead=h("div",{style:{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",gap:"6px",alignItems:"center"}});
+    sbHead.appendChild(h("span",{style:{fontSize:"14px",fontWeight:700,flexShrink:0}},"⚠"));
+    sbHead.appendChild(h("input",{id:"risk-search-input",className:"input",style:{flex:1,fontSize:"12px",padding:"6px 10px"},placeholder:"Search risks...",value:S.riskSearch||"",onInput:e=>{S.riskSearch=e.target.value;render();}}));
+    sbHead.appendChild(h("button",{className:"btn btn-pri",style:{padding:"6px 12px",fontSize:"14px",lineHeight:1,flexShrink:0},onClick:addRisk,title:"Add risk"},"+"));
+    sidebar.appendChild(sbHead);
+
+    // Risk sidebar filters
+    const sbFilters=h("div",{style:{padding:"6px 12px",borderBottom:"1px solid var(--border)",display:"flex",gap:"4px"}});
+    const rCatSel=h("select",{id:"risk-filter-cat",className:"input",style:{flex:1,fontSize:"11px",padding:"4px 6px"},onChange:e=>{S.riskFilterCat=e.target.value;render();}});
+    rCatSel.appendChild(h("option",{value:"All"},"All Categories"));
+    RISK_CATEGORIES.forEach(c=>rCatSel.appendChild(h("option",{value:c},c)));
+    rCatSel.value=S.riskFilterCat;
+    sbFilters.appendChild(rCatSel);
+    const rStatSel=h("select",{id:"risk-filter-stat",className:"input",style:{flex:1,fontSize:"11px",padding:"4px 6px"},onChange:e=>{S.riskFilterStat=e.target.value;render();}});
+    rStatSel.appendChild(h("option",{value:"All"},"All Status"));
+    RISK_STATUS.forEach(s=>rStatSel.appendChild(h("option",{value:s},s)));
+    rStatSel.value=S.riskFilterStat;
+    sbFilters.appendChild(rStatSel);
+    sidebar.appendChild(sbFilters);
+
+    const filteredRisks=S.risks.filter(r=>{
+      if(S.riskFilterCat!=="All"&&r.category!==S.riskFilterCat)return false;
+      if(S.riskFilterStat!=="All"&&r.status!==S.riskFilterStat)return false;
+      if(S.riskSearch){
+        const q=S.riskSearch.toLowerCase();
+        if(!r.id.toLowerCase().includes(q)&&!(r.title||"").toLowerCase().includes(q)&&!r.category.toLowerCase().includes(q))return false;
+      }
+      return true;
+    });
+
+    const sbList=h("div",{style:{flex:1,overflowY:"auto"}});
+    if(filteredRisks.length===0){
+      sbList.appendChild(h("div",{style:{padding:"24px 12px",textAlign:"center",color:"var(--textDim)",fontSize:"13px"}},S.riskSearch?"No matches":"No risks yet"));
+    }
+    filteredRisks.forEach(risk=>{
+      const score=riskScore(risk.likelihood,risk.impact);
+      const rl=riskLevel(score);
+      const isSel=S.selRiskId===risk.id;
+      const item=h("div",{style:{padding:"10px 12px",borderBottom:"1px solid var(--border)",borderLeft:isSel?"3px solid var(--accent)":"3px solid transparent",background:isSel?"var(--accentDim)22":"transparent",cursor:"pointer",transition:"background .1s"},onClick:()=>{S.selRiskId=risk.id;render();}});
+      item.addEventListener("mouseenter",()=>{if(!isSel)item.style.background="var(--cardHov)";});
+      item.addEventListener("mouseleave",()=>{item.style.background=isSel?"var(--accentDim)22":"transparent";});
+      const itemTop=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"3px"}});
+      itemTop.appendChild(h("span",{className:"mono",style:{fontSize:"12px",fontWeight:600,color:isSel?"var(--accent)":"var(--textMid)"}},risk.id));
+      const itemBadge=h("div",{style:{display:"flex",alignItems:"center",gap:"5px"}});
+      itemBadge.appendChild(h("span",{style:{fontSize:"10px",padding:"2px 6px",borderRadius:"4px",background:rl.color+"22",color:rl.color,fontWeight:700}},rl.level));
+      itemTop.appendChild(itemBadge);
+      item.appendChild(itemTop);
+      item.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",lineHeight:"1.4",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},risk.title||"(No title)"));
+      sbList.appendChild(item);
+    });
+    sidebar.appendChild(sbList);
+    const sbFoot=h("div",{style:{padding:"8px 12px",borderTop:"1px solid var(--border)",fontSize:"11px",color:"var(--textDim)",textAlign:"center"}});
+    sbFoot.textContent=filteredRisks.length+(S.riskSearch?" of "+S.risks.length:"")+" risk"+(filteredRisks.length!==1?"s":"");
+    sidebar.appendChild(sbFoot);
+    grid.appendChild(sidebar);
+
+    // ─── CENTER: Risk editor ───
+    const center=h("div",{});
+    const selRisk=S.risks.find(r=>r.id===S.selRiskId);
+    if(selRisk){
+      const risk=selRisk;
+      const score=riskScore(risk.likelihood,risk.impact);
+      const rl=riskLevel(score);
+
+      // Header
+      const edCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      const edHdr=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px"}});
+      const edLeft=h("div",{style:{display:"flex",alignItems:"center",gap:"10px"}});
+      edLeft.appendChild(h("span",{className:"mono",style:{fontSize:"14px",color:"var(--accent)",fontWeight:600}},risk.id));
+      edLeft.appendChild(h("span",{className:"badge",style:{background:rl.color+"22",color:rl.color}},rl.level+" ("+score+")"));
+      edLeft.appendChild(h("span",{className:"badge",style:{background:"var(--surface)",color:"var(--textMid)"}},risk.status));
+      edHdr.appendChild(edLeft);
+      edHdr.appendChild(h("button",{className:"btn btn-danger",style:{padding:"5px 12px",fontSize:"12px"},onClick:()=>{if(confirm("Delete "+risk.id+"?"))deleteRisk(risk.id);}},"✕ Delete"));
+      edCard.appendChild(edHdr);
+
+      // Title
+      const r1=h("div",{style:{marginBottom:"12px"}});
+      r1.appendChild(h("label",{className:"label"},"Risk Title"));
+      r1.appendChild(h("input",{className:"input",value:risk.title||"",placeholder:"Brief title for this risk",onInput:e=>updateRiskSilent(risk.id,{title:e.target.value})}));
+      edCard.appendChild(r1);
+
+      // Description
+      const r2=h("div",{style:{marginBottom:"12px"}});
+      r2.appendChild(h("label",{className:"label"},"Description"));
+      r2.appendChild(h("textarea",{className:"input",style:{minHeight:"80px",resize:"vertical",fontFamily:"inherit",lineHeight:"1.6"},value:risk.description||"",placeholder:"Detailed description of the risk...",onInput:e=>updateRiskSilent(risk.id,{description:e.target.value})}));
+      edCard.appendChild(r2);
+
+      // Category, Likelihood, Impact, Status
+      const r3=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:"12px",marginBottom:"12px"}});
+      const catDiv=h("div",{});catDiv.appendChild(h("label",{className:"label"},"Category"));
+      const catSel=h("select",{className:"input",value:risk.category,onChange:e=>updateRisk(risk.id,{category:e.target.value})});
+      RISK_CATEGORIES.forEach(c=>catSel.appendChild(h("option",{value:c},c)));
+      catDiv.appendChild(catSel);r3.appendChild(catDiv);
+      const likDiv=h("div",{});likDiv.appendChild(h("label",{className:"label"},"Likelihood (1-5)"));
+      const likSel=h("select",{className:"input",value:risk.likelihood,onChange:e=>updateRisk(risk.id,{likelihood:parseInt(e.target.value)})});
+      LIKELIHOOD.forEach((l,i)=>likSel.appendChild(h("option",{value:i+1},l)));
+      likDiv.appendChild(likSel);r3.appendChild(likDiv);
+      const impDiv=h("div",{});impDiv.appendChild(h("label",{className:"label"},"Impact (1-5)"));
+      const impSel=h("select",{className:"input",value:risk.impact,onChange:e=>updateRisk(risk.id,{impact:parseInt(e.target.value)})});
+      IMPACT.forEach((im,i)=>impSel.appendChild(h("option",{value:i+1},im)));
+      impDiv.appendChild(impSel);r3.appendChild(impDiv);
+      const statDiv=h("div",{});statDiv.appendChild(h("label",{className:"label"},"Status"));
+      const statSel=h("select",{className:"input",value:risk.status,onChange:e=>updateRisk(risk.id,{status:e.target.value})});
+      RISK_STATUS.forEach(st=>statSel.appendChild(h("option",{value:st},st)));
+      statDiv.appendChild(statSel);r3.appendChild(statDiv);
+      edCard.appendChild(r3);
+      center.appendChild(edCard);
+
+      // Mitigations card
+      const mitCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      mitCard.appendChild(h("label",{className:"label"},"Mitigation Requirements"));
+      if(S.reqs.length===0){
+        mitCard.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",padding:"8px",background:"var(--surface)",borderRadius:"6px"}},"No requirements defined yet. Create requirements first to link them as mitigations."));
+      }else{
+        const mitList=h("div",{style:{maxHeight:"180px",overflowY:"auto",border:"1px solid var(--border)",borderRadius:"8px",background:"var(--surface)"}});
+        S.reqs.forEach(req=>{
+          const isChecked=(risk.mitigations||[]).includes(req.id);
+          const item=h("label",{style:{display:"flex",alignItems:"flex-start",gap:"8px",padding:"8px 10px",cursor:"pointer",borderBottom:"1px solid var(--border)",fontSize:"12px"}});
+          const cb=h("input",{type:"checkbox",checked:isChecked,style:{marginTop:"2px"},onChange:e=>{
+            e.stopPropagation();
+            let mits=[...(risk.mitigations||[])];
+            if(e.target.checked){if(!mits.includes(req.id))mits.push(req.id);}
+            else{mits=mits.filter(m=>m!==req.id);}
+            updateRisk(risk.id,{mitigations:mits});
+          }});
+          item.appendChild(cb);
+          const label=h("div",{style:{flex:1}});
+          label.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:600}},req.id));
+          label.appendChild(h("span",{style:{color:"var(--textMid)",marginLeft:"8px"}},(req.text||"").substring(0,60)+(req.text&&req.text.length>60?"...":"")));
+          item.appendChild(label);
+          mitList.appendChild(item);
+        });
+        mitCard.appendChild(mitList);
+      }
+      if(risk.mitigations&&risk.mitigations.length>0){
+        const linked=h("div",{style:{display:"flex",flexWrap:"wrap",gap:"6px",marginTop:"8px"}});
+        linked.appendChild(h("span",{style:{fontSize:"12px",color:"var(--textDim)",marginRight:"4px"}},"Linked:"));
+        risk.mitigations.forEach(mid=>{
+          const req=S.reqs.find(r=>r.id===mid);
+          if(req)linked.appendChild(h("span",{className:"badge",style:{background:"var(--accent)22",color:"var(--accent)",cursor:"pointer"},onClick:()=>{S.selId=req.id;setState({view:"editor"});}},mid));
+        });
+        mitCard.appendChild(linked);
+      }
+      center.appendChild(mitCard);
+
+      // Owner, Due Date, Notes
+      const metaCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      const r5=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"12px",marginBottom:"12px"}});
+      const ownDiv=h("div",{});ownDiv.appendChild(h("label",{className:"label"},"Owner"));
+      ownDiv.appendChild(h("input",{className:"input",value:risk.owner||"",placeholder:"Responsible person",onInput:e=>updateRiskSilent(risk.id,{owner:e.target.value})}));
+      r5.appendChild(ownDiv);
+      const dueDiv=h("div",{});dueDiv.appendChild(h("label",{className:"label"},"Due Date"));
+      dueDiv.appendChild(h("input",{className:"input",type:"date",value:risk.dueDate||"",onChange:e=>updateRisk(risk.id,{dueDate:e.target.value})}));
+      r5.appendChild(dueDiv);
+      metaCard.appendChild(r5);
+      const r6=h("div",{});r6.appendChild(h("label",{className:"label"},"Notes"));
+      r6.appendChild(h("textarea",{className:"input",style:{minHeight:"60px",resize:"vertical",fontFamily:"inherit",lineHeight:"1.6"},value:risk.notes||"",placeholder:"Additional notes...",onInput:e=>updateRiskSilent(risk.id,{notes:e.target.value})}));
+      metaCard.appendChild(r6);
+      center.appendChild(metaCard);
+    }else{
+      const empty=h("div",{className:"card",style:{textAlign:"center",padding:"64px 32px"}});
+      empty.appendChild(h("div",{style:{fontSize:"48px",opacity:".1",marginBottom:"16px"}},"⚠"));
+      empty.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"16px",fontWeight:600,marginBottom:"8px"}},"Select a Risk"));
+      empty.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"13px",lineHeight:"1.6",maxWidth:"360px",margin:"0 auto 20px"}},"Choose a risk from the sidebar to view and edit its details, or create a new one."));
+      empty.appendChild(h("button",{className:"btn btn-pri",style:{padding:"10px 24px",fontSize:"14px"},onClick:addRisk},"+ Add Risk"));
+      center.appendChild(empty);
+    }
+    grid.appendChild(center);
+
+    // ─── RIGHT: Risk Matrix Summary ───
+    const right=h("div",{});
+    const matrixPanel=h("div",{style:{position:"sticky",top:"80px"}});
+    const matrixCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+    matrixCard.appendChild(h("div",{style:{fontSize:"13px",fontWeight:600,marginBottom:"12px"}},"Risk Matrix Summary"));
+    const matrixGrid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}});
+    const critical=S.risks.filter(r=>riskScore(r.likelihood,r.impact)>=15).length;
+    const high=S.risks.filter(r=>{const s=riskScore(r.likelihood,r.impact);return s>=10&&s<15;}).length;
+    const medium=S.risks.filter(r=>{const s=riskScore(r.likelihood,r.impact);return s>=5&&s<10;}).length;
+    const low=S.risks.filter(r=>riskScore(r.likelihood,r.impact)<5).length;
+    [{l:"Critical",c:critical,clr:"var(--danger)"},{l:"High",c:high,clr:"var(--orange)"},{l:"Medium",c:medium,clr:"var(--warn)"},{l:"Low",c:low,clr:"var(--success)"}].forEach(x=>{
+      const box=h("div",{style:{background:x.clr+"22",border:"1px solid "+x.clr+"44",borderRadius:"8px",padding:"14px",textAlign:"center"}});
+      box.appendChild(h("div",{style:{fontSize:"28px",fontWeight:700,color:x.clr}},String(x.c)));
+      box.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textMid)",marginTop:"2px",textTransform:"uppercase",fontWeight:600}},x.l));
+      matrixGrid.appendChild(box);
+    });
+    matrixCard.appendChild(matrixGrid);
+    matrixPanel.appendChild(matrixCard);
+
+    // Status breakdown
+    if(S.risks.length>0){
+      const statusCard=h("div",{className:"card"});
+      statusCard.appendChild(h("div",{style:{fontSize:"13px",fontWeight:600,marginBottom:"12px"}},"By Status"));
+      const statusCounts={};RISK_STATUS.forEach(st=>statusCounts[st]=S.risks.filter(r=>r.status===st).length);
+      Object.entries(statusCounts).filter(([,v])=>v>0).forEach(([st,count])=>{
+        const row=h("div",{style:{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid var(--border)",fontSize:"13px"}});
+        row.appendChild(h("span",{style:{color:"var(--textMid)"}},st));
+        row.appendChild(h("span",{className:"mono",style:{fontWeight:700,color:"var(--text)"}},String(count)));
+        statusCard.appendChild(row);
+      });
+      // Category breakdown
+      statusCard.appendChild(h("div",{style:{fontSize:"13px",fontWeight:600,marginTop:"16px",marginBottom:"12px"}},"By Category"));
+      const catCounts={};S.risks.forEach(r=>{catCounts[r.category]=(catCounts[r.category]||0)+1;});
+      Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).forEach(([cat,count])=>{
+        const row=h("div",{style:{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid var(--border)",fontSize:"13px"}});
+        row.appendChild(h("span",{style:{color:"var(--textMid)"}},cat));
+        row.appendChild(h("span",{className:"mono",style:{fontWeight:700,color:"var(--text)"}},String(count)));
+        statusCard.appendChild(row);
+      });
+      matrixPanel.appendChild(statusCard);
+    }
+    right.appendChild(matrixPanel);
+    grid.appendChild(right);
+    main.appendChild(grid);
+  }
+
+  // ═══ DECISION LOG ═══
+  if(S.view==="decisions"){
+    const grid=h("div",{style:{display:"grid",gridTemplateColumns:"260px 1fr 300px",gap:"16px"}});
+
+    // ─── LEFT SIDEBAR: Decision list ───
+    const sidebar=h("div",{style:{background:"var(--card)",borderRadius:"12px",border:"1px solid var(--border)",overflow:"hidden",display:"flex",flexDirection:"column",maxHeight:"calc(100vh - 120px)",position:"sticky",top:"80px"}});
+    const sbHead=h("div",{style:{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",gap:"6px",alignItems:"center"}});
+    sbHead.appendChild(h("span",{style:{fontSize:"14px",fontWeight:700,flexShrink:0}},"📋"));
+    sbHead.appendChild(h("input",{id:"dec-search-input",className:"input",style:{flex:1,fontSize:"12px",padding:"6px 10px"},placeholder:"Search decisions...",value:S.decSearch||"",onInput:e=>{S.decSearch=e.target.value;render();}}));
+    sbHead.appendChild(h("button",{className:"btn btn-pri",style:{padding:"6px 12px",fontSize:"14px",lineHeight:1,flexShrink:0},onClick:addDec,title:"Add decision"},"+"));
+    sidebar.appendChild(sbHead);
+
+    // Decision sidebar filters
+    const decStatusClr={Proposed:"var(--warn)",Approved:"var(--success)",Superseded:"var(--textDim)",Rejected:"var(--danger)",Deferred:"var(--purple)"};
+    const sbFilters=h("div",{style:{padding:"6px 12px",borderBottom:"1px solid var(--border)",display:"flex",gap:"4px"}});
+    const dCatSel=h("select",{id:"dec-filter-cat",className:"input",style:{flex:1,fontSize:"11px",padding:"4px 6px"},onChange:e=>{S.decFilterCat=e.target.value;render();}});
+    dCatSel.appendChild(h("option",{value:"All"},"All Categories"));
+    DEC_CATEGORIES.forEach(c=>dCatSel.appendChild(h("option",{value:c},c)));
+    dCatSel.value=S.decFilterCat;
+    sbFilters.appendChild(dCatSel);
+    const dStatSel=h("select",{id:"dec-filter-stat",className:"input",style:{flex:1,fontSize:"11px",padding:"4px 6px"},onChange:e=>{S.decFilterStat=e.target.value;render();}});
+    dStatSel.appendChild(h("option",{value:"All"},"All Status"));
+    DEC_STATUSES.forEach(s=>dStatSel.appendChild(h("option",{value:s},s)));
+    dStatSel.value=S.decFilterStat;
+    sbFilters.appendChild(dStatSel);
+    sidebar.appendChild(sbFilters);
+
+    const filteredDecs=S.decisions.filter(d=>{
+      if(S.decFilterCat!=="All"&&d.category!==S.decFilterCat)return false;
+      if(S.decFilterStat!=="All"&&d.status!==S.decFilterStat)return false;
+      if(S.decSearch){
+        const q=S.decSearch.toLowerCase();
+        if(!d.id.toLowerCase().includes(q)&&!(d.title||"").toLowerCase().includes(q)&&!d.category.toLowerCase().includes(q)&&!d.status.toLowerCase().includes(q))return false;
+      }
+      return true;
+    });
+
+    const sbList=h("div",{style:{flex:1,overflowY:"auto"}});
+    if(filteredDecs.length===0){
+      sbList.appendChild(h("div",{style:{padding:"24px 12px",textAlign:"center",color:"var(--textDim)",fontSize:"13px"}},S.decSearch?"No matches":"No decisions yet"));
+    }
+    filteredDecs.forEach(dec=>{
+      const stClr=decStatusClr[dec.status]||"var(--textDim)";
+      const isSel=S.selDecId===dec.id;
+      const item=h("div",{style:{padding:"10px 12px",borderBottom:"1px solid var(--border)",borderLeft:isSel?"3px solid var(--accent)":"3px solid transparent",background:isSel?"var(--accentDim)22":"transparent",cursor:"pointer",transition:"background .1s"},onClick:()=>{S.selDecId=dec.id;render();}});
+      item.addEventListener("mouseenter",()=>{if(!isSel)item.style.background="var(--cardHov)";});
+      item.addEventListener("mouseleave",()=>{item.style.background=isSel?"var(--accentDim)22":"transparent";});
+      const itemTop=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"3px"}});
+      itemTop.appendChild(h("span",{className:"mono",style:{fontSize:"12px",fontWeight:600,color:isSel?"var(--accent)":"var(--textMid)"}},dec.id));
+      itemTop.appendChild(h("span",{style:{fontSize:"10px",padding:"2px 6px",borderRadius:"4px",background:stClr+"22",color:stClr,fontWeight:600}},dec.status));
+      item.appendChild(itemTop);
+      item.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",lineHeight:"1.4",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},dec.title||"Untitled"));
+      sbList.appendChild(item);
+    });
+    sidebar.appendChild(sbList);
+    const sbFoot=h("div",{style:{padding:"8px 12px",borderTop:"1px solid var(--border)",fontSize:"11px",color:"var(--textDim)",textAlign:"center"}});
+    sbFoot.textContent=filteredDecs.length+(S.decSearch?" of "+S.decisions.length:"")+" decision"+(filteredDecs.length!==1?"s":"");
+    sidebar.appendChild(sbFoot);
+    grid.appendChild(sidebar);
+
+    // ─── CENTER: Decision editor ───
+    const center=h("div",{});
+    const selDec=S.decisions.find(d=>d.id===S.selDecId);
+    if(selDec){
+      const dec=selDec;
+      const stClr=decStatusClr[dec.status]||"var(--textDim)";
+
+      // Header card
+      const edCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      const edHdr=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px"}});
+      const edLeft=h("div",{style:{display:"flex",alignItems:"center",gap:"10px"}});
+      edLeft.appendChild(h("span",{className:"mono",style:{fontSize:"14px",color:"var(--accent)",fontWeight:600}},dec.id));
+      edLeft.appendChild(h("span",{className:"badge",style:{background:stClr+"22",color:stClr}},dec.status));
+      edLeft.appendChild(h("span",{className:"badge",style:{background:"var(--surface)",color:"var(--textMid)"}},dec.category));
+      edHdr.appendChild(edLeft);
+      const edBtns=h("div",{style:{display:"flex",gap:"6px"}});
+      edBtns.appendChild(h("button",{className:"btn btn-sec",style:{fontSize:"12px",padding:"5px 12px"},onClick:()=>{
+        const txt=`${dec.id}: ${dec.title}\nDate: ${dec.date}\nStatus: ${dec.status}\nCategory: ${dec.category}\nDecision Maker: ${dec.decisionMaker||"N/A"}\n\nDecision: ${dec.decision}\n\nRationale: ${dec.rationale}\n\nAlternatives: ${dec.alternatives||"N/A"}\n\nAffected Requirements: ${(dec.affectedReqs||[]).join(", ")||"None"}`;
+        navigator.clipboard.writeText(txt).then(()=>toast("Copied to clipboard","success")).catch(()=>toast("Copy failed","danger"));
+      }},"📋 Copy"));
+      edBtns.appendChild(h("button",{className:"btn btn-danger",style:{fontSize:"12px",padding:"5px 12px"},onClick:()=>{if(confirm("Delete "+dec.id+"?"))deleteDec(dec.id);}},"✕"));
+      edHdr.appendChild(edBtns);
+      edCard.appendChild(edHdr);
+
+      // Title + Date + Decision Maker
+      const r1=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 160px 200px",gap:"12px",marginBottom:"12px"}});
+      const titleGrp=h("div",{});titleGrp.appendChild(h("label",{className:"label"},"Title"));
+      titleGrp.appendChild(h("input",{className:"input",value:dec.title,placeholder:"Decision title",onInput:e=>updateDecSilent(dec.id,{title:e.target.value})}));
+      r1.appendChild(titleGrp);
+      const dateGrp=h("div",{});dateGrp.appendChild(h("label",{className:"label"},"Date"));
+      dateGrp.appendChild(h("input",{className:"input",type:"date",value:dec.date,onChange:e=>updateDec(dec.id,{date:e.target.value})}));
+      r1.appendChild(dateGrp);
+      const makerGrp=h("div",{});makerGrp.appendChild(h("label",{className:"label"},"Decision Maker"));
+      makerGrp.appendChild(h("input",{className:"input",value:dec.decisionMaker||"",placeholder:"Who decided",onInput:e=>updateDecSilent(dec.id,{decisionMaker:e.target.value})}));
+      r1.appendChild(makerGrp);
+      edCard.appendChild(r1);
+
+      // Category + Status
+      const r2=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"12px",marginBottom:"12px"}});
+      const catGrp=h("div",{});catGrp.appendChild(h("label",{className:"label"},"Category"));
+      const catSel=h("select",{className:"input",value:dec.category,onChange:e=>updateDec(dec.id,{category:e.target.value})});
+      DEC_CATEGORIES.forEach(c=>{const o=h("option",{value:c},c);if(c===dec.category)o.selected=true;catSel.appendChild(o);});
+      catGrp.appendChild(catSel);r2.appendChild(catGrp);
+      const statGrp=h("div",{});statGrp.appendChild(h("label",{className:"label"},"Status"));
+      const statSel=h("select",{className:"input",value:dec.status,onChange:e=>updateDec(dec.id,{status:e.target.value})});
+      DEC_STATUSES.forEach(s=>{const o=h("option",{value:s},s);if(s===dec.status)o.selected=true;statSel.appendChild(o);});
+      statGrp.appendChild(statSel);r2.appendChild(statGrp);
+      r2.appendChild(h("div",{}));
+      edCard.appendChild(r2);
+      center.appendChild(edCard);
+
+      // Decision + Rationale + Alternatives card
+      const textCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      const decGrp=h("div",{style:{marginBottom:"12px"}});decGrp.appendChild(h("label",{className:"label"},"Decision"));
+      decGrp.appendChild(h("textarea",{className:"input",style:{minHeight:"80px",resize:"vertical",fontFamily:"inherit",lineHeight:"1.6"},value:dec.decision,placeholder:"Describe the decision made...",onInput:e=>updateDecSilent(dec.id,{decision:e.target.value})}));
+      textCard.appendChild(decGrp);
+      const ratGrp=h("div",{style:{marginBottom:"12px"}});ratGrp.appendChild(h("label",{className:"label"},"Rationale"));
+      ratGrp.appendChild(h("textarea",{className:"input",style:{minHeight:"60px",resize:"vertical",fontFamily:"inherit",lineHeight:"1.6"},value:dec.rationale,placeholder:"Why was this decision made?",onInput:e=>updateDecSilent(dec.id,{rationale:e.target.value})}));
+      textCard.appendChild(ratGrp);
+      const altGrp=h("div",{});altGrp.appendChild(h("label",{className:"label"},"Alternatives Considered"));
+      altGrp.appendChild(h("textarea",{className:"input",style:{minHeight:"50px",resize:"vertical",fontFamily:"inherit",lineHeight:"1.6"},value:dec.alternatives||"",placeholder:"What other options were evaluated?",onInput:e=>updateDecSilent(dec.id,{alternatives:e.target.value})}));
+      textCard.appendChild(altGrp);
+      center.appendChild(textCard);
+
+      // Affected Requirements card
+      const reqCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      reqCard.appendChild(h("label",{className:"label"},"Affected Requirements"));
+      if(S.reqs.length===0){
+        reqCard.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",padding:"8px 0"}},"No requirements to link. Add requirements first."));
+      }else{
+        const reqBox=h("div",{style:{maxHeight:"180px",overflowY:"auto",background:"var(--surface)",borderRadius:"8px",border:"1px solid var(--border)",padding:"8px"}});
+        S.reqs.forEach(r=>{
+          const isChecked=(dec.affectedReqs||[]).includes(r.id);
+          const row=h("label",{style:{display:"flex",alignItems:"center",gap:"8px",padding:"4px 6px",borderRadius:"4px",cursor:"pointer",fontSize:"12px"}});
+          row.addEventListener("mouseenter",()=>row.style.background="var(--surfAlt)");row.addEventListener("mouseleave",()=>row.style.background="transparent");
+          const cb=h("input",{type:"checkbox",checked:isChecked,onChange:e=>{
+            const cur=dec.affectedReqs||[];
+            const updated=e.target.checked?[...cur,r.id]:cur.filter(x=>x!==r.id);
+            updateDec(dec.id,{affectedReqs:updated});
+          }});
+          row.appendChild(cb);
+          row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:600,minWidth:"72px"}},r.id));
+          row.appendChild(h("span",{style:{color:"var(--textMid)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},r.text?r.text.substring(0,80)+(r.text.length>80?"...":""):"(empty)"));
+          reqBox.appendChild(row);
+        });
+        reqCard.appendChild(reqBox);
+      }
+      if(dec.affectedReqs&&dec.affectedReqs.length>0){
+        const linkedBadges=h("div",{style:{display:"flex",flexWrap:"wrap",gap:"4px",marginTop:"8px"}});
+        dec.affectedReqs.forEach(rid=>{
+          const linkedReq=S.reqs.find(r=>r.id===rid);
+          if(linkedReq)linkedBadges.appendChild(h("span",{className:"badge",style:{background:"var(--accentDim)",color:"var(--accent)",cursor:"pointer"},onClick:()=>{S.selId=rid;setState({view:"editor"});}},rid));
+        });
+        reqCard.appendChild(linkedBadges);
+      }
+      center.appendChild(reqCard);
+    }else{
+      const empty=h("div",{className:"card",style:{textAlign:"center",padding:"64px 32px"}});
+      empty.appendChild(h("div",{style:{fontSize:"48px",opacity:".1",marginBottom:"16px"}},"📋"));
+      empty.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"16px",fontWeight:600,marginBottom:"8px"}},"Select a Decision"));
+      empty.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"13px",lineHeight:"1.6",maxWidth:"360px",margin:"0 auto 20px"}},"Choose a decision from the sidebar to view and edit its details, or create a new one."));
+      empty.appendChild(h("button",{className:"btn btn-pri",style:{padding:"10px 24px",fontSize:"14px"},onClick:addDec},"+ Add Decision"));
+      center.appendChild(empty);
+    }
+    grid.appendChild(center);
+
+    // ─── RIGHT: Status summary ───
+    const right=h("div",{});
+    const summaryPanel=h("div",{style:{position:"sticky",top:"80px"}});
+
+    // Status counts
+    const statusCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+    statusCard.appendChild(h("div",{style:{fontSize:"13px",fontWeight:600,marginBottom:"12px"}},"Status Overview"));
+    const statusGrid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}});
+    const allCount=S.decisions.length;
+    const statusCounts={};DEC_STATUSES.forEach(s=>statusCounts[s]=S.decisions.filter(d=>d.status===s).length);
+    [{l:"Total",v:allCount,c:"var(--accent)"}, ...DEC_STATUSES.map(s=>({l:s,v:statusCounts[s],c:decStatusClr[s]}))].filter(x=>x.v>0).forEach(s=>{
+      const box=h("div",{style:{background:s.c+"15",border:"1px solid "+s.c+"33",borderRadius:"8px",padding:"12px",textAlign:"center"}});
+      box.appendChild(h("div",{style:{fontSize:"24px",fontWeight:700,color:s.c}},String(s.v)));
+      box.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textMid)",marginTop:"2px",textTransform:"uppercase",fontWeight:600}},s.l));
+      statusGrid.appendChild(box);
+    });
+    statusCard.appendChild(statusGrid);
+    summaryPanel.appendChild(statusCard);
+
+    // Category breakdown
+    if(S.decisions.length>0){
+      const catCard=h("div",{className:"card"});
+      catCard.appendChild(h("div",{style:{fontSize:"13px",fontWeight:600,marginBottom:"12px"}},"By Category"));
+      const catCounts={};S.decisions.forEach(d=>{catCounts[d.category]=(catCounts[d.category]||0)+1;});
+      Object.entries(catCounts).sort((a,b)=>b[1]-a[1]).forEach(([cat,count])=>{
+        const row=h("div",{style:{display:"flex",justifyContent:"space-between",padding:"6px 0",borderBottom:"1px solid var(--border)",fontSize:"13px"}});
+        row.appendChild(h("span",{style:{color:"var(--textMid)"}},cat));
+        row.appendChild(h("span",{className:"mono",style:{fontWeight:700,color:"var(--text)"}},String(count)));
+        catCard.appendChild(row);
+      });
+      // Recent decisions
+      catCard.appendChild(h("div",{style:{fontSize:"13px",fontWeight:600,marginTop:"16px",marginBottom:"12px"}},"Recent Decisions"));
+      S.decisions.slice().sort((a,b)=>(b.modified||b.date).localeCompare(a.modified||a.date)).slice(0,5).forEach(d=>{
+        const row=h("div",{style:{padding:"6px 0",borderBottom:"1px solid var(--border)"}});
+        row.appendChild(h("div",{className:"mono",style:{fontSize:"11px",color:"var(--accent)",fontWeight:600}},d.id));
+        row.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textMid)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},d.title||"Untitled"));
+        catCard.appendChild(row);
+      });
+      summaryPanel.appendChild(catCard);
+    }
+    right.appendChild(summaryPanel);
+    grid.appendChild(right);
+    main.appendChild(grid);
+  }
+
+  // ═══ V&V ═══
+  if(S.view==="vv"){
+    main.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700,marginBottom:"20px"}},"Verification & Validation Planning"));
+    if(S.reqs.length===0){
+      const emptyVV=h("div",{className:"card",style:{textAlign:"center",padding:"48px 32px"}});
+      emptyVV.appendChild(h("div",{style:{fontSize:"40px",opacity:".1",marginBottom:"12px"}},"✓"));
+      emptyVV.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"15px",fontWeight:600,marginBottom:"8px"}},"No V&V Data"));
+      emptyVV.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"13px",lineHeight:"1.6",marginBottom:"16px"}},"Add requirements with verification methods to plan your Verification & Validation activities."));
+      emptyVV.appendChild(h("button",{className:"btn btn-pri",style:{padding:"8px 20px"},onClick:()=>setState({view:"editor"})},"Go to Author →"));
+      main.appendChild(emptyVV);
+    }
+    else{
+      const vGrid=h("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"14px",marginBottom:"24px"}});
+      const vClrs={Test:"var(--accent)",Analysis:"var(--purple)",Inspection:"var(--warn)",Demonstration:"var(--teal)"};
+      const vIcons={Test:"🧪",Analysis:"📐",Inspection:"🔍",Demonstration:"▶"};
+      V_METHODS.forEach(m=>{
+        const cnt=S.reqs.filter(r=>r.verification===m).length;
+        const card=h("div",{className:"card",style:{textAlign:"center"}});
+        card.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",textTransform:"uppercase",fontWeight:600}},vIcons[m]+" "+m));
+        card.appendChild(h("div",{className:"mono",style:{fontSize:"36px",fontWeight:700,color:vClrs[m],marginTop:"6px"}},String(cnt)));
+        card.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",marginTop:"2px"}},(S.reqs.length?Math.round(cnt/S.reqs.length*100):0)+"% of total"));
+        vGrid.appendChild(card);
+      });
+      main.appendChild(vGrid);
+
+      // Requirements grouped by verification method
+      V_METHODS.forEach(m=>{
+        const mReqs=S.reqs.filter(r=>r.verification===m);
+        if(!mReqs.length)return;
+        const sec=h("div",{className:"card",style:{marginBottom:"14px"}});
+        const secHdr=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"12px"}});
+        secHdr.appendChild(h("div",{style:{display:"flex",alignItems:"center",gap:"8px"}},
+          h("div",{style:{width:"4px",height:"20px",borderRadius:"2px",background:vClrs[m]}}),
+          h("h3",{style:{fontSize:"14px",fontWeight:600}},vIcons[m]+" "+m),
+          h("span",{className:"mono",style:{fontSize:"12px",color:"var(--textDim)"}},mReqs.length+" requirement"+(mReqs.length!==1?"s":""))));
+        sec.appendChild(secHdr);
+        mReqs.forEach((r,idx)=>{
+          const a=analyze(r.text);const sc=a.score>=80?"var(--success)":a.score>=60?"var(--warn)":"var(--danger)";
+          const stC=r.status==="Approved"?"var(--success)":r.status==="Reviewed"?"var(--purple)":"var(--warn)";
+          const row=h("div",{style:{display:"grid",gridTemplateColumns:"80px 1fr 80px 70px 55px",gap:"8px",padding:"10px 12px",background:idx%2===0?"var(--surface)":"transparent",borderRadius:"6px",alignItems:"center",cursor:"pointer",transition:"background .1s",fontSize:"13px"},onClick:()=>{S.selId=r.id;setState({view:"editor"});}});
+          row.addEventListener("mouseenter",()=>row.style.background="var(--cardHov)");
+          row.addEventListener("mouseleave",()=>row.style.background=idx%2===0?"var(--surface)":"transparent");
+          row.appendChild(h("span",{className:"mono",style:{fontSize:"12px",color:"var(--accent)",fontWeight:600}},r.id));
+          row.appendChild(h("span",{style:{overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",color:"var(--text)"}},r.text||"(empty)"));
+          row.appendChild(h("span",{style:{fontSize:"12px",color:"var(--textMid)"}},r.level.replace(" Requirement","").replace("Stakeholder ","STK ")));
+          row.appendChild(h("span",{className:"badge",style:{background:stC+"22",color:stC}},r.status));
+          row.appendChild(h("span",{className:"mono",style:{fontSize:"12px",color:sc,fontWeight:700,textAlign:"right"}},a.score+"%"));
+          sec.appendChild(row);
+        });
+        main.appendChild(sec);
+      });
+
+      // Unassigned (requirements with default "Test" that might need review)
+      const noVerif=S.reqs.filter(r=>!r.verification||r.verification==="Test");
+      if(noVerif.length>0){
+        const hint=h("div",{style:{padding:"12px 16px",background:"var(--warn)11",borderRadius:"10px",border:"1px solid var(--warn)33",fontSize:"13px",color:"var(--textMid)",lineHeight:"1.5"}});
+        hint.textContent="💡 "+noVerif.length+" requirement"+(noVerif.length!==1?"s":"")+" use the default \"Test\" method. Review these in the Author view to confirm the appropriate verification approach.";
+        main.appendChild(hint);
+      }
+    }
+  }
+
+  // ═══ RULES REF ═══
+  if(S.view==="rules"){
+    main.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700,marginBottom:"4px"}},"INCOSE GtWR v4 — 42 Rules Reference"));
+    main.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"13px",marginBottom:"20px"}},"Complete reference: 14 categories, 15 characteristics."));
+    CATS.forEach(cat=>{
+      const cr=RULES.filter(r=>r.cat===cat.nm);if(!cr.length)return;
+      const card=h("div",{className:"card",style:{marginBottom:"12px"}});
+      const ch=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",marginBottom:"14px"}});
+      ch.appendChild(h("div",{style:{width:"3px",height:"22px",borderRadius:"2px",background:cat.c}}));
+      ch.appendChild(h("h3",{style:{fontSize:"15px",fontWeight:700}},cat.nm));
+      ch.appendChild(h("span",{className:"mono",style:{fontSize:"12px",color:"var(--textDim)"}},cat.r));
+      card.appendChild(ch);
+      cr.forEach(rule=>{
+        const row=h("div",{style:{display:"grid",gridTemplateColumns:"60px 160px 1fr",gap:"14px",padding:"10px 14px",background:"var(--surface)",borderRadius:"8px",alignItems:"center",marginBottom:"4px"}});
+        row.appendChild(h("span",{className:"mono",style:{fontSize:"12px",color:cat.c,fontWeight:700}},rule.id));
+        row.appendChild(h("span",{style:{fontSize:"12px",fontWeight:600,color:"var(--text)"}},rule.nm));
+        row.appendChild(h("span",{style:{fontSize:"12px",color:"var(--textMid)"}},rule.desc));
+        card.appendChild(row);
+      });
+      main.appendChild(card);
+    });
+  }
+
+  // ═══ GLOSSARY ═══
+  if(S.view==="glossary"){
+    const ghdr=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"20px"}});
+    ghdr.appendChild(h("div",{},h("h2",{style:{fontSize:"20px",fontWeight:700}},"Project Glossary"),h("p",{style:{color:"var(--textDim)",fontSize:"13px",marginTop:"2px"}},"Per R4 (Defined Terms) & R36 (Consistent Terms) · "+S.glossary.length+" term"+(S.glossary.length!==1?"s":""))));
+    const ghdrRight=h("div",{style:{display:"flex",gap:"8px",alignItems:"center"}});
+    ghdrRight.appendChild(h("input",{id:"gloss-search-input",className:"input",style:{width:"200px",fontSize:"13px"},placeholder:"🔍 Search terms...",value:S.glossSearch||"",onInput:e=>{S.glossSearch=e.target.value;render();}}));
+    ghdrRight.appendChild(h("button",{className:"btn btn-pri",onClick:()=>{History.save();S.glossary.push({term:"",def:""});render();}},"+ Add Term"));
+    ghdr.appendChild(ghdrRight);
+    main.appendChild(ghdr);
+
+    // Filter and sort
+    const filteredGloss=S.glossSearch?S.glossary.map((g,i)=>({...g,idx:i})).filter(g=>
+      g.term.toLowerCase().includes(S.glossSearch.toLowerCase())||
+      g.def.toLowerCase().includes(S.glossSearch.toLowerCase())
+    ):S.glossary.map((g,i)=>({...g,idx:i}));
+    const sortedGloss=[...filteredGloss].sort((a,b)=>{
+      if(!a.term&&!b.term)return 0;if(!a.term)return 1;if(!b.term)return -1;
+      return a.term.toLowerCase().localeCompare(b.term.toLowerCase());
+    });
+
+    const gCard=h("div",{className:"card",style:{padding:0,overflow:"hidden"}});
+    const gHdr=h("div",{style:{display:"grid",gridTemplateColumns:"200px 1fr 50px",gap:"14px",padding:"12px 20px",background:"var(--surface)",fontSize:"12px",fontWeight:700,color:"var(--textDim)",textTransform:"uppercase",letterSpacing:".06em"}});
+    ["Term","Definition",""].forEach(t=>gHdr.appendChild(h("div",{},t)));gCard.appendChild(gHdr);
+    sortedGloss.forEach(g=>{
+      const row=h("div",{style:{display:"grid",gridTemplateColumns:"200px 1fr 50px",gap:"14px",padding:"10px 20px",borderTop:"1px solid var(--border)",alignItems:"center"}});
+      row.appendChild(h("input",{className:"input",style:{fontWeight:600},value:g.term,placeholder:"Term",onInput:e=>{S.glossary[g.idx].term=e.target.value;autoSave();}}));
+      row.appendChild(h("input",{className:"input",value:g.def,placeholder:"Definition",onInput:e=>{S.glossary[g.idx].def=e.target.value;autoSave();}}));
+      row.appendChild(h("button",{className:"btn btn-danger",style:{padding:"4px 8px",fontSize:"12px"},onClick:()=>{History.save();S.glossary.splice(g.idx,1);autoSave();render();}},"✕"));
+      gCard.appendChild(row);
+    });
+    if(sortedGloss.length===0){
+      const emptyG=h("div",{style:{padding:"36px 20px",textAlign:"center"}});
+      if(S.glossSearch){
+        emptyG.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"13px"}},"No terms match \""+S.glossSearch+"\"."));
+      }else{
+        emptyG.appendChild(h("div",{style:{fontSize:"32px",opacity:".1",marginBottom:"8px"}},"📖"));
+        emptyG.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"14px",fontWeight:600,marginBottom:"6px"}},"No Glossary Terms"));
+        emptyG.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"13px",lineHeight:"1.5"}},"Define project-specific terms to ensure consistency across your requirements (INCOSE R4, R36)."));
+      }
+      gCard.appendChild(emptyG);
+    }
+    main.appendChild(gCard);
+  }
+
+  app.appendChild(main);
+
+  // Footer
+  if(S.view!=="welcome"){
+    const footer=h("footer",{style:{padding:"14px 28px",borderTop:"1px solid var(--borderHi)",display:"flex",justifyContent:"space-between",fontSize:"12px",color:"var(--textMid)"}});
+    const footerLeft=h("div",{});
+    footerLeft.appendChild(document.createTextNode("ReqRight v2.2.0-beta · Based on INCOSE® GtWR v4 · ISO/IEC/IEEE 29148 · 15288 · "));
+    const helpLink=h("a",{href:"https://github.com/ssaleem74/reqright#readme",target:"_blank",style:{color:"var(--accent)",textDecoration:"none"}},"Help & Tutorial");
+    footerLeft.appendChild(helpLink);
+    footerLeft.appendChild(document.createTextNode(" · "));
+    const discLink=h("a",{href:"DISCLAIMER.md",style:{color:"var(--textMid)",textDecoration:"none"}},"Disclaimer");
+    footerLeft.appendChild(discLink);
+    footerLeft.appendChild(document.createTextNode(" · "));
+    const privLink=h("a",{href:"PRIVACY.md",style:{color:"var(--textMid)",textDecoration:"none"}},"Privacy");
+    footerLeft.appendChild(privLink);
+    footer.appendChild(footerLeft);
+    footer.appendChild(h("div",{},S.reqs.length+" requirement"+(S.reqs.length!==1?"s":"")+(S.risks.length?" · "+S.risks.length+" risk"+(S.risks.length!==1?"s":""):"")+(S.decisions.length?" · "+S.decisions.length+" decision"+(S.decisions.length!==1?"s":""):"")+" · Auto-saved in browser"));
+    app.appendChild(footer);
+  }
+
+  // Restore focus after DOM rebuild
+  if(_fId){const el=document.getElementById(_fId);if(el){el.focus();try{if(typeof _fStart==="number"&&el.setSelectionRange)el.setSelectionRange(_fStart,_fEnd);}catch(e){}}}
+}
+
+// ─── INIT ─────────────────────────────────────────────────
+render();
+</script>
+</body>
+</html>
