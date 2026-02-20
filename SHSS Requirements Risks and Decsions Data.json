@@ -1,0 +1,944 @@
+{
+  "project": "Smart Home Security System — AegisGuard Pro",
+  "version": "2.2",
+  "standard": "INCOSE GtWR v4",
+  "exportDate": "2026-02-20T05:53:25.832Z",
+  "requirements": [
+    {
+      "id": "STK-0001",
+      "text": "The system shall detect unauthorized entry through [doors AND windows] within 2 ± 0.5 seconds of the breach event.",
+      "type": "Functional",
+      "level": "Stakeholder Need",
+      "priority": "Critical",
+      "verification": "Test",
+      "rationale": "Homeowners require immediate detection of intrusion attempts to ensure family safety and enable rapid response.",
+      "parent": "",
+      "status": "Approved",
+      "source": "Customer Survey CS-2025-041",
+      "risk": "Critical",
+      "created": "2026-02-20T05:52:26.231Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 92,
+      "qualityGrade": "A"
+    },
+    {
+      "id": "STK-0002",
+      "text": "The system shall notify the homeowner of security events via [mobile push notification AND SMS] within 5 ± 1 seconds of event detection.",
+      "type": "Functional",
+      "level": "Stakeholder Need",
+      "priority": "Critical",
+      "verification": "Demonstration",
+      "rationale": "Homeowners need real-time awareness of security events whether at home or away.",
+      "parent": "",
+      "status": "Approved",
+      "source": "Market Research MR-2025-017",
+      "risk": "High",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 96,
+      "qualityGrade": "A+"
+    },
+    {
+      "id": "STK-0003",
+      "text": "The system shall provide continuous video surveillance of the property perimeter with a minimum resolution of 1920 × 1080 pixels at 30 ± 2 frames per second.",
+      "type": "Functional",
+      "level": "Stakeholder Need",
+      "priority": "High",
+      "verification": "Test",
+      "rationale": "Property owners require clear visual evidence for insurance claims and law enforcement cooperation.",
+      "parent": "",
+      "status": "Approved",
+      "source": "Insurance Partner IP-2025-003",
+      "risk": "Medium",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 96,
+      "qualityGrade": "A+"
+    },
+    {
+      "id": "STK-0004",
+      "text": "The system shall operate continuously for a minimum of 72 ± 4 hours on battery backup during power outages.",
+      "type": "Reliability",
+      "level": "Stakeholder Need",
+      "priority": "Critical",
+      "verification": "Test",
+      "rationale": "Power outages are a common vulnerability exploited during break-ins; continuous operation is essential.",
+      "parent": "",
+      "status": "Approved",
+      "source": "Regulatory Requirement REG-2025-008",
+      "risk": "High",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 96,
+      "qualityGrade": "A+"
+    },
+    {
+      "id": "STK-0005",
+      "text": "The system shall enable the homeowner to arm and disarm the security system remotely via a mobile application within 3 ± 1 seconds.",
+      "type": "Operational",
+      "level": "Stakeholder Need",
+      "priority": "High",
+      "verification": "Demonstration",
+      "rationale": "Homeowners frequently need to control the system when away from the property.",
+      "parent": "",
+      "status": "Approved",
+      "source": "User Story US-2025-022",
+      "risk": "Medium",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 92,
+      "qualityGrade": "A"
+    },
+    {
+      "id": "STK-0006",
+      "text": "The system shall comply with UL 2900-1 cybersecurity requirements for network-connected products.",
+      "type": "Regulatory",
+      "level": "Stakeholder Need",
+      "priority": "Critical",
+      "verification": "Inspection",
+      "rationale": "UL certification is required for retail distribution and insurance company partnerships.",
+      "parent": "",
+      "status": "Reviewed",
+      "source": "Legal Department LD-2025-011",
+      "risk": "High",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 96,
+      "qualityGrade": "A+"
+    },
+    {
+      "id": "SYS-0001",
+      "text": "The intrusion detection subsystem shall process signals from each door and window sensor and generate an intrusion alert within 1.5 ± 0.3 seconds of sensor activation.",
+      "type": "Functional",
+      "level": "System Requirement",
+      "priority": "Critical",
+      "verification": "Test",
+      "rationale": "Allocates the 2-second stakeholder detection window between sensor processing (1.5s) and alert generation (0.5s).",
+      "parent": "STK-0001",
+      "status": "Approved",
+      "source": "System Architecture SA-001",
+      "risk": "Critical",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 92,
+      "qualityGrade": "A"
+    },
+    {
+      "id": "SYS-0002",
+      "text": "The notification service shall deliver push notifications to the AegisGuard mobile application within 3 ± 0.5 seconds of alert generation by the central controller.",
+      "type": "Performance",
+      "level": "System Requirement",
+      "priority": "Critical",
+      "verification": "Test",
+      "rationale": "The 3-second allocation plus 1.5-second detection meets the 5-second stakeholder notification window.",
+      "parent": "STK-0002",
+      "status": "Approved",
+      "source": "System Architecture SA-001",
+      "risk": "High",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 96,
+      "qualityGrade": "A+"
+    },
+    {
+      "id": "SYS-0003",
+      "text": "The notification service shall deliver SMS messages to the registered phone number within 4 ± 1 seconds of alert generation.",
+      "type": "Performance",
+      "level": "System Requirement",
+      "priority": "High",
+      "verification": "Test",
+      "rationale": "SMS serves as fallback when mobile data is unavailable; slightly longer latency is acceptable.",
+      "parent": "STK-0002",
+      "status": "Approved",
+      "source": "System Architecture SA-001",
+      "risk": "Medium",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 96,
+      "qualityGrade": "A+"
+    },
+    {
+      "id": "SYS-0004",
+      "text": "The video surveillance subsystem shall encode and transmit H.265 video streams at 1920 × 1080 pixels and 30 ± 2 frames per second with a maximum bitrate of 4 ± 0.5 Mbps per camera.",
+      "type": "Performance",
+      "level": "System Requirement",
+      "priority": "High",
+      "verification": "Test",
+      "rationale": "H.265 encoding reduces bandwidth by 50% vs H.264 while maintaining required resolution.",
+      "parent": "STK-0003",
+      "status": "Approved",
+      "source": "Architecture Decision DEC-0003",
+      "risk": "Medium",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 96,
+      "qualityGrade": "A+"
+    },
+    {
+      "id": "SYS-0005",
+      "text": "The central controller shall maintain a local video buffer storing a minimum of 48 ± 2 hours of recorded footage from each camera.",
+      "type": "Functional",
+      "level": "System Requirement",
+      "priority": "High",
+      "verification": "Test",
+      "rationale": "Local storage ensures footage availability even during network outages.",
+      "parent": "STK-0003",
+      "status": "Reviewed",
+      "source": "Architecture Decision DEC-0004",
+      "risk": "Medium",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 96,
+      "qualityGrade": "A+"
+    },
+    {
+      "id": "SYS-0006",
+      "text": "The battery management subsystem shall provide uninterrupted power to the central controller, sensor hub, and cellular modem for a minimum of 72 ± 4 hours when mains power is unavailable.",
+      "type": "Reliability",
+      "level": "System Requirement",
+      "priority": "Critical",
+      "verification": "Test",
+      "rationale": "Direct allocation of 72-hour stakeholder requirement; video recording excluded during battery operation to conserve power.",
+      "parent": "STK-0004",
+      "status": "Approved",
+      "source": "Power Budget Analysis PBA-001",
+      "risk": "High",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 92,
+      "qualityGrade": "A"
+    },
+    {
+      "id": "SYS-0007",
+      "text": "The mobile application shall authenticate the user via biometric verification and transmit the arm/disarm command to the central controller within 2 ± 0.5 seconds of user confirmation.",
+      "type": "Functional",
+      "level": "System Requirement",
+      "priority": "High",
+      "verification": "Demonstration",
+      "rationale": "2-second app response plus 1-second network latency meets the 3-second stakeholder requirement.",
+      "parent": "STK-0005",
+      "status": "Reviewed",
+      "source": "System Architecture SA-001",
+      "risk": "Medium",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 88,
+      "qualityGrade": "B+"
+    },
+    {
+      "id": "SYS-0008",
+      "text": "The central controller shall encrypt each communication channel using AES-256-GCM with unique session keys rotated every 3600 ± 60 seconds.",
+      "type": "Security",
+      "level": "System Requirement",
+      "priority": "Critical",
+      "verification": "Analysis",
+      "rationale": "AES-256-GCM meets UL 2900-1 encryption requirements and provides authenticated encryption.",
+      "parent": "STK-0006",
+      "status": "Approved",
+      "source": "Security Architecture SecA-001",
+      "risk": "Critical",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 92,
+      "qualityGrade": "A"
+    },
+    {
+      "id": "SYS-0009",
+      "text": "The system shall perform firmware integrity verification using SHA-256 hash comparison at each boot cycle and reject firmware images that fail verification.",
+      "type": "Security",
+      "level": "System Requirement",
+      "priority": "Critical",
+      "verification": "Test",
+      "rationale": "Prevents execution of tampered or malicious firmware; required by UL 2900-1 Section 7.",
+      "parent": "STK-0006",
+      "status": "Approved",
+      "source": "Security Architecture SecA-001",
+      "risk": "High",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 88,
+      "qualityGrade": "B+"
+    },
+    {
+      "id": "SYS-0010",
+      "text": "The central controller shall detect sensor communication loss and generate a tamper alert within 30 ± 5 seconds of the last successful heartbeat from each sensor.",
+      "type": "Safety",
+      "level": "System Requirement",
+      "priority": "High",
+      "verification": "Test",
+      "rationale": "Prevents attackers from silently disabling sensors by jamming or destroying them.",
+      "parent": "STK-0001",
+      "status": "Approved",
+      "source": "Threat Model TM-001",
+      "risk": "High",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 92,
+      "qualityGrade": "A"
+    },
+    {
+      "id": "SUB-0001",
+      "text": "The door/window sensor module shall transmit a state-change signal to the sensor hub using 915 MHz ISM band within 200 ± 20 milliseconds of reed switch activation.",
+      "type": "Interface",
+      "level": "Subsystem Requirement",
+      "priority": "Critical",
+      "verification": "Test",
+      "rationale": "200ms sensor transmission plus hub processing must fit within the 1.5-second system detection window.",
+      "parent": "SYS-0001",
+      "status": "Approved",
+      "source": "Interface Control Document ICD-001",
+      "risk": "Medium",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 96,
+      "qualityGrade": "A+"
+    },
+    {
+      "id": "SUB-0002",
+      "text": "The sensor hub shall aggregate signals from up to 64 sensors and forward validated intrusion events to the central controller via the internal bus within 500 ± 50 milliseconds.",
+      "type": "Performance",
+      "level": "Subsystem Requirement",
+      "priority": "High",
+      "verification": "Test",
+      "rationale": "500ms hub processing allows 200ms sensor tx + 800ms controller processing within the 1.5s window.",
+      "parent": "SYS-0001",
+      "status": "Reviewed",
+      "source": "System Architecture SA-001",
+      "risk": "Medium",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 92,
+      "qualityGrade": "A"
+    },
+    {
+      "id": "SUB-0003",
+      "text": "The notification gateway shall maintain persistent connections to [Apple APNS AND Google FCM] services and retry failed delivery attempts a maximum of 3 times with 500 ± 100 millisecond intervals.",
+      "type": "Interface",
+      "level": "Subsystem Requirement",
+      "priority": "High",
+      "verification": "Test",
+      "rationale": "Persistent connections eliminate handshake latency; retries handle transient cloud service failures.",
+      "parent": "SYS-0002",
+      "status": "Approved",
+      "source": "Interface Control Document ICD-003",
+      "risk": "Medium",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 96,
+      "qualityGrade": "A+"
+    },
+    {
+      "id": "SUB-0004",
+      "text": "The IP camera module shall perform automatic white balance and exposure adjustment within 2 ± 0.5 seconds when ambient lighting conditions change by more than 50%.",
+      "type": "Performance",
+      "level": "Subsystem Requirement",
+      "priority": "Medium",
+      "verification": "Test",
+      "rationale": "Rapid lighting adaptation ensures usable footage during dawn/dusk transitions and when lights are switched.",
+      "parent": "SYS-0004",
+      "status": "Draft",
+      "source": "Camera Specification CAM-001",
+      "risk": "Low",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 92,
+      "qualityGrade": "A"
+    },
+    {
+      "id": "SUB-0005",
+      "text": "The battery management controller shall monitor cell voltage, current, and temperature at 1 ± 0.1 second intervals and initiate protective shutdown when cell temperature exceeds 60 ± 2 °C.",
+      "type": "Safety",
+      "level": "Subsystem Requirement",
+      "priority": "Critical",
+      "verification": "Test",
+      "rationale": "Lithium battery thermal runaway prevention is critical for residential safety.",
+      "parent": "SYS-0006",
+      "status": "Approved",
+      "source": "Battery Safety Analysis BSA-001",
+      "risk": "Critical",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 96,
+      "qualityGrade": "A+"
+    },
+    {
+      "id": "CMP-0001",
+      "text": "The reed switch sensor component shall detect a magnetic field change of 10 ± 1 Gauss at a maximum air gap of 25 ± 2 mm.",
+      "type": "Physical",
+      "level": "Component Requirement",
+      "priority": "High",
+      "verification": "Test",
+      "rationale": "25mm gap accommodates standard residential door/window frame tolerances.",
+      "parent": "SUB-0001",
+      "status": "Approved",
+      "source": "Component Specification CMP-S-001",
+      "risk": "Low",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 100,
+      "qualityGrade": "A+"
+    },
+    {
+      "id": "CMP-0002",
+      "text": "The 915 MHz radio transceiver shall achieve a minimum receiver sensitivity of -110 ± 2 dBm at a data rate of 50 kbps.",
+      "type": "Performance",
+      "level": "Component Requirement",
+      "priority": "High",
+      "verification": "Test",
+      "rationale": "Sensitivity specification ensures reliable reception through 2 interior walls at 30m range.",
+      "parent": "SUB-0001",
+      "status": "Reviewed",
+      "source": "RF Link Budget Analysis RF-001",
+      "risk": "Medium",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 100,
+      "qualityGrade": "A+"
+    },
+    {
+      "id": "CMP-0003",
+      "text": "The lithium iron phosphate battery pack shall provide a rated capacity of 100 ± 5 Ah at a nominal voltage of 12.8 V with a cycle life exceeding 2000 charge cycles to 80% capacity.",
+      "type": "Physical",
+      "level": "Component Requirement",
+      "priority": "Critical",
+      "verification": "Analysis",
+      "rationale": "100Ah at 12.8V = 1280Wh; system draws 15W average = 85 hours, exceeding the 72-hour requirement.",
+      "parent": "SUB-0005",
+      "status": "Approved",
+      "source": "Power Budget Analysis PBA-001",
+      "risk": "Medium",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 100,
+      "qualityGrade": "A+"
+    },
+    {
+      "id": "SYS-0011",
+      "text": "The system should be user-friendly and easy to install with reasonable effort.",
+      "type": "Human Factors",
+      "level": "System Requirement",
+      "priority": "Medium",
+      "verification": "Demonstration",
+      "rationale": "Ease of use drives customer satisfaction.",
+      "parent": "STK-0005",
+      "status": "Draft",
+      "source": "Product Manager",
+      "risk": "Low",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 89,
+      "qualityGrade": "B+"
+    },
+    {
+      "id": "SYS-0012",
+      "text": "When a motion event is detected, it shall be processed quickly and the user should be notified promptly via the app if necessary.",
+      "type": "Functional",
+      "level": "System Requirement",
+      "priority": "High",
+      "verification": "Test",
+      "rationale": "Motion events need rapid processing.",
+      "parent": "STK-0001",
+      "status": "Draft",
+      "source": "Engineering Team",
+      "risk": "Medium",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 74,
+      "qualityGrade": "C"
+    },
+    {
+      "id": "SYS-0013",
+      "text": "The system shall use REST API and MQTT protocol to communicate between components, including but not limited to sensors, controllers, and cloud services.",
+      "type": "Interface",
+      "level": "System Requirement",
+      "priority": "Medium",
+      "verification": "Inspection",
+      "rationale": "Standard protocols reduce integration complexity.",
+      "parent": "STK-0006",
+      "status": "Draft",
+      "source": "Software Architecture",
+      "risk": "Low",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 80,
+      "qualityGrade": "B"
+    },
+    {
+      "id": "SYS-0014",
+      "text": "The system shall be capable of supporting additional sensors and shall have the ability to integrate with third-party devices as needed.",
+      "type": "Maintainability",
+      "level": "System Requirement",
+      "priority": "Low",
+      "verification": "Demonstration",
+      "rationale": "Extensibility is important for product roadmap.",
+      "parent": "",
+      "status": "Draft",
+      "source": "Product Roadmap",
+      "risk": "Low",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 77,
+      "qualityGrade": "C+"
+    },
+    {
+      "id": "SUB-0006",
+      "text": "The cloud storage module shall upload encrypted video clips to the remote server and the data should be backed up regularly.",
+      "type": "Functional",
+      "level": "Subsystem Requirement",
+      "priority": "Medium",
+      "verification": "Test",
+      "rationale": "Cloud backup provides off-site redundancy.",
+      "parent": "SYS-0005",
+      "status": "Draft",
+      "source": "Cloud Architecture",
+      "risk": "Medium",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z",
+      "qualityScore": 92,
+      "qualityGrade": "A"
+    }
+  ],
+  "decisions": [
+    {
+      "id": "DEC-0001",
+      "title": "Wireless Protocol Selection for Sensor Network",
+      "decision": "The sensor network shall use a proprietary protocol on the 915 MHz ISM band with frequency hopping spread spectrum (FHSS) rather than Zigbee, Z-Wave, or Wi-Fi for sensor-to-hub communication.",
+      "rationale": "915 MHz provides superior wall penetration compared to 2.4 GHz alternatives. FHSS mitigates the shared-band interference risk (RSK-0001). Proprietary protocol allows optimized packet structure for minimal latency (sub-200ms target). Z-Wave licensing fees add $2.50/sensor. Zigbee mesh introduces unpredictable latency. Wi-Fi power consumption is 10× higher, unacceptable for battery-powered sensors.",
+      "alternatives": "Zigbee 3.0 (rejected: latency), Z-Wave Long Range (rejected: licensing cost), Wi-Fi HaLow 802.11ah (rejected: power consumption), Bluetooth LE (rejected: range insufficient for large properties)",
+      "category": "Technology",
+      "status": "Approved",
+      "decisionMaker": "Sarah Chen — RF Engineering Lead",
+      "date": "2025-11-15",
+      "affectedReqs": [
+        "SUB-0001",
+        "CMP-0002",
+        "SYS-0001"
+      ],
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    },
+    {
+      "id": "DEC-0002",
+      "title": "Dual-Path Notification Architecture",
+      "decision": "The system shall implement a dual-path notification architecture using both cloud push notifications (primary) and cellular SMS (secondary fallback), with automatic failover when push delivery is not confirmed within 3 seconds.",
+      "rationale": "Cloud push notification alone has a 99.5% reliability rate, insufficient for a safety-critical system. Adding SMS as fallback brings effective reliability to 99.95%. The dual-path approach addresses RSK-0002 (cloud service outage). Cost impact is $0.01 per SMS; projected average of 2 SMS fallbacks per user per month = $0.24/year/user.",
+      "alternatives": "Push notification only (rejected: insufficient reliability), SMS only (rejected: high cost at $0.01/message for all events), dedicated cellular voice call (rejected: excessive cost and user annoyance), satellite communication (rejected: cost prohibitive for consumer product)",
+      "category": "Architectural",
+      "status": "Approved",
+      "decisionMaker": "Marcus Rivera — Cloud Infrastructure",
+      "date": "2025-12-03",
+      "affectedReqs": [
+        "SYS-0002",
+        "SYS-0003",
+        "SUB-0003",
+        "STK-0002"
+      ],
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    },
+    {
+      "id": "DEC-0003",
+      "title": "Edge Processing for Video Analytics",
+      "decision": "Video analytics (motion detection, person classification, object tracking) shall be performed on the central controller using an edge AI accelerator rather than streaming to cloud for processing.",
+      "rationale": "Edge processing reduces cloud bandwidth costs by 85% (only event clips uploaded vs continuous streams). Eliminates privacy concerns about continuous video transmission (addresses RSK-0008). Reduces notification latency by 1-2 seconds. Operates during internet outages. Selected Google Coral Edge TPU providing 4 TOPS at 2W power envelope.",
+      "alternatives": "Cloud-based video analytics (rejected: latency, bandwidth cost, privacy), hybrid cloud/edge (deferred: complexity for v1.0), no AI analytics (rejected: false alarm rate would be unacceptable per RSK-0006)",
+      "category": "Architectural",
+      "status": "Approved",
+      "decisionMaker": "David Kim — Algorithm Engineering",
+      "date": "2026-01-10",
+      "affectedReqs": [
+        "SYS-0004",
+        "SYS-0005",
+        "STK-0003"
+      ],
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    },
+    {
+      "id": "DEC-0004",
+      "title": "Dual Storage Strategy for Video Retention",
+      "decision": "The system shall implement a tiered storage architecture: industrial-grade M.2 SSD for 48-hour local rolling buffer, plus automatic encrypted upload of event-triggered clips to cloud storage with 30-day retention.",
+      "rationale": "Local-only storage risks total loss on SSD failure (RSK-0010). Cloud-only requires continuous upload bandwidth. The hybrid approach provides immediate local playback, cloud redundancy for event clips, and graceful degradation during internet outages. Industrial SSD (Samsung PM9A3) rated for 1 DWPD provides 5-year life at continuous recording workload.",
+      "alternatives": "Local SSD only (rejected: single point of failure), cloud only (rejected: bandwidth cost and internet dependency), RAID-1 dual SSD (rejected: cost and physical space constraints), SD card storage (rejected: write endurance insufficient)",
+      "category": "Design",
+      "status": "Approved",
+      "decisionMaker": "Sarah Chen — Hardware Engineering",
+      "date": "2026-01-18",
+      "affectedReqs": [
+        "SYS-0005",
+        "SUB-0006"
+      ],
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    },
+    {
+      "id": "DEC-0005",
+      "title": "A/B Partition Firmware Update Architecture",
+      "decision": "The central controller shall use an A/B partition scheme with dual boot partitions, allowing firmware updates to be applied to the inactive partition while the active partition continues security monitoring, with atomic switchover on validated reboot.",
+      "rationale": "Eliminates the 30-90 second vulnerability window during firmware updates (RSK-0004). Provides automatic rollback if new firmware fails health check. Requires additional 512 MB flash storage ($1.20 BOM increase) but eliminates the security exposure entirely. Industry best practice per NIST SP 800-193.",
+      "alternatives": "Single partition with monitoring pause (rejected: security vulnerability RSK-0004), differential patching on running system (rejected: complexity and corruption risk), user-scheduled updates with explicit monitoring pause (rejected: user burden, still has vulnerability window)",
+      "category": "Security",
+      "status": "Approved",
+      "decisionMaker": "James Park — Security Architecture",
+      "date": "2026-01-25",
+      "affectedReqs": [
+        "SYS-0009",
+        "SYS-0008"
+      ],
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    },
+    {
+      "id": "DEC-0006",
+      "title": "FPGA Fallback for Sensor Hub Processing",
+      "decision": "An FPGA-based sensor hub design using Lattice iCE40 shall be developed as a parallel backup to the custom ASIC (AegisHub-1), to be activated if the ASIC supply chain experiences delays exceeding 4 weeks beyond the committed schedule.",
+      "rationale": "Custom ASIC has a single-source supplier with 16-week lead time (RSK-0005). FPGA design uses commodity parts available from multiple distributors with 2-week lead time. BOM cost increase of $12/unit is acceptable as a schedule risk mitigation. FPGA prototype can also serve as the development platform while ASIC samples are in fabrication.",
+      "alternatives": "Accept schedule risk with ASIC only (rejected: 4-6 month delay would miss holiday launch window), switch entirely to FPGA (rejected: long-term BOM cost $12 higher at scale), software-only implementation on main CPU (rejected: insufficient real-time performance for 64-sensor aggregation)",
+      "category": "Trade-off",
+      "status": "Proposed",
+      "decisionMaker": "Lisa Thompson — Supply Chain",
+      "date": "2026-02-10",
+      "affectedReqs": [
+        "SUB-0002"
+      ],
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    },
+    {
+      "id": "DEC-0007",
+      "title": "LiFePO4 Battery Chemistry Selection",
+      "decision": "The backup battery pack shall use Lithium Iron Phosphate (LiFePO4) chemistry rather than standard Lithium-ion (NMC/NCA) or Lead-Acid.",
+      "rationale": "LiFePO4 provides inherent thermal stability (thermal runaway onset >270°C vs ~150°C for NMC), addressing RSK-0003 battery safety concerns. Cycle life of 2000+ cycles vs 500 for lead-acid reduces total cost of ownership. Energy density is sufficient for the 72-hour requirement (100Ah at 12.8V = 1280Wh vs 1080Wh needed). Flat discharge curve maintains consistent voltage throughout discharge. UL 9540A listing simplifies residential installation certification.",
+      "alternatives": "NMC Lithium-ion (rejected: thermal safety concerns for unattended residential use), Lead-Acid AGM (rejected: 3× heavier, 4× fewer cycles, hydrogen off-gassing risk), Lithium Titanate (rejected: excessive cost at $800/kWh vs $250/kWh for LiFePO4)",
+      "category": "Safety",
+      "status": "Approved",
+      "decisionMaker": "Dr. Amy Walsh — Battery Systems",
+      "date": "2025-10-28",
+      "affectedReqs": [
+        "SYS-0006",
+        "SUB-0005",
+        "CMP-0003",
+        "STK-0004"
+      ],
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    },
+    {
+      "id": "DEC-0008",
+      "title": "NFC-Based Sensor Pairing Replacement",
+      "decision": "Sensor pairing shall transition from BLE scanning to NFC tap-to-pair, where the user taps each sensor against the hub to register it, replacing the current multi-step BLE pairing flow.",
+      "rationale": "Beta testing reveals BLE pairing accounts for 35% of installation support calls (RSK-0009). NFC tap requires no user configuration, no PIN entry, and completes in under 2 seconds. NFC hardware adds $0.40/sensor and $1.20 to the hub. Projected support cost savings of $6.50/unit over first year far exceed BOM increase.",
+      "alternatives": "Improve BLE pairing UX with better instructions (rejected: fundamental UX complexity remains), QR code scanning (rejected: requires line-of-sight and good lighting), pre-paired sensors shipped with assigned hub (rejected: eliminates sensor replacement flexibility)",
+      "category": "Design",
+      "status": "Proposed",
+      "decisionMaker": "Tom Bradley — Customer Experience",
+      "date": "2026-02-14",
+      "affectedReqs": [
+        "SYS-0011",
+        "SYS-0007",
+        "SUB-0001"
+      ],
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    }
+  ],
+  "risks": [
+    {
+      "id": "RSK-0001",
+      "title": "RF Interference Causes Sensor Communication Failure",
+      "description": "The 915 MHz ISM band is shared with other consumer devices (baby monitors, garage door openers, LoRa devices). High RF interference in dense residential areas could cause missed sensor signals, leading to undetected intrusions. Field testing in apartment complexes has shown interference levels 15dB above suburban baseline.",
+      "category": "Technical",
+      "likelihood": 4,
+      "impact": 5,
+      "status": "Open",
+      "mitigations": [
+        "SUB-0001",
+        "CMP-0002",
+        "SYS-0010"
+      ],
+      "owner": "Sarah Chen — RF Engineering Lead",
+      "dueDate": "2026-04-15",
+      "notes": "Investigating frequency hopping spread spectrum (FHSS) as mitigation. Prototype testing scheduled for Sprint 14. May need to add secondary 2.4 GHz backup channel.",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    },
+    {
+      "id": "RSK-0002",
+      "title": "Cloud Notification Service Outage",
+      "description": "Dependency on Apple APNS and Google FCM means push notifications fail during cloud service outages. Historical data shows APNS has experienced 3 outages exceeding 30 minutes in the past 12 months. SMS fallback partially mitigates this but has its own carrier-dependent reliability issues.",
+      "category": "External",
+      "likelihood": 3,
+      "impact": 4,
+      "status": "Mitigated",
+      "mitigations": [
+        "SYS-0002",
+        "SYS-0003",
+        "SUB-0003"
+      ],
+      "owner": "Marcus Rivera — Cloud Infrastructure",
+      "dueDate": "2026-03-01",
+      "notes": "Implemented dual-path notification (push + SMS). Also added local siren activation as tertiary alert mechanism independent of cloud services. Residual risk accepted by product owner.",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    },
+    {
+      "id": "RSK-0003",
+      "title": "Battery Thermal Runaway in Extreme Heat",
+      "description": "LiFePO4 battery pack installed in non-climate-controlled garage or attic locations could experience thermal stress during summer months. While LiFePO4 is inherently safer than Li-ion, sustained ambient temperatures above 45°C combined with charging could push cell temperatures toward the 60°C shutdown threshold, causing nuisance shutdowns.",
+      "category": "Safety",
+      "likelihood": 2,
+      "impact": 5,
+      "status": "Open",
+      "mitigations": [
+        "SUB-0005",
+        "CMP-0003"
+      ],
+      "owner": "Dr. Amy Walsh — Battery Systems",
+      "dueDate": "2026-05-01",
+      "notes": "Evaluating passive cooling solutions. Installation guide will recommend climate-controlled locations. Considering adding active fan cooling as optional accessory.",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    },
+    {
+      "id": "RSK-0004",
+      "title": "Firmware Update Vulnerability Window",
+      "description": "During over-the-air firmware updates, the system enters a 30-90 second window where the security monitoring loop is paused. An attacker with knowledge of the update schedule could exploit this window. Currently, updates are pushed globally at a predictable time (2:00 AM local).",
+      "category": "Security",
+      "likelihood": 2,
+      "impact": 4,
+      "status": "Open",
+      "mitigations": [
+        "SYS-0009",
+        "SYS-0008"
+      ],
+      "owner": "James Park — Security Architecture",
+      "dueDate": "2026-04-01",
+      "notes": "Proposed solution: A/B partition scheme where update is applied to inactive partition while active partition continues monitoring. Seamless switchover on next boot. Requires additional flash storage — see DEC-0005.",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    },
+    {
+      "id": "RSK-0005",
+      "title": "Supply Chain Delay for Custom Sensor Hub ASIC",
+      "description": "The custom sensor aggregation ASIC (AegisHub-1) has a single-source supplier with 16-week lead time. Any fabrication issue could delay product launch by 4-6 months. Current geopolitical tensions have increased semiconductor supply chain volatility.",
+      "category": "Schedule",
+      "likelihood": 3,
+      "impact": 4,
+      "status": "Open",
+      "mitigations": [
+        "SUB-0002"
+      ],
+      "owner": "Lisa Thompson — Supply Chain",
+      "dueDate": "2026-03-15",
+      "notes": "Evaluating FPGA-based fallback design that uses off-the-shelf components. Would increase BOM cost by $12 per unit but eliminates single-source risk. Decision pending — see DEC-0006.",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    },
+    {
+      "id": "RSK-0006",
+      "title": "False Alarm Rate Exceeds Customer Tolerance",
+      "description": "Early beta testing shows 2.3 false alarms per week per household, primarily from pet motion, HVAC drafts on door sensors, and spider webs on cameras. Industry benchmark for acceptable false alarm rate is less than 0.5 per week. High false alarm rates lead to alarm fatigue, system disarming, and negative reviews.",
+      "category": "Technical",
+      "likelihood": 4,
+      "impact": 3,
+      "status": "Open",
+      "mitigations": [
+        "SYS-0001",
+        "SYS-0010",
+        "SYS-0012"
+      ],
+      "owner": "David Kim — Algorithm Engineering",
+      "dueDate": "2026-04-30",
+      "notes": "Implementing ML-based anomaly classification using edge inference on the central controller. Training dataset of 50,000 labeled events collected from beta program. Target: reduce false alarms to < 0.3/week while maintaining 99.7% true detection rate.",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    },
+    {
+      "id": "RSK-0007",
+      "title": "UL 2900-1 Certification Delay",
+      "description": "UL 2900-1 certification process typically takes 8-12 weeks. If penetration testing reveals vulnerabilities requiring code changes, the certification cycle restarts. Two competitors have recently failed initial certification, suggesting increased scrutiny from UL.",
+      "category": "Schedule",
+      "likelihood": 3,
+      "impact": 3,
+      "status": "Open",
+      "mitigations": [
+        "SYS-0008",
+        "SYS-0009",
+        "STK-0006"
+      ],
+      "owner": "James Park — Security Architecture",
+      "dueDate": "2026-06-01",
+      "notes": "Pre-certification security audit scheduled with independent firm (CyberSec Partners) for March. Early identification of issues should reduce risk of UL failures. Budget allocated for 2 certification cycles.",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    },
+    {
+      "id": "RSK-0008",
+      "title": "Camera Privacy Regulation Non-Compliance",
+      "description": "Emerging privacy regulations in California (CPRA), EU (GDPR), and Illinois (BIPA) impose strict requirements on residential video surveillance data. Requirements for on-device processing, data retention limits, and consent mechanisms may require architectural changes if not addressed during design phase.",
+      "category": "External",
+      "likelihood": 3,
+      "impact": 3,
+      "status": "Accepted",
+      "mitigations": [
+        "SYS-0004",
+        "SYS-0005"
+      ],
+      "owner": "Rachel Adams — Legal & Compliance",
+      "dueDate": "2026-05-15",
+      "notes": "Legal review completed. Edge processing architecture (DEC-0003) naturally supports privacy-by-design. Adding configurable retention policies and privacy zone masking. GDPR Data Protection Impact Assessment scheduled for Q2.",
+      "created": "2026-02-20T05:52:26.232Z",
+      "modified": "2026-02-20T05:52:26.232Z"
+    },
+    {
+      "id": "RSK-0009",
+      "title": "Installation Complexity Drives Up Support Costs",
+      "description": "Beta program reveals average self-installation time of 3.5 hours vs target of 1.5 hours. Primary issues: Wi-Fi range to sensor hub, sensor calibration, and mobile app pairing. 40% of beta users required phone support, averaging 25 minutes per call. At scale, this would cost $18 per unit in support.",
+      "category": "Cost",
+      "likelihood": 4,
+      "impact": 2,
+      "status": "Open",
+      "mitigations": [
+        "SYS-0011",
+        "SYS-0007"
+      ],
+      "owner": "Tom Bradley — Customer Experience",
+      "dueDate": "2026-04-15",
+      "notes": "Developing AR-guided installation feature in mobile app. Redesigning sensor pairing to use NFC tap instead of BLE scanning. Creating video tutorial series. Target: reduce average install time to under 2 hours and support calls to under 15%.",
+      "created": "2026-02-20T05:52:26.233Z",
+      "modified": "2026-02-20T05:52:26.233Z"
+    },
+    {
+      "id": "RSK-0010",
+      "title": "Local Storage SSD Failure Causes Footage Loss",
+      "description": "The central controller uses a single M.2 SSD for local video storage. Consumer-grade SSDs have a 0.5-1% annual failure rate. Loss of the SSD means loss of all locally buffered footage. For units deployed in high-write environments, wear leveling may be exhausted within 3 years.",
+      "category": "Technical",
+      "likelihood": 2,
+      "impact": 3,
+      "status": "Closed",
+      "mitigations": [
+        "SYS-0005",
+        "SUB-0006"
+      ],
+      "owner": "Sarah Chen — Hardware Engineering",
+      "dueDate": "2026-02-15",
+      "notes": "Resolved by implementing dual storage strategy: industrial-grade SSD with SMART monitoring for local buffer, plus automatic cloud sync of event clips. SSD health alerts added to maintenance notifications. DEC-0004 documents the storage architecture decision.",
+      "created": "2026-02-20T05:52:26.233Z",
+      "modified": "2026-02-20T05:52:26.233Z"
+    }
+  ],
+  "glossary": [
+    {
+      "term": "SOI",
+      "def": "System of Interest"
+    },
+    {
+      "term": "ICD",
+      "def": "Interface Control Document"
+    },
+    {
+      "term": "V&V",
+      "def": "Verification and Validation"
+    },
+    {
+      "term": "ConOps",
+      "def": "Concept of Operations"
+    },
+    {
+      "term": "SOI",
+      "def": "System of Interest — the AegisGuard Pro Smart Home Security System"
+    },
+    {
+      "term": "ICD",
+      "def": "Interface Control Document — specifies communication protocols between subsystems"
+    },
+    {
+      "term": "V&V",
+      "def": "Verification and Validation — processes to confirm requirements are met"
+    },
+    {
+      "term": "ConOps",
+      "def": "Concept of Operations — describes how the system is intended to be used"
+    },
+    {
+      "term": "APNS",
+      "def": "Apple Push Notification Service — Apple's cloud service for delivering push notifications to iOS devices"
+    },
+    {
+      "term": "FCM",
+      "def": "Firebase Cloud Messaging — Google's cloud service for delivering push notifications to Android devices"
+    },
+    {
+      "term": "FHSS",
+      "def": "Frequency Hopping Spread Spectrum — RF technique that rapidly switches carrier frequencies to reduce interference"
+    },
+    {
+      "term": "ISM Band",
+      "def": "Industrial, Scientific, and Medical radio band — unlicensed frequency bands (including 915 MHz)"
+    },
+    {
+      "term": "AES-256-GCM",
+      "def": "Advanced Encryption Standard 256-bit with Galois/Counter Mode — authenticated encryption algorithm"
+    },
+    {
+      "term": "ASIC",
+      "def": "Application-Specific Integrated Circuit — custom-designed silicon chip optimized for a specific function"
+    },
+    {
+      "term": "FPGA",
+      "def": "Field-Programmable Gate Array — reconfigurable integrated circuit used for prototyping and low-volume production"
+    },
+    {
+      "term": "LiFePO4",
+      "def": "Lithium Iron Phosphate — battery chemistry known for thermal stability and long cycle life"
+    },
+    {
+      "term": "NMC",
+      "def": "Nickel Manganese Cobalt — lithium-ion battery chemistry with high energy density but lower thermal stability"
+    },
+    {
+      "term": "TPU",
+      "def": "Tensor Processing Unit — specialized AI accelerator for machine learning inference at the edge"
+    },
+    {
+      "term": "DWPD",
+      "def": "Drive Writes Per Day — SSD endurance metric indicating how many times the full drive capacity can be written per day"
+    },
+    {
+      "term": "BOM",
+      "def": "Bill of Materials — complete list of components and their costs required to manufacture the product"
+    },
+    {
+      "term": "UL 2900-1",
+      "def": "Underwriters Laboratories standard for software cybersecurity of network-connectable products"
+    },
+    {
+      "term": "SMART",
+      "def": "Self-Monitoring, Analysis, and Reporting Technology — drive health monitoring standard for SSDs and HDDs"
+    },
+    {
+      "term": "NFC",
+      "def": "Near Field Communication — short-range wireless technology for contactless data exchange at distances under 10 cm"
+    },
+    {
+      "term": "BIPA",
+      "def": "Biometric Information Privacy Act — Illinois state law governing collection of biometric data including facial recognition"
+    },
+    {
+      "term": "CPRA",
+      "def": "California Privacy Rights Act — California state law expanding consumer data privacy rights"
+    },
+    {
+      "term": "NIST SP 800-193",
+      "def": "National Institute of Standards and Technology Special Publication — guidelines for firmware resilience and update integrity"
+    },
+    {
+      "term": "Edge AI",
+      "def": "Artificial intelligence inference performed locally on the device rather than in the cloud"
+    },
+    {
+      "term": "Tamper Alert",
+      "def": "System-generated alarm when sensor communication loss or physical interference is detected"
+    }
+  ]
+}
