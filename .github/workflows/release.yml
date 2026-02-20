@@ -1,0 +1,119 @@
+# Auto-create a GitHub Release when a version tag (e.g., v2.2.0) is pushed
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for changelog generation
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Generate release notes from commits
+        id: notes
+        run: |
+          # Get the previous tag
+          PREV_TAG=$(git tag --sort=-version:refnum | grep '^v' | sed -n '2p')
+          
+          if [ -z "$PREV_TAG" ]; then
+            echo "First release - using all commits"
+            RANGE="HEAD"
+          else
+            echo "Changes since $PREV_TAG"
+            RANGE="${PREV_TAG}..HEAD"
+          fi
+          
+          # Generate categorised changelog from conventional commits
+          {
+            echo "NOTES<<ENDOFNOTES"
+            echo "## What's Changed in v${{ steps.version.outputs.VERSION }}"
+            echo ""
+            
+            # New features
+            FEATS=$(git log $RANGE --pretty=format:"%s" --grep="^feat" 2>/dev/null | sed 's/^feat[:(]//' | sed 's/^[^)]*) //' | sed 's/^/- /')
+            if [ -n "$FEATS" ]; then
+              echo "### ✨ New Features"
+              echo "$FEATS"
+              echo ""
+            fi
+            
+            # Bug fixes
+            FIXES=$(git log $RANGE --pretty=format:"%s" --grep="^fix" 2>/dev/null | sed 's/^fix[:(]//' | sed 's/^[^)]*) //' | sed 's/^/- /')
+            if [ -n "$FIXES" ]; then
+              echo "### 🐛 Bug Fixes"
+              echo "$FIXES"
+              echo ""
+            fi
+            
+            # UI/UX improvements
+            STYLE=$(git log $RANGE --pretty=format:"%s" --grep="^style\|^ui\|^ux" 2>/dev/null | sed 's/^[a-z]*[:(]//' | sed 's/^[^)]*) //' | sed 's/^/- /')
+            if [ -n "$STYLE" ]; then
+              echo "### 🎨 UI/UX Improvements"
+              echo "$STYLE"
+              echo ""
+            fi
+            
+            # Performance
+            PERF=$(git log $RANGE --pretty=format:"%s" --grep="^perf" 2>/dev/null | sed 's/^perf[:(]//' | sed 's/^[^)]*) //' | sed 's/^/- /')
+            if [ -n "$PERF" ]; then
+              echo "### ⚡ Performance"
+              echo "$PERF"
+              echo ""
+            fi
+            
+            # Documentation
+            DOCS=$(git log $RANGE --pretty=format:"%s" --grep="^docs" 2>/dev/null | sed 's/^docs[:(]//' | sed 's/^[^)]*) //' | sed 's/^/- /')
+            if [ -n "$DOCS" ]; then
+              echo "### 📚 Documentation"
+              echo "$DOCS"
+              echo ""
+            fi
+            
+            # Other changes (chore, refactor, etc.)
+            OTHER=$(git log $RANGE --pretty=format:"%s" --grep="^chore\|^refactor\|^build\|^ci" 2>/dev/null | sed 's/^[a-z]*[:(]//' | sed 's/^[^)]*) //' | sed 's/^/- /')
+            if [ -n "$OTHER" ]; then
+              echo "### 🔧 Other Changes"
+              echo "$OTHER"
+              echo ""
+            fi
+
+            echo "---"
+            echo ""
+            echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREV_TAG}...v${{ steps.version.outputs.VERSION }}"
+            echo "ENDOFNOTES"
+          } >> $GITHUB_OUTPUT
+
+      - name: Check for CHANGELOG.md
+        id: changelog
+        run: |
+          if [ -f "CHANGELOG.md" ]; then
+            echo "EXISTS=true" >> $GITHUB_OUTPUT
+          else
+            echo "EXISTS=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "ReqRight v${{ steps.version.outputs.VERSION }}"
+          body: ${{ steps.notes.outputs.NOTES }}
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.VERSION, 'beta') || contains(steps.version.outputs.VERSION, 'alpha') }}
+          files: |
+            reqright.html
+            CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
