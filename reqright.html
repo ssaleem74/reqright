@@ -7,6 +7,7 @@
 <meta name="description" content="ReqRight — Free systems engineering workbench with 6 integrated modules: Requirements, Risks, Decisions, Stakeholders, Interfaces, Use Cases. INCOSE GtWR v4 quality analysis, 42 rules, cross-module traceability, configurable PDF reports. No login. Your data stays on your machine.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
   --bg:#06080f;--bg2:#0a0f1c;--surface:#0f1628;--surfAlt:#131b30;
@@ -187,6 +188,64 @@ const IFC_PROTOCOLS=["SPI","I2C","UART","USB","Ethernet","TCP/IP","MQTT","HTTP/R
 const UC_TYPES=["Operational","Maintenance","Emergency","Installation","Diagnostic","Training","Degraded Mode"];
 const UC_STATUSES=["Draft","Reviewed","Validated","Approved","Deprecated"];
 const UC_PRIORITIES=["Critical","High","Medium","Low"];
+
+// ─── REQUIREMENT TEMPLATES ────────────────────────────────
+const REQ_TEMPLATES=[
+  {cat:"Functional",templates:[
+    {name:"Data Processing",text:"The [System_Name] shall process [data_type] within [time_value] [time_unit] of receipt.",type:"Functional",level:"System Requirement",verification:"Test"},
+    {name:"User Authentication",text:"The [System_Name] shall authenticate the user identity using [authentication_method] before granting access to [protected_resource].",type:"Functional",level:"System Requirement",verification:"Test"},
+    {name:"Data Storage",text:"The [System_Name] shall store [data_type] for a minimum of [duration] in [storage_location].",type:"Functional",level:"System Requirement",verification:"Test"},
+    {name:"Notification",text:"The [System_Name] shall notify the [user_role] within [time_value] [time_unit] when [trigger_condition] occurs.",type:"Functional",level:"System Requirement",verification:"Demonstration"},
+    {name:"Data Conversion",text:"The [System_Name] shall convert [input_format] to [output_format] with no loss of [quality_attribute].",type:"Functional",level:"Subsystem Requirement",verification:"Test"},
+    {name:"State Transition",text:"The [System_Name] shall transition from [state_A] to [state_B] when [trigger_event] is detected.",type:"Functional",level:"System Requirement",verification:"Test"},
+  ]},
+  {cat:"Performance",templates:[
+    {name:"Response Time",text:"The [System_Name] shall respond to [user_action] within [time_value] [time_unit] under [load_condition].",type:"Performance",level:"System Requirement",verification:"Test"},
+    {name:"Throughput",text:"The [System_Name] shall process a minimum of [quantity] [item_type] per [time_unit] under normal operating conditions.",type:"Performance",level:"System Requirement",verification:"Test"},
+    {name:"Capacity",text:"The [System_Name] shall support a minimum of [quantity] concurrent [user_type] without degradation of [quality_attribute].",type:"Performance",level:"System Requirement",verification:"Test"},
+    {name:"Startup Time",text:"The [System_Name] shall be fully operational within [time_value] [time_unit] of power-on.",type:"Performance",level:"System Requirement",verification:"Test"},
+    {name:"Latency",text:"The [System_Name] shall transmit [data_type] with a maximum latency of [time_value] [time_unit] between [source] and [destination].",type:"Performance",level:"Subsystem Requirement",verification:"Test"},
+  ]},
+  {cat:"Interface",templates:[
+    {name:"Protocol Compliance",text:"The [System_Name] shall communicate with [External_System] using [protocol_name] version [version_number].",type:"Interface",level:"System Requirement",verification:"Test"},
+    {name:"Data Exchange",text:"The [System_Name] shall send [data_type] to [External_System] at a rate of [rate_value] [rate_unit].",type:"Interface",level:"Subsystem Requirement",verification:"Test"},
+    {name:"API Endpoint",text:"The [System_Name] shall provide a [REST/SOAP] API for [External_System] to [action] [data_type].",type:"Interface",level:"System Requirement",verification:"Demonstration"},
+    {name:"Connector",text:"The [System_Name] shall provide a [connector_type] physical interface for connection to [External_System].",type:"Interface",level:"Component Requirement",verification:"Inspection"},
+  ]},
+  {cat:"Safety",templates:[
+    {name:"Fault Detection",text:"The [System_Name] shall detect [fault_type] within [time_value] [time_unit] of occurrence.",type:"Safety",level:"System Requirement",verification:"Test"},
+    {name:"Safe State",text:"The [System_Name] shall transition to a safe state within [time_value] [time_unit] upon detection of [hazard_condition].",type:"Safety",level:"System Requirement",verification:"Test"},
+    {name:"Redundancy",text:"The [System_Name] shall provide [redundancy_type] redundancy for [critical_function] to ensure continued operation upon single-point failure.",type:"Safety",level:"System Requirement",verification:"Analysis"},
+    {name:"Emergency Shutdown",text:"The [System_Name] shall initiate an emergency shutdown within [time_value] [time_unit] when [emergency_condition] is detected.",type:"Safety",level:"System Requirement",verification:"Demonstration"},
+  ]},
+  {cat:"Security",templates:[
+    {name:"Encryption",text:"The [System_Name] shall encrypt [data_type] using [encryption_standard] with a minimum key length of [key_length] bits.",type:"Security",level:"System Requirement",verification:"Test"},
+    {name:"Access Control",text:"The [System_Name] shall restrict access to [resource] to users with [role/permission] authorization.",type:"Security",level:"System Requirement",verification:"Test"},
+    {name:"Audit Logging",text:"The [System_Name] shall log all [event_type] events including timestamp, user identity, and action performed.",type:"Security",level:"System Requirement",verification:"Demonstration"},
+    {name:"Session Timeout",text:"The [System_Name] shall terminate inactive user sessions after [time_value] [time_unit] of inactivity.",type:"Security",level:"System Requirement",verification:"Test"},
+  ]},
+  {cat:"Reliability",templates:[
+    {name:"MTBF",text:"The [System_Name] shall have a Mean Time Between Failures (MTBF) of no less than [time_value] [time_unit] under [operating_conditions].",type:"Reliability",level:"System Requirement",verification:"Analysis"},
+    {name:"Availability",text:"The [System_Name] shall maintain an availability of [percentage]% or higher measured over a [time_period] period.",type:"Reliability",level:"System Requirement",verification:"Analysis"},
+    {name:"Error Recovery",text:"The [System_Name] shall recover from [error_type] within [time_value] [time_unit] without loss of [data_type].",type:"Reliability",level:"System Requirement",verification:"Test"},
+  ]},
+  {cat:"Environmental",templates:[
+    {name:"Temperature Range",text:"The [System_Name] shall operate within the temperature range of [min_temp]°C to [max_temp]°C.",type:"Environmental",level:"System Requirement",verification:"Test"},
+    {name:"Humidity",text:"The [System_Name] shall operate in relative humidity from [min_humidity]% to [max_humidity]% non-condensing.",type:"Environmental",level:"System Requirement",verification:"Test"},
+    {name:"Vibration",text:"The [System_Name] shall withstand vibration levels up to [vibration_value] [vibration_unit] across [frequency_range] Hz.",type:"Environmental",level:"Component Requirement",verification:"Test"},
+    {name:"Ingress Protection",text:"The [System_Name] shall provide a minimum ingress protection rating of IP[rating] per IEC 60529.",type:"Environmental",level:"Component Requirement",verification:"Inspection"},
+  ]},
+  {cat:"Maintainability",templates:[
+    {name:"MTTR",text:"The [System_Name] shall have a Mean Time To Repair (MTTR) of no more than [time_value] [time_unit] for [maintenance_type] maintenance.",type:"Maintainability",level:"System Requirement",verification:"Demonstration"},
+    {name:"Module Replacement",text:"The [System_Name] shall allow replacement of [module_name] by [skill_level] personnel using [tool_type] tools within [time_value] [time_unit].",type:"Maintainability",level:"Component Requirement",verification:"Demonstration"},
+    {name:"Diagnostics",text:"The [System_Name] shall provide built-in diagnostics that identify [fault_type] to the [LRU/module] level.",type:"Maintainability",level:"System Requirement",verification:"Demonstration"},
+  ]},
+  {cat:"Regulatory",templates:[
+    {name:"Standard Compliance",text:"The [System_Name] shall comply with [Standard_Name] version [version] Section [section_number].",type:"Regulatory",level:"System Requirement",verification:"Inspection"},
+    {name:"Data Privacy",text:"The [System_Name] shall handle personal data in accordance with [regulation_name] requirements for [data_category].",type:"Regulatory",level:"System Requirement",verification:"Inspection"},
+    {name:"Certification",text:"The [System_Name] shall meet the requirements for [certification_body] [certification_type] certification.",type:"Regulatory",level:"System Requirement",verification:"Analysis"},
+  ]},
+];
 
 // ─── ANALYSIS ──────────────────────────────────────────────
 function analyze(text){
@@ -411,6 +470,8 @@ const S={
   showImport:false,importText:"",showExport:false,showBulkAI:false,showSearch:false,globalSearchQ:"",showReportCfg:false,
   rptSections:{execSummary:true,qualityStats:true,requirements:true,stakeholders:true,useCases:true,interfaces:true,risks:true,decisions:true,traceability:true,hierarchy:true,vv:false,glossary:true},
   rptLayout:"A",
+  showTemplates:false,
+  xlsxPreview:null,
   aiLoading:null,toast:null,
   autoSaveKey:"reqright_autosave"
 };
@@ -659,6 +720,8 @@ document.addEventListener("keydown",e=>{
   if(e.key==="Escape"){
     if(S.showSearch){S.showSearch=false;S.globalSearchQ="";render();}
     if(S.showReportCfg){S.showReportCfg=false;render();}
+    if(S.showTemplates){S.showTemplates=false;render();}
+    if(S.xlsxPreview){S.xlsxPreview=null;render();}
     if(S.showExport){S.showExport=false;render();}
     if(S.showBulkAI){S.showBulkAI=false;render();}
     if(S.showImport){S.showImport=false;render();}
@@ -1200,6 +1263,33 @@ function mapCSVToReqs(headers,rows){
 }
 
 function importFile(file,type){
+  if(type==="xlsx"){
+    // Excel import via SheetJS
+    if(typeof XLSX==="undefined"){toast("Excel library not loaded. Check internet connection.","danger");return;}
+    const reader=new FileReader();
+    reader.onload=e=>{
+      try{
+        const wb=XLSX.read(e.target.result,{type:"array"});
+        const sheetNames=wb.SheetNames;
+        const ws=wb.Sheets[sheetNames[0]];
+        const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
+        if(raw.length<2){toast("Spreadsheet is empty or has no data rows","danger");return;}
+        const headers=raw[0].map(h=>String(h||"").trim());
+        const rows=raw.slice(1).filter(r=>r.some(c=>c!==""));
+        // Show preview/mapping modal
+        S.xlsxPreview={headers,rows,sheetNames,activeSheet:0,wb,
+          mapping:{text:-1,type:-1,level:-1,priority:-1,status:-1,verification:-1,rationale:-1,source:-1,parent:-1}
+        };
+        // Auto-detect column mapping
+        const fieldAliases={text:["text","statement","requirement","description","req","content","body"],type:["type","category","reqtype"],level:["level","tier","reqlevel"],priority:["priority","pri","importance"],status:["status","state"],verification:["verification","verificationmethod","vmethod"],rationale:["rationale","reason","justification"],source:["source","origin","reference"],parent:["parent","parentid","tracesto","derivesfrom"]};
+        headers.forEach((h,i)=>{const hn=h.toLowerCase().replace(/[^a-z0-9]/g,"");
+          for(const[field,aliases]of Object.entries(fieldAliases)){if(S.xlsxPreview.mapping[field]===-1&&aliases.some(a=>hn.includes(a)))S.xlsxPreview.mapping[field]=i;}});
+        render();
+      }catch(err){toast("Error reading Excel file: "+err.message,"danger");}
+    };
+    reader.readAsArrayBuffer(file);
+    return;
+  }
   const reader=new FileReader();
   reader.onload=e=>{
     const content=e.target.result;
@@ -1396,12 +1486,12 @@ function render(){
     // Load file
     const fileLabel=h("label",{className:"file-drop",style:{display:"block",marginBottom:"16px"}});
     fileLabel.appendChild(h("div",{style:{fontSize:"24px",opacity:".3",marginBottom:"8px"}},"📂"));
-    fileLabel.appendChild(h("div",{style:{color:"var(--textMid)",fontSize:"13px"}},"Load Saved Project (.json) or Import Spreadsheet (.csv)"));
-    const fileInput=h("input",{type:"file",accept:".json,.txt,.csv,.tsv,.md",style:{display:"none"},onChange:e=>{const f=e.target.files[0];if(!f)return;const ext=f.name.split(".").pop().toLowerCase();importFile(f,ext==="json"?"json":(ext==="csv"||ext==="tsv")?"csv":"text");}});
+    fileLabel.appendChild(h("div",{style:{color:"var(--textMid)",fontSize:"13px"}},"Load Project (.json) · Import Spreadsheet (.xlsx, .csv)"));
+    const fileInput=h("input",{type:"file",accept:".json,.txt,.csv,.tsv,.md,.xlsx,.xls",style:{display:"none"},onChange:e=>{const f=e.target.files[0];if(!f)return;const ext=f.name.split(".").pop().toLowerCase();importFile(f,ext==="json"?"json":(ext==="xlsx"||ext==="xls")?"xlsx":(ext==="csv"||ext==="tsv")?"csv":"text");}});
     fileLabel.appendChild(fileInput);
     fileLabel.addEventListener("dragover",e=>{e.preventDefault();fileLabel.classList.add("dragover");});
     fileLabel.addEventListener("dragleave",()=>fileLabel.classList.remove("dragover"));
-    fileLabel.addEventListener("drop",e=>{e.preventDefault();fileLabel.classList.remove("dragover");const f=e.dataTransfer.files[0];if(f){const ext=f.name.split(".").pop().toLowerCase();importFile(f,ext==="json"?"json":(ext==="csv"||ext==="tsv")?"csv":"text");}});
+    fileLabel.addEventListener("drop",e=>{e.preventDefault();fileLabel.classList.remove("dragover");const f=e.dataTransfer.files[0];if(f){const ext=f.name.split(".").pop().toLowerCase();importFile(f,ext==="json"?"json":(ext==="xlsx"||ext==="xls")?"xlsx":(ext==="csv"||ext==="tsv")?"csv":"text");}});
     card.appendChild(fileLabel);
 
     // Tutorial link
@@ -1556,6 +1646,154 @@ function render(){
       results.appendChild(hint);
     }
     modal.appendChild(results);
+    overlay.appendChild(modal);app.appendChild(overlay);
+  }
+
+  // ═══ XLSX COLUMN MAPPING MODAL ═══
+  if(S.xlsxPreview){
+    const xp=S.xlsxPreview;
+    const overlay=h("div",{className:"modal-overlay",onClick:()=>{S.xlsxPreview=null;render();}});
+    const modal=h("div",{className:"modal",style:{width:"860px",maxHeight:"88vh",overflow:"auto",padding:0},onClick:e=>e.stopPropagation()});
+
+    const mHead=h("div",{style:{padding:"20px 24px 16px",borderBottom:"1px solid var(--border)"}});
+    mHead.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700,marginBottom:"4px"}},"📊 Import from Excel"));
+    mHead.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"13px"}},`Found ${xp.headers.length} columns and ${xp.rows.length} data rows. Map columns to requirement fields below.`));
+    if(xp.sheetNames.length>1){
+      const sheetSel=h("div",{style:{display:"flex",gap:"6px",marginTop:"10px"}});
+      xp.sheetNames.forEach((sn,si)=>{
+        sheetSel.appendChild(h("button",{className:"btn "+(si===xp.activeSheet?"btn-pri":"btn-sec"),style:{fontSize:"11px",padding:"4px 12px"},onClick:()=>{
+          const ws=xp.wb.Sheets[sn];const raw=XLSX.utils.sheet_to_json(ws,{header:1,defval:""});
+          xp.headers=raw[0].map(hd=>String(hd||"").trim());xp.rows=raw.slice(1).filter(r=>r.some(c=>c!==""));xp.activeSheet=si;render();
+        }},sn));
+      });
+      mHead.appendChild(sheetSel);
+    }
+    modal.appendChild(mHead);
+
+    const mBody=h("div",{style:{padding:"20px 24px"}});
+    // Column mapping
+    const fields=[{k:"text",l:"Statement *",req:true},{k:"type",l:"Type"},{k:"level",l:"Level"},{k:"priority",l:"Priority"},{k:"status",l:"Status"},{k:"verification",l:"V&V Method"},{k:"rationale",l:"Rationale"},{k:"source",l:"Source"},{k:"parent",l:"Parent ID"}];
+    const mapGrid=h("div",{style:{display:"grid",gridTemplateColumns:"140px 1fr 1fr",gap:"8px",marginBottom:"20px"}});
+    mapGrid.appendChild(h("div",{style:{fontWeight:700,fontSize:"12px",color:"var(--textDim)"}},"Field"));
+    mapGrid.appendChild(h("div",{style:{fontWeight:700,fontSize:"12px",color:"var(--textDim)"}},"Mapped Column"));
+    mapGrid.appendChild(h("div",{style:{fontWeight:700,fontSize:"12px",color:"var(--textDim)"}},"Sample Data"));
+    fields.forEach(f=>{
+      mapGrid.appendChild(h("div",{style:{fontSize:"13px",fontWeight:f.req?700:500,color:f.req?"var(--accent)":"var(--text)",display:"flex",alignItems:"center"}},f.l));
+      const sel=h("select",{className:"input",style:{fontSize:"12px",padding:"6px 8px"},value:String(xp.mapping[f.k]),onChange:e=>{xp.mapping[f.k]=parseInt(e.target.value);render();}});
+      sel.appendChild(h("option",{value:"-1"},"— Not mapped —"));
+      xp.headers.forEach((hdr,i)=>sel.appendChild(h("option",{value:String(i)},hdr||"Column "+(i+1))));
+      sel.value=String(xp.mapping[f.k]);
+      mapGrid.appendChild(sel);
+      const ci=xp.mapping[f.k];
+      const sample=ci>=0&&xp.rows.length>0?String(xp.rows[0][ci]||"").substring(0,60):"—";
+      mapGrid.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",display:"flex",alignItems:"center",fontFamily:"var(--mono)"}},sample));
+    });
+    mBody.appendChild(mapGrid);
+
+    // Preview table
+    mBody.appendChild(h("div",{style:{fontSize:"13px",fontWeight:700,marginBottom:"8px"}},"Preview (first 5 rows)"));
+    const prevTable=h("table",{style:{fontSize:"10px",marginBottom:"16px"}});
+    const thead=h("tr");xp.headers.forEach(hdr=>thead.appendChild(h("th",{style:{padding:"4px 6px",maxWidth:"120px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},hdr||"(empty)")));
+    prevTable.appendChild(thead);
+    xp.rows.slice(0,5).forEach(row=>{
+      const tr=h("tr");
+      xp.headers.forEach((hdr,i)=>tr.appendChild(h("td",{style:{padding:"3px 6px",maxWidth:"120px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},String(row[i]||""))));
+      prevTable.appendChild(tr);
+    });
+    mBody.appendChild(prevTable);
+    modal.appendChild(mBody);
+
+    // Footer
+    const mFoot=h("div",{style:{padding:"16px 24px",borderTop:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}});
+    const validMap=xp.mapping.text>=0;
+    mFoot.appendChild(h("span",{style:{fontSize:"11px",color:validMap?"var(--success)":"var(--danger)"}},validMap?`✓ Statement column mapped — ${xp.rows.length} rows ready`:"⚠ Map the Statement column to import"));
+    const fBtns=h("div",{style:{display:"flex",gap:"8px"}});
+    fBtns.appendChild(h("button",{className:"btn btn-sec",onClick:()=>{S.xlsxPreview=null;render();}},"Cancel"));
+    fBtns.appendChild(h("button",{className:"btn btn-pri",style:{opacity:validMap?1:.5},onClick:()=>{
+      if(!validMap)return;
+      History.save();
+      const mp=xp.mapping;let imported=0;
+      xp.rows.forEach(row=>{
+        const text=String(row[mp.text]||"").trim();if(!text)return;
+        const o={text};
+        if(mp.type>=0&&row[mp.type]){const m=REQ_TYPES.find(rt=>rt.toLowerCase()===String(row[mp.type]).toLowerCase());if(m)o.type=m;}
+        if(mp.level>=0&&row[mp.level]){const l=String(row[mp.level]);const m=REQ_LEVELS.find(rl=>rl.toLowerCase().includes(l.toLowerCase()));if(m)o.level=m;}
+        if(mp.priority>=0&&row[mp.priority]){const m=PRIORITIES.find(p=>p.toLowerCase()===String(row[mp.priority]).toLowerCase());if(m)o.priority=m;}
+        if(mp.status>=0&&row[mp.status]){const m=STATUSES.find(s=>s.toLowerCase()===String(row[mp.status]).toLowerCase());if(m)o.status=m;}
+        if(mp.verification>=0&&row[mp.verification]){const m=V_METHODS.find(v=>v.toLowerCase()===String(row[mp.verification]).toLowerCase());if(m)o.verification=m;}
+        if(mp.rationale>=0)o.rationale=String(row[mp.rationale]||"");
+        if(mp.source>=0)o.source=String(row[mp.source]||"");
+        S.reqs.push(mkReq(o));imported++;
+      });
+      S.xlsxPreview=null;autoSave();
+      toast(`Imported ${imported} requirements from Excel`,"success");
+      S.view="dashboard";render();
+    }},"Import "+xp.rows.length+" Rows"));
+    mFoot.appendChild(fBtns);
+    modal.appendChild(mFoot);
+    overlay.appendChild(modal);app.appendChild(overlay);
+  }
+
+  // ═══ TEMPLATES MODAL ═══
+  if(S.showTemplates){
+    const overlay=h("div",{className:"modal-overlay",onClick:()=>{S.showTemplates=false;render();}});
+    const modal=h("div",{className:"modal",style:{width:"900px",maxHeight:"88vh",overflow:"auto",padding:0},onClick:e=>e.stopPropagation()});
+
+    const mHead=h("div",{style:{padding:"20px 24px 16px",borderBottom:"1px solid var(--border)"}});
+    mHead.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700,marginBottom:"4px"}},"📋 Requirement Templates Library"));
+    mHead.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"13px"}},"Click any template to insert it as a new requirement. Replace [placeholders] with your specific values."));
+    modal.appendChild(mHead);
+
+    const mBody=h("div",{style:{padding:"20px 24px"}});
+    const catColors={"Functional":"var(--accent)","Performance":"#f59e0b","Interface":"#8b5cf6","Safety":"#ef4444","Security":"#ec4899","Reliability":"#10b981","Environmental":"#06b6d4","Maintainability":"#84cc16","Regulatory":"#f97316"};
+
+    REQ_TEMPLATES.forEach(cat=>{
+      const catSec=h("div",{style:{marginBottom:"20px"}});
+      const catHead=h("div",{style:{display:"flex",alignItems:"center",gap:"8px",marginBottom:"10px"}});
+      catHead.appendChild(h("div",{style:{width:"4px",height:"20px",borderRadius:"2px",background:catColors[cat.cat]||"var(--accent)"}}));
+      catHead.appendChild(h("div",{style:{fontSize:"14px",fontWeight:700,color:catColors[cat.cat]||"var(--accent)"}},cat.cat));
+      catHead.appendChild(h("span",{style:{fontSize:"11px",color:"var(--textDim)"}},cat.templates.length+" templates"));
+      catSec.appendChild(catHead);
+
+      const grid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}});
+      cat.templates.forEach(t=>{
+        const card=h("div",{style:{padding:"12px",borderRadius:"10px",border:"1px solid var(--border)",cursor:"pointer",transition:"all .15s"},onClick:()=>{
+          History.save();const r=mkReq({text:t.text,type:t.type,level:t.level,verification:t.verification});
+          S.reqs.push(r);S.selId=r.id;S.showTemplates=false;S.view="editor";autoSave();
+          toast("Created "+r.id+" from template","success");render();
+        }});
+        card.addEventListener("mouseenter",()=>{card.style.borderColor="var(--accent)";card.style.background="var(--accentDim)22";});
+        card.addEventListener("mouseleave",()=>{card.style.borderColor="var(--border)";card.style.background="transparent";});
+        const top=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"6px"}});
+        top.appendChild(h("div",{style:{fontSize:"13px",fontWeight:600}},t.name));
+        const tags=h("div",{style:{display:"flex",gap:"4px"}});
+        tags.appendChild(h("span",{className:"badge",style:{fontSize:"9px",background:(catColors[t.type]||"var(--accent)")+"22",color:catColors[t.type]||"var(--accent)"}},t.type));
+        tags.appendChild(h("span",{className:"badge",style:{fontSize:"9px"}},t.level.replace(" Requirement","")));
+        top.appendChild(tags);
+        card.appendChild(top);
+        // Highlight placeholders in the template text
+        const textDiv=h("div",{style:{fontSize:"11px",color:"var(--textMid)",lineHeight:"1.5"}});
+        const parts=t.text.split(/(\[[^\]]+\])/g);
+        parts.forEach(part=>{
+          if(part.startsWith("[")){
+            textDiv.appendChild(h("span",{style:{color:"var(--accent)",fontWeight:600,background:"var(--accentDim)22",padding:"1px 4px",borderRadius:"3px",fontSize:"10px"}},part));
+          }else{
+            textDiv.appendChild(document.createTextNode(part));
+          }
+        });
+        card.appendChild(textDiv);
+        grid.appendChild(card);
+      });
+      catSec.appendChild(grid);
+      mBody.appendChild(catSec);
+    });
+    modal.appendChild(mBody);
+
+    const mFoot=h("div",{style:{padding:"12px 24px",borderTop:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}});
+    const totalTemplates=REQ_TEMPLATES.reduce((s,c)=>s+c.templates.length,0);
+    mFoot.appendChild(h("span",{style:{fontSize:"11px",color:"var(--textDim)"}},totalTemplates+" templates across "+REQ_TEMPLATES.length+" categories · Click to insert"));
+    mFoot.appendChild(h("button",{className:"btn btn-sec",onClick:()=>{S.showTemplates=false;render();}},"Close"));
+    modal.appendChild(mFoot);
     overlay.appendChild(modal);app.appendChild(overlay);
   }
 
@@ -1748,6 +1986,7 @@ function render(){
   searchBtn.appendChild(h("span",{style:{fontSize:"11px",color:"var(--textDim)",fontFamily:"var(--mono)"}},"⌘K"));
   hActions.appendChild(searchBtn);
   hActions.appendChild(h("button",{className:"btn btn-pri",onClick:addReq},"+ New"));
+  hActions.appendChild(h("button",{className:"btn btn-sec",style:{borderColor:"#f59e0b44",color:"#f59e0b"},onClick:()=>{S.showTemplates=true;render();}},"📋 Templates"));
 
   // File dropdown (Save/Load/Export consolidated)
   const fileWrap=h("div",{style:{position:"relative"}});
@@ -1762,7 +2001,7 @@ function render(){
     const loadLabel=h("label",{style:{display:"block",padding:"10px 16px",color:"var(--accent)",fontSize:"13px",cursor:"pointer",borderRadius:"6px",fontWeight:600}});
     loadLabel.textContent="📂 Load Project";
     loadLabel.addEventListener("mouseenter",()=>loadLabel.style.background="var(--surfAlt)");loadLabel.addEventListener("mouseleave",()=>loadLabel.style.background="transparent");
-    loadLabel.appendChild(h("input",{type:"file",accept:".json,.txt,.csv,.tsv,.md",style:{display:"none"},onChange:e=>{const f=e.target.files[0];if(f){const ext=f.name.split(".").pop().toLowerCase();importFile(f,ext==="json"?"json":(ext==="csv"||ext==="tsv")?"csv":"text");}e.target.value="";S.showExport=false;}}));
+    loadLabel.appendChild(h("input",{type:"file",accept:".json,.txt,.csv,.tsv,.md,.xlsx,.xls",style:{display:"none"},onChange:e=>{const f=e.target.files[0];if(f){const ext=f.name.split(".").pop().toLowerCase();importFile(f,ext==="json"?"json":(ext==="xlsx"||ext==="xls")?"xlsx":(ext==="csv"||ext==="tsv")?"csv":"text");}e.target.value="";S.showExport=false;}}));
     dd.appendChild(loadLabel);
     dd.appendChild(h("div",{style:{borderTop:"1px solid var(--border)",margin:"4px 0"}}));
     // Exports
@@ -1773,9 +2012,9 @@ function render(){
     });
     dd.appendChild(h("div",{style:{borderTop:"1px solid var(--border)",margin:"4px 0"}}));
     const impLabel=h("label",{style:{display:"block",padding:"10px 16px",color:"var(--text)",fontSize:"13px",cursor:"pointer",borderRadius:"6px"}});
-    impLabel.textContent="↑ Import CSV/Document";
+    impLabel.textContent="↑ Import Excel/CSV/Document";
     impLabel.addEventListener("mouseenter",()=>impLabel.style.background="var(--surfAlt)");impLabel.addEventListener("mouseleave",()=>impLabel.style.background="transparent");
-    impLabel.appendChild(h("input",{type:"file",accept:".txt,.csv,.tsv,.md",style:{display:"none"},onChange:e=>{const f=e.target.files[0];if(f){const ext=f.name.split(".").pop().toLowerCase();importFile(f,(ext==="csv"||ext==="tsv")?"csv":"text");}S.showExport=false;}}));
+    impLabel.appendChild(h("input",{type:"file",accept:".txt,.csv,.tsv,.md,.xlsx,.xls",style:{display:"none"},onChange:e=>{const f=e.target.files[0];if(f){const ext=f.name.split(".").pop().toLowerCase();importFile(f,(ext==="xlsx"||ext==="xls")?"xlsx":(ext==="csv"||ext==="tsv")?"csv":"text");}S.showExport=false;}}));
     dd.appendChild(impLabel);fileWrap.appendChild(dd);
   }
   hActions.appendChild(fileWrap);
