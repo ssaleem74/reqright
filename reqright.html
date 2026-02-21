@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>ReqRight — Free Systems Engineering Tool</title>
-<meta name="description" content="ReqRight — Free educational requirements engineering tool based on INCOSE GtWR v4. 42-rule quality analysis, AI improvement, traceability, ReqIF/DOORS export. No login. Your data stays on your machine.">
+<meta name="description" content="ReqRight — Free systems engineering workbench with 6 integrated modules: Requirements, Risks, Decisions, Stakeholders, Interfaces, Use Cases. INCOSE GtWR v4 quality analysis, 42 rules, cross-module traceability, configurable PDF reports. No login. Your data stays on your machine.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -54,8 +54,10 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)!important;out
 .card{background:var(--card);border-radius:14px;padding:24px;border:1px solid var(--border);}
 .badge{font-size:11px;padding:3px 9px;border-radius:5px;font-weight:600;white-space:nowrap;display:inline-block;}
 
-.header{padding:12px 28px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:rgba(15,22,40,.88);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;}
-.nav{display:flex;gap:3px;background:var(--surface);border-radius:10px;padding:3px;border:1px solid var(--border);}
+.header{padding:0;border-bottom:1px solid var(--border);background:rgba(15,22,40,.88);backdrop-filter:blur(20px);position:sticky;top:0;z-index:100;}
+.header-top{display:flex;align-items:center;justify-content:space-between;padding:10px 28px;}
+.header-nav{display:flex;padding:0 28px 10px;overflow-x:auto;}
+.nav{display:flex;gap:3px;background:var(--surface);border-radius:10px;padding:3px;border:1px solid var(--border);flex-shrink:0;}
 .nav button{padding:8px 16px;border-radius:8px;border:none;cursor:pointer;font-size:13px;font-weight:500;background:transparent;color:var(--textMid);transition:all .15s;}
 .nav button:hover{background:var(--card);color:var(--text);}
 .nav button.active{font-weight:600;background:var(--accent);color:var(--bg);}
@@ -82,8 +84,8 @@ input:focus,textarea:focus,select:focus{border-color:var(--accent)!important;out
 .file-drop{border:2px dashed var(--border);border-radius:14px;padding:40px;text-align:center;cursor:pointer;transition:all .2s;}
 .file-drop:hover,.file-drop.dragover{border-color:var(--accent);background:var(--accentDim)22;}
 
-@media(max-width:1024px){.header{flex-wrap:wrap;gap:8px;}.nav{overflow-x:auto;flex-shrink:1;}}
-@media(max-width:768px){.header{padding:10px 16px;}.nav button{padding:7px 12px;font-size:12px;}}
+@media(max-width:1024px){.header-top{padding:8px 16px;}.header-nav{padding:0 16px 8px;}.nav{overflow-x:auto;flex-shrink:1;}}
+@media(max-width:768px){.header-top{padding:8px 12px;}.header-nav{padding:0 12px 8px;}.nav button{padding:7px 12px;font-size:12px;}}
 .risk-card,.dec-card{margin-bottom:12px;transition:border-color .2s;}
 .risk-card:hover,.dec-card:hover{border-color:var(--borderHi);}
 </style>
@@ -175,6 +177,16 @@ const LIKELIHOOD=["1 - Rare","2 - Unlikely","3 - Possible","4 - Likely","5 - Alm
 const IMPACT=["1 - Negligible","2 - Minor","3 - Moderate","4 - Major","5 - Severe"];
 const RISK_STATUS=["Open","Mitigated","Accepted","Closed"];
 const RISK_CATEGORIES=["Technical","Schedule","Cost","Resource","External","Safety","Security"];
+const STK_ROLES=["End User","Operator","Maintainer","Sponsor","Regulator","Acquirer","Developer","Tester","Project Manager","System Architect","Domain Expert","Other"];
+const STK_INFLUENCE=["Critical","High","Medium","Low"];
+const STK_CATEGORIES=["Internal","External","Customer","Supplier","Regulatory","Support"];
+const IFC_TYPES=["Data","Electrical","Mechanical","Software","Thermal","Optical","Fluid","Human-Machine","Network","Power","Other"];
+const IFC_DIRECTIONS=["Unidirectional →","Bidirectional ↔","Broadcast ⇉"];
+const IFC_STATUSES=["Draft","Defined","Agreed","Verified","Deprecated"];
+const IFC_PROTOCOLS=["SPI","I2C","UART","USB","Ethernet","TCP/IP","MQTT","HTTP/REST","CAN","Bluetooth","Wi-Fi","Zigbee","Analog","Digital","Custom"];
+const UC_TYPES=["Operational","Maintenance","Emergency","Installation","Diagnostic","Training","Degraded Mode"];
+const UC_STATUSES=["Draft","Reviewed","Validated","Approved","Deprecated"];
+const UC_PRIORITIES=["Critical","High","Medium","Low"];
 
 // ─── ANALYSIS ──────────────────────────────────────────────
 function analyze(text){
@@ -327,18 +339,42 @@ function gridRisk(){
 function mkRisk(o={}){return{id:gridRisk(),title:"",description:"",category:"Technical",likelihood:3,impact:3,status:"Open",mitigations:[],owner:"",dueDate:"",notes:"",created:new Date().toISOString(),modified:new Date().toISOString(),...o};}
 function riskScore(l,i){return l*i;}
 function riskLevel(score){if(score>=15)return{level:"Critical",color:"var(--danger)"};if(score>=10)return{level:"High",color:"var(--orange)"};if(score>=5)return{level:"Medium",color:"var(--warn)"};return{level:"Low",color:"var(--success)"};}
+
+// Stakeholder ID generator (gap-filling)
+function gStkId(){
+  const usedNums=(S.stakeholders||[]).map(s=>parseInt(s.id.replace(/\D/g,""))||0);
+  let n=1;while(usedNums.includes(n))n++;
+  return"STH-"+String(n).padStart(4,"0");
+}
+function mkStk(o={}){return{id:gStkId(),name:"",role:"End User",organization:"",influence:"Medium",category:"Internal",concerns:"",expectations:"",linkedNeeds:[],contactInfo:"",notes:"",created:new Date().toISOString(),modified:new Date().toISOString(),...o};}
+
+// Interface ID generator (gap-filling)
+function gIfcId(){
+  const usedNums=(S.interfaces||[]).map(i=>parseInt(i.id.replace(/\D/g,""))||0);
+  let n=1;while(usedNums.includes(n))n++;
+  return"IFC-"+String(n).padStart(4,"0");
+}
+function mkIfc(o={}){return{id:gIfcId(),name:"",type:"Data",source:"",destination:"",direction:"Unidirectional →",protocol:"",dataItems:"",dataRate:"",physicalChar:"",status:"Draft",linkedReqs:[],notes:"",created:new Date().toISOString(),modified:new Date().toISOString(),...o};}
+
+// Use Case ID generator (gap-filling)
+function gUcId(){
+  const usedNums=(S.useCases||[]).map(u=>parseInt(u.id.replace(/\D/g,""))||0);
+  let n=1;while(usedNums.includes(n))n++;
+  return"UC-"+String(n).padStart(4,"0");
+}
+function mkUc(o={}){return{id:gUcId(),title:"",type:"Operational",priority:"Medium",status:"Draft",actor:"",trigger:"",preconditions:"",mainFlow:"",alternativeFlows:"",postconditions:"",derivedReqs:[],linkedStakeholders:[],notes:"",created:new Date().toISOString(),modified:new Date().toISOString(),...o};}
 function dl(content,type,fn){const b=new Blob([content],{type});const u=URL.createObjectURL(b);const a=document.createElement("a");a.href=u;a.download=fn;a.click();URL.revokeObjectURL(u);}
 
 // ─── THEME TOGGLE ────────────────────────────────────────
 function getTheme(){
-  const saved=localStorage.getItem("incose_theme");
+  const saved=localStorage.getItem("reqright_theme")||localStorage.getItem("incose_theme");
   if(saved)return saved;
   // Check system preference
   if(window.matchMedia&&window.matchMedia("(prefers-color-scheme: light)").matches)return "light";
   return "dark";
 }
 function setTheme(theme){
-  localStorage.setItem("incose_theme",theme);
+  localStorage.setItem("reqright_theme",theme);
   if(theme==="light"){
     document.documentElement.classList.add("light");
   }else{
@@ -352,6 +388,15 @@ function toggleTheme(){
   render();
 }
 // Apply saved theme on load
+// Migrate old localStorage keys
+if(!localStorage.getItem("reqright_autosave")&&localStorage.getItem("incose_workbench_autosave")){
+  localStorage.setItem("reqright_autosave",localStorage.getItem("incose_workbench_autosave"));
+  localStorage.removeItem("incose_workbench_autosave");
+}
+if(!localStorage.getItem("reqright_theme")&&localStorage.getItem("incose_theme")){
+  localStorage.setItem("reqright_theme",localStorage.getItem("incose_theme"));
+  localStorage.removeItem("incose_theme");
+}
 setTheme(getTheme());
 
 // ─── STATE ────────────────────────────────────────────────
@@ -359,9 +404,15 @@ const S={
   view:"welcome",reqs:[],selId:null,glossary:[{term:"SOI",def:"System of Interest"},{term:"ICD",def:"Interface Control Document"},{term:"V&V",def:"Verification and Validation"},{term:"ConOps",def:"Concept of Operations"}],
   decisions:[],selDecId:null,
   risks:[],selRiskId:null,
-  project:"New Systems Engineering Project",filterType:"All",filterLevel:"All",search:"",authorSearch:"",authorFilterType:"All",authorFilterLevel:"All",authorFilterStatus:"All",riskSearch:"",riskFilterCat:"All",riskFilterStat:"All",decSearch:"",decFilterCat:"All",decFilterStat:"All",glossSearch:"",sort:"id",
-  showImport:false,importText:"",showExport:false,showBulkAI:false,aiLoading:null,toast:null,
-  autoSaveKey:"incose_workbench_autosave"
+  stakeholders:[],selStkId:null,
+  interfaces:[],selIfcId:null,
+  useCases:[],selUcId:null,
+  project:"New Systems Engineering Project",filterType:"All",filterLevel:"All",search:"",authorSearch:"",authorFilterType:"All",authorFilterLevel:"All",authorFilterStatus:"All",riskSearch:"",riskFilterCat:"All",riskFilterStat:"All",decSearch:"",decFilterCat:"All",decFilterStat:"All",stkSearch:"",stkFilterRole:"All",stkFilterInfluence:"All",ifcSearch:"",ifcFilterType:"All",ifcFilterStatus:"All",ucSearch:"",ucFilterType:"All",ucFilterStat:"All",traceTab:"hierarchy",glossSearch:"",sort:"id",
+  showImport:false,importText:"",showExport:false,showBulkAI:false,showSearch:false,globalSearchQ:"",showReportCfg:false,
+  rptSections:{execSummary:true,qualityStats:true,requirements:true,stakeholders:true,useCases:true,interfaces:true,risks:true,decisions:true,traceability:true,hierarchy:true,vv:false,glossary:true},
+  rptLayout:"A",
+  aiLoading:null,toast:null,
+  autoSaveKey:"reqright_autosave"
 };
 
 function setState(updates){Object.assign(S,updates);render();}
@@ -379,10 +430,16 @@ const History={
       glossary:JSON.parse(JSON.stringify(S.glossary)),
       decisions:JSON.parse(JSON.stringify(S.decisions)),
       risks:JSON.parse(JSON.stringify(S.risks)),
+      stakeholders:JSON.parse(JSON.stringify(S.stakeholders||[])),
+      interfaces:JSON.parse(JSON.stringify(S.interfaces||[])),
+      useCases:JSON.parse(JSON.stringify(S.useCases||[])),
       project:S.project,
       selId:S.selId,
       selDecId:S.selDecId,
-      selRiskId:S.selRiskId
+      selRiskId:S.selRiskId,
+      selStkId:S.selStkId,
+      selIfcId:S.selIfcId,
+      selUcId:S.selUcId
     };
     this.undoStack.push(snapshot);
     if(this.undoStack.length>this.maxSize)this.undoStack.shift();
@@ -398,10 +455,16 @@ const History={
       glossary:JSON.parse(JSON.stringify(S.glossary)),
       decisions:JSON.parse(JSON.stringify(S.decisions)),
       risks:JSON.parse(JSON.stringify(S.risks)),
+      stakeholders:JSON.parse(JSON.stringify(S.stakeholders||[])),
+      interfaces:JSON.parse(JSON.stringify(S.interfaces||[])),
+      useCases:JSON.parse(JSON.stringify(S.useCases||[])),
       project:S.project,
       selId:S.selId,
       selDecId:S.selDecId,
-      selRiskId:S.selRiskId
+      selRiskId:S.selRiskId,
+      selStkId:S.selStkId,
+      selIfcId:S.selIfcId,
+      selUcId:S.selUcId
     };
     this.redoStack.push(current);
     
@@ -411,10 +474,16 @@ const History={
     S.glossary=prev.glossary;
     S.decisions=prev.decisions||[];
     S.risks=prev.risks||[];
+    S.stakeholders=prev.stakeholders||[];
+    S.interfaces=prev.interfaces||[];
+    S.useCases=prev.useCases||[];
     S.project=prev.project;
     S.selId=prev.selId;
     S.selDecId=prev.selDecId||null;
     S.selRiskId=prev.selRiskId||null;
+    S.selStkId=prev.selStkId||null;
+    S.selIfcId=prev.selIfcId||null;
+    S.selUcId=prev.selUcId||null;
     
     // Update _id counter
     if(S.reqs.length>0){
@@ -434,10 +503,16 @@ const History={
       glossary:JSON.parse(JSON.stringify(S.glossary)),
       decisions:JSON.parse(JSON.stringify(S.decisions)),
       risks:JSON.parse(JSON.stringify(S.risks)),
+      stakeholders:JSON.parse(JSON.stringify(S.stakeholders||[])),
+      interfaces:JSON.parse(JSON.stringify(S.interfaces||[])),
+      useCases:JSON.parse(JSON.stringify(S.useCases||[])),
       project:S.project,
       selId:S.selId,
       selDecId:S.selDecId,
-      selRiskId:S.selRiskId
+      selRiskId:S.selRiskId,
+      selStkId:S.selStkId,
+      selIfcId:S.selIfcId,
+      selUcId:S.selUcId
     };
     this.undoStack.push(current);
     
@@ -447,10 +522,16 @@ const History={
     S.glossary=next.glossary;
     S.decisions=next.decisions||[];
     S.risks=next.risks||[];
+    S.stakeholders=next.stakeholders||[];
+    S.interfaces=next.interfaces||[];
+    S.useCases=next.useCases||[];
     S.project=next.project;
     S.selId=next.selId;
     S.selDecId=next.selDecId||null;
     S.selRiskId=next.selRiskId||null;
+    S.selStkId=next.selStkId||null;
+    S.selIfcId=next.selIfcId||null;
+    S.selUcId=next.selUcId||null;
     
     // Update _id counter
     if(S.reqs.length>0){
@@ -526,7 +607,13 @@ document.addEventListener("keydown",e=>{
   }
   
   // Ctrl+Z for Undo, Ctrl+Y or Ctrl+Shift+Z for Redo (only when not typing)
-  if((e.ctrlKey||e.metaKey)&&!e.altKey&&!isTyping){
+  if((e.ctrlKey||e.metaKey)&&!e.altKey){
+    if(e.key==="k"||e.key==="K"){
+      e.preventDefault();
+      if(S.view!=="welcome"){S.showSearch=!S.showSearch;S.globalSearchQ="";render();setTimeout(()=>document.getElementById("global-search-input")?.focus(),50);}
+      return false;
+    }
+    if(!isTyping){
     if(e.key==="z"||e.key==="Z"){
       if(e.shiftKey){
         // Ctrl+Shift+Z = Redo
@@ -553,6 +640,7 @@ document.addEventListener("keydown",e=>{
       }
       return false;
     }
+    }// end isTyping check
   }
   
   // Arrow keys for requirement navigation (only when not typing)
@@ -569,6 +657,8 @@ document.addEventListener("keydown",e=>{
   
   // Escape to close modals
   if(e.key==="Escape"){
+    if(S.showSearch){S.showSearch=false;S.globalSearchQ="";render();}
+    if(S.showReportCfg){S.showReportCfg=false;render();}
     if(S.showExport){S.showExport=false;render();}
     if(S.showBulkAI){S.showBulkAI=false;render();}
     if(S.showImport){S.showImport=false;render();}
@@ -594,7 +684,7 @@ function copyToClipboard(text){
 // ─── AUTO-SAVE TO LOCALSTORAGE ────────────────────────────
 function autoSave(){
   try{
-    const data={project:S.project,reqs:S.reqs,glossary:S.glossary,decisions:S.decisions,risks:S.risks,savedAt:new Date().toISOString()};
+    const data={project:S.project,reqs:S.reqs,glossary:S.glossary,decisions:S.decisions,risks:S.risks,stakeholders:S.stakeholders||[],interfaces:S.interfaces||[],useCases:S.useCases||[],savedAt:new Date().toISOString()};
     localStorage.setItem(S.autoSaveKey,JSON.stringify(data));
   }catch(e){}
 }
@@ -603,8 +693,8 @@ function autoLoad(){
     const raw=localStorage.getItem(S.autoSaveKey);
     if(!raw)return false;
     const data=JSON.parse(raw);
-    if((data.reqs&&data.reqs.length>0)||(data.risks&&data.risks.length>0)||(data.decisions&&data.decisions.length>0)){
-      S.reqs=data.reqs||[];S.project=data.project||S.project;S.glossary=data.glossary||S.glossary;S.decisions=data.decisions||[];S.risks=data.risks||[];
+    if((data.reqs&&data.reqs.length>0)||(data.risks&&data.risks.length>0)||(data.decisions&&data.decisions.length>0)||(data.stakeholders&&data.stakeholders.length>0)||(data.interfaces&&data.interfaces.length>0)||(data.useCases&&data.useCases.length>0)){
+      S.reqs=data.reqs||[];S.project=data.project||S.project;S.glossary=data.glossary||S.glossary;S.decisions=data.decisions||[];S.risks=data.risks||[];S.stakeholders=data.stakeholders||[];S.interfaces=data.interfaces||[];S.useCases=data.useCases||[];
       _id=Math.max(0,...(data.reqs||[]).map(r=>parseInt(r.id.replace(/\D/g,""))||0));
       _riskId=Math.max(0,...(data.risks||[]).map(r=>parseInt(r.id.replace(/\D/g,""))||0));
       return true;
@@ -718,10 +808,40 @@ function deleteRisk(id){
   render();
 }
 
+// ─── STAKEHOLDER ACTIONS ────────────────────────────────
+function addStk(){History.save();const s=mkStk();S.stakeholders.push(s);S.selStkId=s.id;S.view="stakeholders";autoSave();toast("Created "+s.id,"success");render();}
+let _stkHistoryTimer=null;
+function updateStkSilent(id,u){
+  const s=S.stakeholders.find(x=>x.id===id);
+  if(s){clearTimeout(_stkHistoryTimer);_stkHistoryTimer=setTimeout(()=>History.save(),1000);Object.assign(s,u,{modified:new Date().toISOString()});autoSave();}
+}
+function updateStk(id,u){History.save();const s=S.stakeholders.find(x=>x.id===id);if(s){Object.assign(s,u,{modified:new Date().toISOString()});autoSave();render();}}
+function deleteStk(id){History.save();S.stakeholders=S.stakeholders.filter(s=>s.id!==id);if(S.selStkId===id)S.selStkId=null;autoSave();toast("Stakeholder deleted","info");render();}
+
+// ─── INTERFACE ACTIONS ──────────────────────────────────
+function addIfc(){History.save();const i=mkIfc();S.interfaces.push(i);S.selIfcId=i.id;S.view="interfaces";autoSave();toast("Created "+i.id,"success");render();}
+let _ifcHistoryTimer=null;
+function updateIfcSilent(id,u){
+  const i=S.interfaces.find(x=>x.id===id);
+  if(i){clearTimeout(_ifcHistoryTimer);_ifcHistoryTimer=setTimeout(()=>History.save(),1000);Object.assign(i,u,{modified:new Date().toISOString()});autoSave();}
+}
+function updateIfc(id,u){History.save();const i=S.interfaces.find(x=>x.id===id);if(i){Object.assign(i,u,{modified:new Date().toISOString()});autoSave();render();}}
+function deleteIfc(id){History.save();S.interfaces=S.interfaces.filter(i=>i.id!==id);if(S.selIfcId===id)S.selIfcId=null;autoSave();toast("Interface deleted","info");render();}
+
+// ─── USE CASE ACTIONS ───────────────────────────────────
+function addUc(){History.save();const u=mkUc();S.useCases.push(u);S.selUcId=u.id;S.view="usecases";autoSave();toast("Created "+u.id,"success");render();}
+let _ucHistoryTimer=null;
+function updateUcSilent(id,u){
+  const uc=S.useCases.find(x=>x.id===id);
+  if(uc){clearTimeout(_ucHistoryTimer);_ucHistoryTimer=setTimeout(()=>History.save(),1000);Object.assign(uc,u,{modified:new Date().toISOString()});autoSave();}
+}
+function updateUc(id,u){History.save();const uc=S.useCases.find(x=>x.id===id);if(uc){Object.assign(uc,u,{modified:new Date().toISOString()});autoSave();render();}}
+function deleteUc(id){History.save();S.useCases=S.useCases.filter(u=>u.id!==id);if(S.selUcId===id)S.selUcId=null;autoSave();toast("Use case deleted","info");render();}
+
 // ─── EXPORTS ──────────────────────────────────────────────
 function exportJSON(){
   const data={project:S.project,version:"2.2",standard:"INCOSE GtWR v4",exportDate:new Date().toISOString(),
-    requirements:S.reqs.map(r=>({...r,qualityScore:analyze(r.text).score,qualityGrade:analyze(r.text).grade})),decisions:S.decisions,risks:S.risks,glossary:S.glossary};
+    requirements:S.reqs.map(r=>({...r,qualityScore:analyze(r.text).score,qualityGrade:analyze(r.text).grade})),decisions:S.decisions,risks:S.risks,stakeholders:S.stakeholders||[],interfaces:S.interfaces||[],useCases:S.useCases||[],glossary:S.glossary};
   dl(JSON.stringify(data,null,2),"application/json",S.project.replace(/\s/g,"_")+"_requirements.json");
   toast("Saved project JSON","success");
 }
@@ -734,313 +854,238 @@ function exportCSV(){
 function exportReqIF(){dl(genReqIF(S.reqs,S.project),"application/xml",S.project.replace(/\s/g,"_")+".reqif");toast("Exported ReqIF","success");}
 
 function exportPDF(){
-  // Generate HTML report that will be printed to PDF
+  const sec=S.rptSections;
   const now=new Date();
   const dateStr=now.toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
   const timeStr=now.toLocaleTimeString("en-US",{hour:"2-digit",minute:"2-digit"});
-  
+
   // Calculate statistics
-  const stats={
-    total:S.reqs.length,
-    byLevel:{},
-    byType:{},
-    byStatus:{},
-    avgScore:0,
-    gradeA:0,gradeB:0,gradeC:0,gradeD:0,gradeF:0
-  };
-  
+  const stats={total:S.reqs.length,byLevel:{},byType:{},byStatus:{},avgScore:0,gradeA:0,gradeB:0,gradeC:0,gradeD:0,gradeF:0};
   let totalScore=0;
   S.reqs.forEach(r=>{
-    const a=analyze(r.text);
-    totalScore+=a.score;
+    const a=analyze(r.text);totalScore+=a.score;
     stats.byLevel[r.level]=(stats.byLevel[r.level]||0)+1;
     stats.byType[r.type]=(stats.byType[r.type]||0)+1;
     stats.byStatus[r.status]=(stats.byStatus[r.status]||0)+1;
-    if(a.score>=90)stats.gradeA++;
-    else if(a.score>=80)stats.gradeB++;
-    else if(a.score>=70)stats.gradeC++;
-    else if(a.score>=60)stats.gradeD++;
-    else stats.gradeF++;
+    if(a.score>=90)stats.gradeA++;else if(a.score>=80)stats.gradeB++;else if(a.score>=70)stats.gradeC++;else if(a.score>=60)stats.gradeD++;else stats.gradeF++;
   });
   stats.avgScore=S.reqs.length>0?Math.round(totalScore/S.reqs.length):0;
-  
+
   // Build traceability tree HTML
   function buildTreeHtml(parentId,level){
-    const children=S.reqs.filter(r=>r.parent===parentId);
-    if(children.length===0)return "";
+    const children=S.reqs.filter(r=>r.parent===parentId);if(children.length===0)return "";
     let result="";
-    children.forEach(r=>{
-      const a=analyze(r.text);
-      const txt=escXml((r.text||"").substring(0,80))+((r.text||"").length>80?"...":"");
-      const childHtml=buildTreeHtml(r.id,level+1);
-      result+='<div class="tree-item level-'+level+'">';
-      result+='<span class="tree-id">'+r.id+'</span>';
-      result+='<span class="tree-text">'+txt+'</span>';
-      result+='<span class="tree-meta">'+r.level.replace(" Requirement","")+" · "+a.score+'%</span>';
-      if(childHtml)result+='<div class="tree-children">'+childHtml+'</div>';
-      result+='</div>';
-    });
-    return result;
+    children.forEach(r=>{const a=analyze(r.text);const txt=escXml((r.text||"").substring(0,80))+((r.text||"").length>80?"...":"");const childHtml=buildTreeHtml(r.id,level+1);
+      result+='<div class="tree-item level-'+level+'"><span class="tree-id">'+r.id+'</span><span class="tree-text">'+txt+'</span><span class="tree-meta">'+r.level.replace(" Requirement","")+" \xB7 "+a.score+'%</span>';
+      if(childHtml)result+='<div class="tree-children">'+childHtml+'</div>';result+='</div>';});return result;
   }
-  
-  let treeHtml='<div class="tree">';
-  const stakeholderNeeds=S.reqs.filter(r=>r.level==="Stakeholder Need");
-  const orphans=S.reqs.filter(r=>!r.parent&&r.level!=="Stakeholder Need"&&!S.reqs.some(c=>c.parent===r.id));
-  
-  if(stakeholderNeeds.length>0){
-    treeHtml+='<h4 style="font-size:11px;color:#475569;margin:12px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;">Stakeholder Needs</h4>';
-    stakeholderNeeds.forEach(r=>{
-      const a=analyze(r.text);
-      const txt=escXml((r.text||"").substring(0,80))+((r.text||"").length>80?"...":"");
-      const childHtml=buildTreeHtml(r.id,1);
-      treeHtml+='<div class="tree-item level-0">';
-      treeHtml+='<span class="tree-id">'+r.id+'</span>';
-      treeHtml+='<span class="tree-text">'+txt+'</span>';
-      treeHtml+='<span class="tree-meta">'+a.score+'%</span>';
-      if(childHtml)treeHtml+='<div class="tree-children">'+childHtml+'</div>';
-      treeHtml+='</div>';
-    });
-  }
-  
-  const otherRoots=S.reqs.filter(r=>!r.parent&&r.level!=="Stakeholder Need"&&S.reqs.some(c=>c.parent===r.id));
-  if(otherRoots.length>0){
-    treeHtml+='<h4 style="font-size:11px;color:#475569;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;">Other Root Requirements</h4>';
-    otherRoots.forEach(r=>{
-      const a=analyze(r.text);
-      const txt=escXml((r.text||"").substring(0,80))+((r.text||"").length>80?"...":"");
-      const childHtml=buildTreeHtml(r.id,1);
-      treeHtml+='<div class="tree-item level-0">';
-      treeHtml+='<span class="tree-id">'+r.id+'</span>';
-      treeHtml+='<span class="tree-text">'+txt+'</span>';
-      treeHtml+='<span class="tree-meta">'+r.level.replace(" Requirement","")+" · "+a.score+'%</span>';
-      if(childHtml)treeHtml+='<div class="tree-children">'+childHtml+'</div>';
-      treeHtml+='</div>';
-    });
-  }
-  treeHtml+='</div>';
-  
-  if(orphans.length>0){
-    treeHtml+='<div class="orphan-box"><h4>⚠ Orphan Requirements (no parent, no children)</h4>';
-    treeHtml+='<p style="font-size:10px;color:#92400e;">These requirements are not linked to any hierarchy.</p>';
-    treeHtml+='<div style="margin-top:8px;">';
-    orphans.forEach(r=>{
-      treeHtml+='<span style="display:inline-block;font-family:monospace;font-size:9px;background:#fff;padding:2px 8px;border-radius:4px;margin:2px;">'+r.id+'</span>';
-    });
-    treeHtml+='</div></div>';
-  }
-  
-  // Build HTML document
-  const html=`<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>${S.project} - Requirements Report</title>
-<style>
-@page{size:A4;margin:20mm 15mm;}
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Segoe UI',Arial,sans-serif;font-size:11px;line-height:1.5;color:#1e293b;}
-.page-break{page-break-after:always;}
-.cover{height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:linear-gradient(135deg,#0f172a,#1e3a5f);}
-.cover h1{font-size:32px;color:#fff;margin-bottom:8px;}
-.cover h2{font-size:18px;color:#94a3b8;font-weight:400;margin-bottom:40px;}
-.cover .meta{color:#64748b;font-size:12px;}
-.cover .badge{display:inline-block;background:#38bdf8;color:#0f172a;padding:6px 16px;border-radius:20px;font-weight:600;margin-top:20px;}
-.toc{padding:40px;}
-.toc h2{font-size:20px;border-bottom:2px solid #0284c7;padding-bottom:8px;margin-bottom:20px;}
-.toc-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dotted #e2e8f0;}
-.toc-item span:last-child{color:#64748b;}
-.section{padding:20px 0;}
-.section h2{font-size:18px;color:#0f172a;border-bottom:2px solid #0284c7;padding-bottom:6px;margin-bottom:16px;}
-.section h3{font-size:14px;color:#334155;margin:16px 0 10px;}
-table{width:100%;border-collapse:collapse;margin:10px 0;font-size:10px;}
-th{background:#f1f5f9;color:#475569;padding:8px 6px;text-align:left;font-weight:600;border:1px solid #e2e8f0;}
-td{padding:6px;border:1px solid #e2e8f0;vertical-align:top;}
-tr:nth-child(even){background:#f8fafc;}
-.score{font-weight:700;text-align:center;}
-.score-a{color:#059669;}
-.score-b{color:#0284c7;}
-.score-c{color:#d97706;}
-.score-d{color:#ea580c;}
-.score-f{color:#dc2626;}
-.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0;}
-.stat-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;text-align:center;}
-.stat-box .value{font-size:24px;font-weight:700;color:#0f172a;}
-.stat-box .label{font-size:10px;color:#64748b;text-transform:uppercase;}
-.footer{position:fixed;bottom:10mm;left:15mm;right:15mm;font-size:9px;color:#94a3b8;display:flex;justify-content:space-between;border-top:1px solid #e2e8f0;padding-top:8px;}
-.badge-sm{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:600;}
-.badge-draft{background:#fef3c7;color:#92400e;}
-.badge-reviewed{background:#ede9fe;color:#6d28d9;}
-.badge-approved{background:#d1fae5;color:#047857;}
-</style>
-</head>
-<body>
 
-<!-- Cover Page -->
-<div class="cover">
-<h1>${escXml(S.project)}</h1>
-<h2>Requirements Specification Report</h2>
-<div class="meta">Generated on ${dateStr} at ${timeStr}</div>
-<div class="badge">INCOSE GtWR v4 Compliant</div>
-<div style="margin-top:60px;color:#64748b;font-size:11px;">
-<div>${stats.total} Requirements</div>
-<div>Average Quality Score: ${stats.avgScore}%</div>
-</div>
-</div>
+  // Section builders - each returns HTML or empty string
+  const builders={};
 
-<div class="page-break"></div>
-
-<!-- Table of Contents -->
-<div class="toc">
-<h2>Table of Contents</h2>
-<div class="toc-item"><span>1. Executive Summary</span><span>3</span></div>
-<div class="toc-item"><span>2. Quality Statistics</span><span>3</span></div>
-<div class="toc-item"><span>3. Requirements Register</span><span>4</span></div>
-<div class="toc-item"><span>4. Traceability Matrix</span><span>${Math.ceil(S.reqs.length/25)+4}</span></div>
-<div class="toc-item"><span>5. Glossary</span><span>${Math.ceil(S.reqs.length/25)+5}</span></div>
-${S.risks.length>0?`<div class="toc-item"><span>6. Risk Register</span><span>${Math.ceil(S.reqs.length/25)+6}</span></div>`:""}
-${S.decisions.length>0?`<div class="toc-item"><span>${S.risks.length>0?"7":"6"}. Decision Log</span><span>${Math.ceil(S.reqs.length/25)+(S.risks.length>0?7:6)}</span></div>`:""}
-</div>
-
-<div class="page-break"></div>
-
-<!-- Executive Summary -->
-<div class="section">
-<h2>1. Executive Summary</h2>
-<p>This report documents ${stats.total} requirements for the "${escXml(S.project)}" project, analyzed against the INCOSE Guide to Writing Requirements (GtWR) version 4 standard with 42 quality rules.</p>
-
-<h3>Project Statistics</h3>
+  builders.execSummary=()=>`<div class="section">
+<h2>{{N}}. Executive Summary</h2>
+<p>This report documents the "${escXml(S.project)}" project, analyzed against the INCOSE Guide to Writing Requirements (GtWR) version 4 standard with 42 quality rules.</p>
 <div class="stat-grid">
-<div class="stat-box"><div class="value">${stats.total}</div><div class="label">Total Requirements</div></div>
-<div class="stat-box"><div class="value">${stats.avgScore}%</div><div class="label">Avg Quality Score</div></div>
-<div class="stat-box"><div class="value">${stats.gradeA+stats.gradeB}</div><div class="label">Pass (≥80%)</div></div>
-<div class="stat-box"><div class="value">${stats.gradeC+stats.gradeD+stats.gradeF}</div><div class="label">Need Review (<80%)</div></div>
-</div>
+<div class="stat-box"><div class="value">${stats.total}</div><div class="label">Requirements</div></div>
+<div class="stat-box"><div class="value">${stats.avgScore}%</div><div class="label">Avg Quality</div></div>
+<div class="stat-box"><div class="value">${stats.gradeA+stats.gradeB}</div><div class="label">Pass (\u226580%)</div></div>
+<div class="stat-box"><div class="value">${S.risks.length}</div><div class="label">Risks</div></div>
+<div class="stat-box"><div class="value">${S.decisions.length}</div><div class="label">Decisions</div></div>
+<div class="stat-box"><div class="value">${S.stakeholders.length}</div><div class="label">Stakeholders</div></div>
+<div class="stat-box"><div class="value">${S.interfaces.length}</div><div class="label">Interfaces</div></div>
+<div class="stat-box"><div class="value">${S.useCases.length}</div><div class="label">Use Cases</div></div>
+</div></div><div class="page-break"></div>`;
 
+  builders.qualityStats=()=>`<div class="section">
+<h2>{{N}}. Quality Statistics</h2>
 <h3>Requirements by Level</h3>
-<table>
-<tr><th>Level</th><th>Count</th><th>Percentage</th></tr>
-${Object.entries(stats.byLevel).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td><td>${Math.round(v/stats.total*100)}%</td></tr>`).join("")}
-</table>
-
+<table><tr><th>Level</th><th>Count</th><th>%</th></tr>
+${Object.entries(stats.byLevel).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td><td>${Math.round(v/stats.total*100)}%</td></tr>`).join("")}</table>
 <h3>Requirements by Status</h3>
-<table>
-<tr><th>Status</th><th>Count</th><th>Percentage</th></tr>
-${Object.entries(stats.byStatus).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td><td>${Math.round(v/stats.total*100)}%</td></tr>`).join("")}
-</table>
-
+<table><tr><th>Status</th><th>Count</th><th>%</th></tr>
+${Object.entries(stats.byStatus).map(([k,v])=>`<tr><td>${k}</td><td>${v}</td><td>${Math.round(v/stats.total*100)}%</td></tr>`).join("")}</table>
 <h3>Quality Distribution</h3>
-<table>
-<tr><th>Grade</th><th>Score Range</th><th>Count</th><th>Percentage</th></tr>
+<table><tr><th>Grade</th><th>Range</th><th>Count</th><th>%</th></tr>
 <tr><td>A (Excellent)</td><td>90-100%</td><td>${stats.gradeA}</td><td>${Math.round(stats.gradeA/stats.total*100)||0}%</td></tr>
 <tr><td>B (Good)</td><td>80-89%</td><td>${stats.gradeB}</td><td>${Math.round(stats.gradeB/stats.total*100)||0}%</td></tr>
 <tr><td>C (Acceptable)</td><td>70-79%</td><td>${stats.gradeC}</td><td>${Math.round(stats.gradeC/stats.total*100)||0}%</td></tr>
 <tr><td>D (Needs Work)</td><td>60-69%</td><td>${stats.gradeD}</td><td>${Math.round(stats.gradeD/stats.total*100)||0}%</td></tr>
 <tr><td>F (Poor)</td><td>0-59%</td><td>${stats.gradeF}</td><td>${Math.round(stats.gradeF/stats.total*100)||0}%</td></tr>
+</table></div><div class="page-break"></div>`;
+
+  builders.requirements=()=>`<div class="section">
+<h2>{{N}}. Requirements Register</h2>
+<table><tr><th style="width:70px">ID</th><th style="width:45%">Statement</th><th>Type</th><th>Level</th><th>Status</th><th style="width:50px">Score</th></tr>
+${S.reqs.map(r=>{const a=analyze(r.text);const sc=a.score>=90?"a":a.score>=80?"b":a.score>=70?"c":a.score>=60?"d":"f";
+return`<tr><td style="font-family:monospace;font-size:9px;color:#0284c7;font-weight:600">${r.id}</td><td>${escXml(r.text)||"<em style='color:#94a3b8'>(empty)</em>"}</td><td style="font-size:9px">${r.type}</td><td style="font-size:9px">${r.level.replace(" Requirement","")}</td><td><span class="badge-sm badge-${r.status.toLowerCase()}">${r.status}</span></td><td class="score score-${sc}">${a.score}%</td></tr>`;}).join("")}
+</table></div><div class="page-break"></div>`;
+
+  builders.stakeholders=()=>S.stakeholders.length===0?"":`<div class="section">
+<h2>{{N}}. Stakeholder Register</h2>
+<table><tr><th style="width:70px">ID</th><th>Name</th><th>Organization</th><th style="width:80px">Role</th><th style="width:60px">Influence</th><th style="width:60px">Category</th><th>Key Concerns</th><th style="width:80px">Linked Needs</th></tr>
+${S.stakeholders.map(s=>{const c=s.influence==="Critical"?"#dc2626":s.influence==="High"?"#ea580c":s.influence==="Medium"?"#d97706":"#059669";
+return`<tr><td style="font-family:monospace;font-size:9px;color:#38bdf8;font-weight:600">${escXml(s.id)}</td><td style="font-weight:600">${escXml(s.name||"")}</td><td>${escXml(s.organization||"")}</td><td>${escXml(s.role)}</td><td style="color:${c};font-weight:600">${escXml(s.influence)}</td><td>${escXml(s.category)}</td><td style="font-size:9px">${escXml((s.concerns||"").substring(0,120))}</td><td style="font-family:monospace;font-size:9px">${(s.linkedNeeds||[]).join(", ")}</td></tr>`;}).join("")}
+</table></div><div class="page-break"></div>`;
+
+  builders.useCases=()=>S.useCases.length===0?"":`<div class="section">
+<h2>{{N}}. Use Cases &amp; Scenarios</h2>
+<table><tr><th style="width:70px">ID</th><th>Title</th><th style="width:80px">Type</th><th style="width:55px">Priority</th><th style="width:55px">Status</th><th>Primary Actor</th><th style="width:80px">Derived Reqs</th></tr>
+${S.useCases.map(u=>{const c=u.priority==="Critical"?"#dc2626":u.priority==="High"?"#ea580c":u.priority==="Medium"?"#d97706":"#059669";
+return`<tr><td style="font-family:monospace;font-size:9px;color:#38bdf8;font-weight:600">${escXml(u.id)}</td><td style="font-weight:600">${escXml(u.title||"")}</td><td>${escXml(u.type)}</td><td style="color:${c};font-weight:600">${escXml(u.priority)}</td><td>${escXml(u.status)}</td><td>${escXml(u.actor||"")}</td><td style="font-family:monospace;font-size:9px">${(u.derivedReqs||[]).join(", ")}</td></tr>`;}).join("")}
 </table>
-</div>
+${S.useCases.map(u=>`<div style="margin:12px 0;padding:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;page-break-inside:avoid;">
+<div style="font-weight:700;font-size:11px;color:#0284c7;margin-bottom:6px;">${escXml(u.id)} \u2014 ${escXml(u.title||"Untitled")}</div>
+<div style="font-size:9px;margin-bottom:4px;"><strong>Actor:</strong> ${escXml(u.actor||"\u2014")} \xB7 <strong>Trigger:</strong> ${escXml(u.trigger||"\u2014")}</div>
+${(u.preconditions||"").trim()?`<div style="font-size:9px;margin-bottom:4px;"><strong>Preconditions:</strong><br>${escXml(u.preconditions)}</div>`:""}
+${(u.mainFlow||"").trim()?`<div style="font-size:9px;margin-bottom:4px;"><strong>Main Flow:</strong><br><span style="font-family:monospace;white-space:pre-wrap;">${escXml(u.mainFlow)}</span></div>`:""}
+${(u.alternativeFlows||"").trim()?`<div style="font-size:9px;margin-bottom:4px;"><strong>Alt Flows:</strong><br><span style="font-family:monospace;white-space:pre-wrap;">${escXml(u.alternativeFlows)}</span></div>`:""}
+${(u.postconditions||"").trim()?`<div style="font-size:9px;"><strong>Postconditions:</strong><br>${escXml(u.postconditions)}</div>`:""}
+</div>`).join("")}
+</div><div class="page-break"></div>`;
 
-<div class="page-break"></div>
+  builders.interfaces=()=>S.interfaces.length===0?"":`<div class="section">
+<h2>{{N}}. Interface Definitions</h2>
+<table><tr><th style="width:70px">ID</th><th>Name</th><th style="width:65px">Type</th><th>Source</th><th style="width:30px"></th><th>Destination</th><th style="width:70px">Protocol</th><th style="width:55px">Status</th><th style="width:80px">Linked Reqs</th></tr>
+${S.interfaces.map(i=>{const c=i.status==="Verified"||i.status==="Agreed"?"#059669":i.status==="Draft"?"#64748b":"#0284c7";const d=i.direction.includes("Bidirectional")?"\u2194":i.direction.includes("Broadcast")?"\u21C9":"\u2192";
+return`<tr><td style="font-family:monospace;font-size:9px;color:#38bdf8;font-weight:600">${escXml(i.id)}</td><td style="font-weight:600">${escXml(i.name||"")}</td><td>${escXml(i.type)}</td><td>${escXml(i.source||"")}</td><td style="text-align:center;font-size:14px;color:#0284c7">${d}</td><td>${escXml(i.destination||"")}</td><td>${escXml(i.protocol||"\u2014")}</td><td style="color:${c};font-weight:600">${escXml(i.status)}</td><td style="font-family:monospace;font-size:9px">${(i.linkedReqs||[]).join(", ")}</td></tr>`;}).join("")}
+</table>
+${S.interfaces.some(i=>(i.dataItems||"").trim())?`<h3>Interface Details</h3>
+${S.interfaces.filter(i=>(i.dataItems||"").trim()||(i.dataRate||"").trim()).map(i=>`<div style="margin:8px 0;padding:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;">
+<div style="font-weight:600;font-size:10px;color:#0284c7;margin-bottom:4px;">${escXml(i.id)} \u2014 ${escXml(i.name||"")}</div>
+${(i.dataItems||"").trim()?`<div style="font-size:9px;"><strong>Data Items:</strong> ${escXml(i.dataItems.substring(0,200))}</div>`:""}
+${(i.dataRate||"").trim()?`<div style="font-size:9px;"><strong>Data Rate:</strong> ${escXml(i.dataRate)}</div>`:""}
+${(i.physicalChar||"").trim()?`<div style="font-size:9px;"><strong>Physical:</strong> ${escXml(i.physicalChar)}</div>`:""}
+</div>`).join("")}`:""}</div><div class="page-break"></div>`;
 
-<!-- Requirements Register -->
-<div class="section">
-<h2>3. Requirements Register</h2>
-<table>
-<tr><th style="width:70px">ID</th><th style="width:45%">Statement</th><th>Type</th><th>Level</th><th>Status</th><th style="width:50px">Score</th></tr>
+  builders.risks=()=>S.risks.length===0?"":`<div class="section">
+<h2>{{N}}. Risk Register</h2>
+<table><tr><th style="width:70px">ID</th><th>Title</th><th style="width:70px">Category</th><th style="width:30px">L</th><th style="width:30px">I</th><th style="width:40px">Score</th><th style="width:55px">Level</th><th style="width:55px">Status</th><th>Mitigations</th><th>Owner</th></tr>
+${S.risks.map(r=>{const sc=riskScore(r.likelihood,r.impact);const rl=riskLevel(sc);
+return`<tr><td style="font-family:monospace;font-size:9px;color:#38bdf8;font-weight:600">${escXml(r.id)}</td><td style="font-weight:600">${escXml(r.title)}</td><td>${escXml(r.category)}</td><td style="text-align:center">${r.likelihood}</td><td style="text-align:center">${r.impact}</td><td style="text-align:center;font-weight:700">${sc}</td><td style="color:${rl.color};font-weight:600">${rl.level}</td><td>${escXml(r.status)}</td><td style="font-size:9px">${(r.mitigations||[]).join("; ")}</td><td>${escXml(r.owner||"")}</td></tr>`;}).join("")}
+</table></div><div class="page-break"></div>`;
+
+  builders.decisions=()=>S.decisions.length===0?"":`<div class="section">
+<h2>{{N}}. Decision Log</h2>
+<table><tr><th style="width:70px">ID</th><th style="width:75px">Date</th><th>Title</th><th style="width:70px">Category</th><th style="width:60px">Status</th><th>Decision</th><th>Rationale</th><th style="width:90px">Affected Reqs</th></tr>
+${S.decisions.map(d=>`<tr><td style="font-family:monospace;font-size:9px;color:#38bdf8;font-weight:600">${escXml(d.id)}</td><td>${escXml(d.date)}</td><td style="font-weight:600">${escXml(d.title)}</td><td>${escXml(d.category)}</td><td>${escXml(d.status)}</td><td>${escXml(d.decision)}</td><td>${escXml(d.rationale)}</td><td style="font-family:monospace;font-size:9px">${(d.affectedReqs||[]).join(", ")}</td></tr>`).join("")}
+</table></div><div class="page-break"></div>`;
+
+  builders.hierarchy=()=>{
+    let t='<div class="tree">';
+    const sn=S.reqs.filter(r=>r.level==="Stakeholder Need");
+    const orphans=S.reqs.filter(r=>!r.parent&&r.level!=="Stakeholder Need"&&!S.reqs.some(c=>c.parent===r.id));
+    if(sn.length>0){t+='<h4 style="font-size:11px;color:#475569;margin:12px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;">Stakeholder Needs</h4>';
+      sn.forEach(r=>{const a=analyze(r.text);const txt=escXml((r.text||"").substring(0,80))+((r.text||"").length>80?"...":"");const ch=buildTreeHtml(r.id,1);
+        t+='<div class="tree-item level-0"><span class="tree-id">'+r.id+'</span><span class="tree-text">'+txt+'</span><span class="tree-meta">'+a.score+'%</span>';if(ch)t+='<div class="tree-children">'+ch+'</div>';t+='</div>';});}
+    const roots=S.reqs.filter(r=>!r.parent&&r.level!=="Stakeholder Need"&&S.reqs.some(c=>c.parent===r.id));
+    if(roots.length>0){t+='<h4 style="font-size:11px;color:#475569;margin:20px 0 8px;border-bottom:1px solid #e2e8f0;padding-bottom:4px;">Other Root Requirements</h4>';
+      roots.forEach(r=>{const a=analyze(r.text);const txt=escXml((r.text||"").substring(0,80))+((r.text||"").length>80?"...":"");const ch=buildTreeHtml(r.id,1);
+        t+='<div class="tree-item level-0"><span class="tree-id">'+r.id+'</span><span class="tree-text">'+txt+'</span><span class="tree-meta">'+r.level.replace(" Requirement","")+' \xB7 '+a.score+'%</span>';if(ch)t+='<div class="tree-children">'+ch+'</div>';t+='</div>';});}
+    t+='</div>';
+    if(orphans.length>0){t+='<div class="orphan-box"><h4>\u26A0 Orphan Requirements</h4><p style="font-size:10px;color:#92400e;">Not linked to any hierarchy.</p><div style="margin-top:8px;">';
+      orphans.forEach(r=>{t+='<span style="display:inline-block;font-family:monospace;font-size:9px;background:#fff;padding:2px 8px;border-radius:4px;margin:2px;">'+r.id+'</span>';});t+='</div></div>';}
+    return`<div class="section"><h2>{{N}}. Traceability Tree</h2>
+<p style="margin-bottom:16px;color:#64748b;font-size:11px;">Requirements hierarchy showing parent \u2192 child derivation.</p>
+<style>.tree{margin:0;padding:0;}.tree-item{position:relative;padding:6px 0 6px 24px;border-left:2px solid #e2e8f0;}.tree-item:last-child{border-left-color:transparent;}.tree-item::before{content:"";position:absolute;left:-2px;top:14px;width:20px;height:2px;background:#e2e8f0;}.tree-item.level-0{border-left:none;padding-left:0;margin-top:12px;}.tree-item.level-0::before{display:none;}.tree-id{font-family:monospace;font-size:10px;font-weight:600;color:#0284c7;display:inline-block;min-width:70px;}.tree-text{font-size:10px;color:#475569;display:inline;}.tree-meta{font-size:9px;color:#94a3b8;margin-left:8px;}.tree-children{margin-left:20px;}.orphan-box{margin-top:24px;padding:12px;background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;}.orphan-box h4{font-size:12px;color:#92400e;margin-bottom:8px;}</style>
+${t}</div><div class="page-break"></div>`;};
+
+  builders.traceability=()=>`<div class="section">
+<h2>{{N}}. Cross-Module Traceability</h2>
+<p style="margin-bottom:16px;color:#64748b;font-size:11px;">Requirements linked across all modules.</p>
+<table><tr><th style="width:70px">Req ID</th><th>Statement</th><th style="width:70px">Decisions</th><th style="width:70px">Stakeholders</th><th style="width:70px">Interfaces</th><th style="width:70px">Use Cases</th></tr>
 ${S.reqs.map(r=>{
-  const a=analyze(r.text);
-  const sc=a.score>=90?"a":a.score>=80?"b":a.score>=70?"c":a.score>=60?"d":"f";
-  const st=r.status.toLowerCase();
-  return`<tr>
-<td style="font-family:monospace;font-size:9px;color:#0284c7;font-weight:600">${r.id}</td>
-<td>${escXml(r.text)||"<em style='color:#94a3b8'>(empty)</em>"}</td>
-<td style="font-size:9px">${r.type}</td>
-<td style="font-size:9px">${r.level.replace(" Requirement","")}</td>
-<td><span class="badge-sm badge-${st}">${r.status}</span></td>
-<td class="score score-${sc}">${a.score}%</td>
-</tr>`;
-}).join("")}
+  const dc=S.decisions.filter(d=>(d.affectedReqs||[]).includes(r.id)).map(d=>d.id);
+  const sk=S.stakeholders.filter(s=>(s.linkedNeeds||[]).includes(r.id)).map(s=>s.id);
+  const ic=S.interfaces.filter(i=>(i.linkedReqs||[]).includes(r.id)).map(i=>i.id);
+  const uc=S.useCases.filter(u=>(u.derivedReqs||[]).includes(r.id)).map(u=>u.id);
+  const bg=(dc.length+sk.length+ic.length+uc.length)===0?"#fef2f2":"transparent";
+  return`<tr style="background:${bg}"><td style="font-family:monospace;font-size:9px;color:#38bdf8;font-weight:600">${r.id}</td><td style="font-size:9px">${escXml((r.text||"").substring(0,60))}</td><td style="font-family:monospace;font-size:9px;text-align:center">${dc.join(", ")||"\u2014"}</td><td style="font-family:monospace;font-size:9px;text-align:center">${sk.join(", ")||"\u2014"}</td><td style="font-family:monospace;font-size:9px;text-align:center">${ic.join(", ")||"\u2014"}</td><td style="font-family:monospace;font-size:9px;text-align:center">${uc.join(", ")||"\u2014"}</td></tr>`;}).join("")}
 </table>
-</div>
+<div style="margin-top:12px;font-size:10px;color:#64748b;"><span style="display:inline-block;width:12px;height:12px;background:#fef2f2;border:1px solid #fecaca;border-radius:2px;vertical-align:middle;margin-right:4px;"></span> Red = no cross-module links</div>
+</div><div class="page-break"></div>`;
 
-<div class="page-break"></div>
+  builders.vv=()=>`<div class="section">
+<h2>{{N}}. Verification &amp; Validation</h2>
+<table><tr><th style="width:70px">ID</th><th>Statement</th><th style="width:80px">V Method</th><th style="width:70px">Level</th><th style="width:55px">Status</th></tr>
+${S.reqs.map(r=>`<tr><td style="font-family:monospace;font-size:9px;color:#38bdf8;font-weight:600">${r.id}</td><td style="font-size:9px">${escXml((r.text||"").substring(0,80))}</td><td style="font-weight:600">${escXml(r.verification||"Test")}</td><td style="font-size:9px">${r.level.replace(" Requirement","")}</td><td><span class="badge-sm badge-${r.status.toLowerCase()}">${r.status}</span></td></tr>`).join("")}
+</table></div><div class="page-break"></div>`;
 
-<!-- Traceability -->
-<div class="section">
-<h2>4. Traceability Tree</h2>
-<p style="margin-bottom:16px;color:#64748b;font-size:11px;">Requirements hierarchy showing parent → child derivation relationships.</p>
-
-<style>
-.tree{margin:0;padding:0;}
-.tree-item{position:relative;padding:6px 0 6px 24px;border-left:2px solid #e2e8f0;}
-.tree-item:last-child{border-left-color:transparent;}
-.tree-item::before{content:"";position:absolute;left:-2px;top:14px;width:20px;height:2px;background:#e2e8f0;}
-.tree-item.level-0{border-left:none;padding-left:0;margin-top:12px;}
-.tree-item.level-0::before{display:none;}
-.tree-id{font-family:monospace;font-size:10px;font-weight:600;color:#0284c7;display:inline-block;min-width:70px;}
-.tree-text{font-size:10px;color:#475569;display:inline;}
-.tree-meta{font-size:9px;color:#94a3b8;margin-left:8px;}
-.tree-children{margin-left:20px;}
-.orphan-box{margin-top:24px;padding:12px;background:#fef3c7;border:1px solid #fcd34d;border-radius:6px;}
-.orphan-box h4{font-size:12px;color:#92400e;margin-bottom:8px;}
-</style>
-
-<div id="trace-tree">${treeHtml}</div>
-</div>
-
-<div class="page-break"></div>
-
-<!-- Glossary -->
-<div class="section">
-<h2>5. Glossary</h2>
-<table>
-<tr><th style="width:150px">Term</th><th>Definition</th></tr>
+  builders.glossary=()=>S.glossary.length===0?"":`<div class="section">
+<h2>{{N}}. Glossary</h2>
+<table><tr><th style="width:150px">Term</th><th>Definition</th></tr>
 ${S.glossary.map(g=>`<tr><td style="font-weight:600">${escXml(g.term)}</td><td>${escXml(g.def)}</td></tr>`).join("")}
-</table>
-</div>
+</table></div>`;
 
-${S.risks.length>0?`<div class="page-break"></div>
-<div class="section">
-<h2>6. Risk Register</h2>
-<table>
-<tr><th style="width:80px">ID</th><th>Title</th><th style="width:80px">Category</th><th style="width:40px">L</th><th style="width:40px">I</th><th style="width:50px">Score</th><th style="width:70px">Level</th><th style="width:70px">Status</th><th>Mitigations</th><th>Owner</th></tr>
-${S.risks.map(r=>{const sc=riskScore(r.likelihood,r.impact);const rl=riskLevel(sc);return`<tr><td class="mono" style="color:#38bdf8;font-weight:600">${escXml(r.id)}</td><td style="font-weight:600">${escXml(r.title)}</td><td>${escXml(r.category)}</td><td style="text-align:center">${r.likelihood}</td><td style="text-align:center">${r.impact}</td><td style="text-align:center;font-weight:700">${sc}</td><td style="color:${rl.color};font-weight:600">${rl.level}</td><td>${escXml(r.status)}</td><td class="mono" style="font-size:9px">${(r.mitigations||[]).join(", ")}</td><td>${escXml(r.owner||"")}</td></tr>`;}).join("")}
-</table>
-</div>`:""}
-
-${S.decisions.length>0?`<div class="page-break"></div>
-<div class="section">
-<h2>${S.risks.length>0?"7":"6"}. Decision Log</h2>
-<table>
-<tr><th style="width:80px">ID</th><th style="width:80px">Date</th><th>Title</th><th style="width:80px">Category</th><th style="width:80px">Status</th><th>Decision</th><th>Rationale</th><th style="width:100px">Affected Reqs</th></tr>
-${S.decisions.map(d=>`<tr><td class="mono" style="color:#38bdf8;font-weight:600">${escXml(d.id)}</td><td>${escXml(d.date)}</td><td style="font-weight:600">${escXml(d.title)}</td><td>${escXml(d.category)}</td><td>${escXml(d.status)}</td><td>${escXml(d.decision)}</td><td>${escXml(d.rationale)}</td><td class="mono" style="font-size:9px">${(d.affectedReqs||[]).join(", ")}</td></tr>`).join("")}
-</table>
-</div>`:""}
-
-<div class="footer">
-<span>${escXml(S.project)} — Requirements Report</span>
-<span>Generated by ReqRight v2.2.0-beta</span>
-</div>
-
-<div style="text-align:center;padding:8px;background:#0a0d12;font-size:9px;color:#4b5f82;border-top:1px solid #1c2744;">
-      ReqRight v2.2.0-beta · Independent educational project · Based on INCOSE® GtWR v4 ·
-      <a href="DISCLAIMER.md" style="color:#4b5f82">Disclaimer</a> ·
-      <a href="PRIVACY.md" style="color:#4b5f82">Privacy</a> ·
-      <a href="LICENSE" style="color:#4b5f82">License (MIT)</a> ·
-      Not affiliated with or endorsed by INCOSE®, IBM®, or any standards body.
-    </div>
-</body>
-</html>`;
-
-  // Open print dialog
-  const printWindow=window.open("","_blank");
-  printWindow.document.write(html);
-  printWindow.document.close();
-  printWindow.onload=()=>{
-    setTimeout(()=>{
-      printWindow.print();
-    },250);
+  // Layout ordering
+  const layoutOrders={
+    A:["execSummary","qualityStats","stakeholders","useCases","requirements","interfaces","risks","decisions","hierarchy","traceability","vv","glossary"],
+    B:["execSummary","qualityStats","requirements","useCases","interfaces","stakeholders","risks","decisions","hierarchy","traceability","vv","glossary"],
+    C:["execSummary","qualityStats","stakeholders","useCases","requirements","interfaces","risks","decisions","hierarchy","traceability","vv","glossary"]
   };
-  toast("PDF report opened — use Print to save as PDF","success");
+  const layoutNames={A:"ISO/INCOSE Standard",B:"NASA-style Hybrid",C:"Management-first"};
+  const sectionLabels={execSummary:"Executive Summary",qualityStats:"Quality Statistics",requirements:"Requirements Register",stakeholders:"Stakeholder Register",useCases:"Use Cases & Scenarios",interfaces:"Interface Definitions",risks:"Risk Register",decisions:"Decision Log",hierarchy:"Traceability Tree",traceability:"Cross-Module Traceability",vv:"Verification & Validation",glossary:"Glossary"};
+
+  // Build ordered active sections
+  const order=layoutOrders[S.rptLayout]||layoutOrders.A;
+  const active=order.filter(k=>sec[k]&&builders[k]);
+
+  // Generate body with auto-numbering
+  let sn=1;let bodyHtml="";
+  active.forEach(k=>{let h=builders[k]();if(!h)return;h=h.replace(/\{\{N\}\}/g,String(sn));bodyHtml+=h;sn++;});
+
+  // Generate TOC
+  let tocHtml="";sn=1;
+  active.forEach(k=>{if(!builders[k])return;const test=builders[k]();if(!test)return;
+    tocHtml+=`<div class="toc-item"><span>${sn}. ${sectionLabels[k]||k}</span><span></span></div>`;sn++;});
+
+  // Assemble
+  const html=`<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>${S.project} - Systems Engineering Report</title>
+<style>
+@page{size:A4;margin:20mm 15mm;}*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Segoe UI',Arial,sans-serif;font-size:11px;line-height:1.5;color:#1e293b;}
+.page-break{page-break-after:always;}
+.cover{height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;background:linear-gradient(135deg,#0f172a,#1e3a5f);}
+.cover h1{font-size:32px;color:#fff;margin-bottom:8px;}.cover h2{font-size:18px;color:#94a3b8;font-weight:400;margin-bottom:40px;}
+.cover .meta{color:#64748b;font-size:12px;}.cover .badge{display:inline-block;background:#38bdf8;color:#0f172a;padding:6px 16px;border-radius:20px;font-weight:600;margin-top:20px;}
+.toc{padding:40px;}.toc h2{font-size:20px;border-bottom:2px solid #0284c7;padding-bottom:8px;margin-bottom:20px;}
+.toc-item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dotted #e2e8f0;}.toc-item span:last-child{color:#64748b;}
+.section{padding:20px 0;}.section h2{font-size:18px;color:#0f172a;border-bottom:2px solid #0284c7;padding-bottom:6px;margin-bottom:16px;}
+.section h3{font-size:14px;color:#334155;margin:16px 0 10px;}
+table{width:100%;border-collapse:collapse;margin:10px 0;font-size:10px;}
+th{background:#f1f5f9;color:#475569;padding:8px 6px;text-align:left;font-weight:600;border:1px solid #e2e8f0;}
+td{padding:6px;border:1px solid #e2e8f0;vertical-align:top;}tr:nth-child(even){background:#f8fafc;}
+.score{font-weight:700;text-align:center;}.score-a{color:#059669;}.score-b{color:#0284c7;}.score-c{color:#d97706;}.score-d{color:#ea580c;}.score-f{color:#dc2626;}
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:16px 0;}
+.stat-box{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:12px;text-align:center;}
+.stat-box .value{font-size:24px;font-weight:700;color:#0f172a;}.stat-box .label{font-size:10px;color:#64748b;text-transform:uppercase;}
+.footer{position:fixed;bottom:10mm;left:15mm;right:15mm;font-size:9px;color:#94a3b8;display:flex;justify-content:space-between;border-top:1px solid #e2e8f0;padding-top:8px;}
+.badge-sm{display:inline-block;padding:2px 6px;border-radius:4px;font-size:9px;font-weight:600;}
+.badge-draft{background:#fef3c7;color:#92400e;}.badge-reviewed{background:#ede9fe;color:#6d28d9;}.badge-approved{background:#d1fae5;color:#047857;}
+</style></head><body>
+<div class="cover">
+<h1>${escXml(S.project)}</h1><h2>Systems Engineering Report</h2>
+<div class="meta">Generated on ${dateStr} at ${timeStr}</div>
+<div class="badge">INCOSE GtWR v4 Compliant</div>
+<div style="margin-top:40px;color:#64748b;font-size:11px;">
+<div>${stats.total} Requirements \xB7 ${S.risks.length} Risks \xB7 ${S.decisions.length} Decisions</div>
+<div>${S.stakeholders.length} Stakeholders \xB7 ${S.interfaces.length} Interfaces \xB7 ${S.useCases.length} Use Cases</div>
+<div style="margin-top:8px;">Average Quality Score: ${stats.avgScore}%</div>
+<div style="margin-top:16px;font-size:10px;color:#475569;">Layout: ${layoutNames[S.rptLayout]} (Option ${S.rptLayout})</div>
+</div></div>
+<div class="page-break"></div>
+<div class="toc"><h2>Table of Contents</h2>${tocHtml}</div>
+<div class="page-break"></div>
+${bodyHtml}
+<div class="footer"><span>${escXml(S.project)} \u2014 Systems Engineering Report</span><span>Generated by ReqRight v2.5.0</span></div>
+<div style="text-align:center;padding:8px;background:#0a0d12;font-size:9px;color:#4b5f82;border-top:1px solid #1c2744;">
+ReqRight v2.5.0 \xB7 Independent educational project \xB7 Based on INCOSE\xAE GtWR v4 \xB7 Not affiliated with or endorsed by INCOSE\xAE, IBM\xAE, or any standards body.</div>
+</body></html>`;
+
+  const pw=window.open("","_blank");pw.document.write(html);pw.document.close();
+  pw.onload=()=>{setTimeout(()=>{pw.print();},250);};
+  toast("PDF report opened \u2014 use Print to save as PDF","success");
 }
 
 // ─── CSV PARSER ──────────────────────────────────────────
@@ -1161,22 +1206,28 @@ function importFile(file,type){
     if(type==="json"){
       try{
         const d=JSON.parse(content);
-        if(d.requirements||d.risks||d.decisions){
+        if(d.requirements||d.risks||d.decisions||d.stakeholders||d.interfaces||d.useCases){
           History.save();
           if(d.requirements)d.requirements.forEach(r=>S.reqs.push(mkReq(r)));
           if(d.glossary)S.glossary=[...S.glossary,...d.glossary];
           if(d.decisions)d.decisions.forEach(dc=>{S.decisions.push({...mkDec(),...dc});});
           if(d.risks){d.risks.forEach(r=>{S.risks.push({...mkRisk(),...r});});_riskId=Math.max(_riskId,...d.risks.map(r=>parseInt(r.id.replace(/\D/g,""))||0));}
+          if(d.stakeholders)d.stakeholders.forEach(s=>{S.stakeholders.push({...mkStk(),...s});});
+          if(d.interfaces)d.interfaces.forEach(i=>{S.interfaces.push({...mkIfc(),...i});});
+          if(d.useCases)d.useCases.forEach(u=>{S.useCases.push({...mkUc(),...u});});
           if(d.project)S.project=d.project;
           autoSave();
           let msg="Loaded";
           if(d.requirements&&d.requirements.length)msg+=" "+d.requirements.length+" requirements";
           if(d.risks&&d.risks.length)msg+=", "+d.risks.length+" risks";
           if(d.decisions&&d.decisions.length)msg+=", "+d.decisions.length+" decisions";
+          if(d.stakeholders&&d.stakeholders.length)msg+=", "+d.stakeholders.length+" stakeholders";
+          if(d.interfaces&&d.interfaces.length)msg+=", "+d.interfaces.length+" interfaces";
+          if(d.useCases&&d.useCases.length)msg+=", "+d.useCases.length+" use cases";
           S.view="dashboard";
           toast(msg,"success");
         }else{
-          toast("No requirements, risks, or decisions found in file","danger");
+          toast("No data found in file","danger");
         }
       }catch(err){toast("Invalid JSON: "+err.message,"danger");}
       render();
@@ -1324,19 +1375,23 @@ function render(){
     const card=h("div",{className:"welcome-card"});
     card.appendChild(h("div",{className:"welcome-logo"},"RR"));
     card.appendChild(h("h1",{style:{fontSize:"28px",fontWeight:700,letterSpacing:"-0.03em",marginBottom:"8px"}},"ReqRight"));
-    card.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"14px",marginBottom:"32px",lineHeight:"1.6"}},"Free, open requirements engineering tool based on the INCOSE Guide to Writing Requirements v4. All 42 rules. AI quality improvement. ReqIF/DOORS export. Your data never leaves your machine."));
+    card.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"14px",marginBottom:"32px",lineHeight:"1.6"}},"Free, open systems engineering workbench with 6 integrated modules — Requirements, Risks, Decisions, Stakeholders, Interfaces, and Use Cases. INCOSE GtWR v4 quality analysis with 42 rules. Cross-module traceability. Configurable PDF reports. Your data never leaves your machine."));
 
     // Continue button
     if(hasAutoSave){
       const contBtn=h("button",{className:"btn btn-ai",style:{width:"100%",marginBottom:"12px"},onClick:()=>{autoLoad();setState({view:"dashboard"})}},"▶ Continue Previous Session");
       card.appendChild(contBtn);
       try{const d=JSON.parse(localStorage.getItem(S.autoSaveKey));
-        card.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"12px",marginBottom:"20px"}},`${d.reqs?.length||0} requirements · Last saved ${new Date(d.savedAt).toLocaleString()}`));
+        const parts=[(d.reqs?.length||0)+" reqs"];
+        if(d.risks?.length)parts.push(d.risks.length+" risks");
+        if(d.decisions?.length)parts.push(d.decisions.length+" decisions");
+        if(d.stakeholders?.length)parts.push(d.stakeholders.length+" stakeholders");
+        card.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"12px",marginBottom:"20px"}},parts.join(" · ")+" · Last saved "+new Date(d.savedAt).toLocaleString()));
       }catch(e){}
     }
 
     // New project
-    card.appendChild(h("button",{className:"btn btn-pri",style:{width:"100%",marginBottom:"12px",padding:"14px"},onClick:()=>{localStorage.removeItem(S.autoSaveKey);S.reqs=[];S.decisions=[];S.risks=[];S.glossary=[{term:"SOI",def:"System of Interest"},{term:"ICD",def:"Interface Control Document"},{term:"V&V",def:"Verification and Validation"},{term:"ConOps",def:"Concept of Operations"}];S.project="New Systems Engineering Project";setState({view:"dashboard"});}},"+ Start New Project"));
+    card.appendChild(h("button",{className:"btn btn-pri",style:{width:"100%",marginBottom:"12px",padding:"14px"},onClick:()=>{localStorage.removeItem(S.autoSaveKey);S.reqs=[];S.decisions=[];S.risks=[];S.stakeholders=[];S.interfaces=[];S.useCases=[];S.glossary=[{term:"SOI",def:"System of Interest"},{term:"ICD",def:"Interface Control Document"},{term:"V&V",def:"Verification and Validation"},{term:"ConOps",def:"Concept of Operations"}];S.project="New Systems Engineering Project";setState({view:"dashboard"});}},"+ Start New Project"));
 
     // Load file
     const fileLabel=h("label",{className:"file-drop",style:{display:"block",marginBottom:"16px"}});
@@ -1357,6 +1412,253 @@ function render(){
     overlay.appendChild(card);
     app.appendChild(overlay);
     return;
+  }
+
+  // ═══ GLOBAL SEARCH MODAL ═══
+  if(S.showSearch){
+    const overlay=h("div",{className:"modal-overlay",onClick:()=>{S.showSearch=false;render();}});
+    const modal=h("div",{className:"modal",style:{width:"720px",maxHeight:"80vh",overflow:"hidden",display:"flex",flexDirection:"column",padding:0},onClick:e=>e.stopPropagation()});
+    // Search header
+    const sHead=h("div",{style:{padding:"16px 20px",borderBottom:"1px solid var(--border)",display:"flex",alignItems:"center",gap:"12px"}});
+    sHead.appendChild(h("span",{style:{fontSize:"20px",opacity:.5}},"🔍"));
+    const sInput=h("input",{id:"global-search-input",className:"input",style:{flex:1,fontSize:"16px",padding:"10px 14px",border:"none",background:"transparent",color:"var(--text)",outline:"none"},placeholder:"Search across all modules...",value:S.globalSearchQ||"",onInput:e=>{S.globalSearchQ=e.target.value;render();setTimeout(()=>{const el=document.getElementById("global-search-input");if(el){el.focus();el.selectionStart=el.selectionEnd=el.value.length;}},10);}});
+    sHead.appendChild(sInput);
+    sHead.appendChild(h("kbd",{style:{fontSize:"11px",padding:"2px 8px",borderRadius:"4px",background:"var(--surface)",color:"var(--textDim)",border:"1px solid var(--border)"}},"ESC"));
+    modal.appendChild(sHead);
+
+    // Results area
+    const results=h("div",{style:{flex:1,overflowY:"auto",padding:"8px 12px",maxHeight:"calc(80vh - 80px)"}});
+    const q=(S.globalSearchQ||"").toLowerCase().trim();
+    let totalHits=0;
+
+    if(q.length>=2){
+      // Search requirements
+      const rHits=S.reqs.filter(r=>r.id.toLowerCase().includes(q)||(r.text||"").toLowerCase().includes(q)||(r.rationale||"").toLowerCase().includes(q)||(r.source||"").toLowerCase().includes(q));
+      if(rHits.length>0){
+        totalHits+=rHits.length;
+        results.appendChild(h("div",{style:{fontSize:"11px",fontWeight:700,color:"var(--textDim)",textTransform:"uppercase",letterSpacing:".06em",padding:"8px 8px 4px"}},"☰ Requirements ("+rHits.length+")"));
+        rHits.slice(0,10).forEach(r=>{
+          const row=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"8px 12px",borderRadius:"8px",cursor:"pointer",marginBottom:"2px"},onClick:()=>{S.selId=r.id;S.showSearch=false;setState({view:"editor"});}});
+          row.addEventListener("mouseenter",()=>row.style.background="var(--surface)");row.addEventListener("mouseleave",()=>row.style.background="transparent");
+          row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:700,fontSize:"12px",minWidth:"65px"}},r.id));
+          row.appendChild(h("span",{className:"badge",style:{background:"var(--accentDim)",color:"var(--accent)",fontSize:"9px",flexShrink:0}},r.type));
+          const txt=h("span",{style:{flex:1,fontSize:"13px",color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}});txt.textContent=r.text?r.text.substring(0,80):"(empty)";
+          row.appendChild(txt);
+          results.appendChild(row);
+        });
+        if(rHits.length>10)results.appendChild(h("div",{style:{padding:"4px 12px",fontSize:"11px",color:"var(--textDim)",fontStyle:"italic"}},"... and "+(rHits.length-10)+" more requirements"));
+      }
+
+      // Search risks
+      const rkHits=S.risks.filter(r=>r.id.toLowerCase().includes(q)||(r.title||"").toLowerCase().includes(q)||(r.description||"").toLowerCase().includes(q)||(r.owner||"").toLowerCase().includes(q));
+      if(rkHits.length>0){
+        totalHits+=rkHits.length;
+        results.appendChild(h("div",{style:{fontSize:"11px",fontWeight:700,color:"var(--textDim)",textTransform:"uppercase",letterSpacing:".06em",padding:"12px 8px 4px"}},"⚠ Risks ("+rkHits.length+")"));
+        rkHits.slice(0,8).forEach(r=>{
+          const row=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"8px 12px",borderRadius:"8px",cursor:"pointer",marginBottom:"2px"},onClick:()=>{S.selRiskId=r.id;S.showSearch=false;setState({view:"risks"});}});
+          row.addEventListener("mouseenter",()=>row.style.background="var(--surface)");row.addEventListener("mouseleave",()=>row.style.background="transparent");
+          row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:700,fontSize:"12px",minWidth:"65px"}},r.id));
+          const rl=riskLevel(riskScore(r.likelihood,r.impact));
+          row.appendChild(h("span",{className:"badge",style:{background:rl.color+"22",color:rl.color,fontSize:"9px",flexShrink:0}},rl.level));
+          row.appendChild(h("span",{style:{flex:1,fontSize:"13px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},r.title||"Untitled"));
+          results.appendChild(row);
+        });
+      }
+
+      // Search decisions
+      const dcHits=S.decisions.filter(d=>d.id.toLowerCase().includes(q)||(d.title||"").toLowerCase().includes(q)||(d.decision||"").toLowerCase().includes(q)||(d.rationale||"").toLowerCase().includes(q));
+      if(dcHits.length>0){
+        totalHits+=dcHits.length;
+        results.appendChild(h("div",{style:{fontSize:"11px",fontWeight:700,color:"var(--textDim)",textTransform:"uppercase",letterSpacing:".06em",padding:"12px 8px 4px"}},"📋 Decisions ("+dcHits.length+")"));
+        dcHits.slice(0,8).forEach(d=>{
+          const row=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"8px 12px",borderRadius:"8px",cursor:"pointer",marginBottom:"2px"},onClick:()=>{S.selDecId=d.id;S.showSearch=false;setState({view:"decisions"});}});
+          row.addEventListener("mouseenter",()=>row.style.background="var(--surface)");row.addEventListener("mouseleave",()=>row.style.background="transparent");
+          row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:700,fontSize:"12px",minWidth:"65px"}},d.id));
+          row.appendChild(h("span",{className:"badge",style:{background:"var(--accentDim)",color:"var(--accent)",fontSize:"9px",flexShrink:0}},d.status));
+          row.appendChild(h("span",{style:{flex:1,fontSize:"13px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},d.title||"Untitled"));
+          results.appendChild(row);
+        });
+      }
+
+      // Search stakeholders
+      const stHits=S.stakeholders.filter(s=>s.id.toLowerCase().includes(q)||(s.name||"").toLowerCase().includes(q)||(s.organization||"").toLowerCase().includes(q)||(s.concerns||"").toLowerCase().includes(q)||(s.expectations||"").toLowerCase().includes(q));
+      if(stHits.length>0){
+        totalHits+=stHits.length;
+        results.appendChild(h("div",{style:{fontSize:"11px",fontWeight:700,color:"var(--textDim)",textTransform:"uppercase",letterSpacing:".06em",padding:"12px 8px 4px"}},"👥 Stakeholders ("+stHits.length+")"));
+        stHits.slice(0,8).forEach(s=>{
+          const row=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"8px 12px",borderRadius:"8px",cursor:"pointer",marginBottom:"2px"},onClick:()=>{S.selStkId=s.id;S.showSearch=false;setState({view:"stakeholders"});}});
+          row.addEventListener("mouseenter",()=>row.style.background="var(--surface)");row.addEventListener("mouseleave",()=>row.style.background="transparent");
+          row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:700,fontSize:"12px",minWidth:"65px"}},s.id));
+          row.appendChild(h("span",{className:"badge",style:{background:"var(--accentDim)",color:"var(--accent)",fontSize:"9px",flexShrink:0}},s.role));
+          row.appendChild(h("span",{style:{flex:1,fontSize:"13px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},s.name||"Unnamed"));
+          results.appendChild(row);
+        });
+      }
+
+      // Search interfaces
+      const ifHits=S.interfaces.filter(i=>i.id.toLowerCase().includes(q)||(i.name||"").toLowerCase().includes(q)||(i.source||"").toLowerCase().includes(q)||(i.destination||"").toLowerCase().includes(q)||(i.protocol||"").toLowerCase().includes(q)||(i.dataItems||"").toLowerCase().includes(q));
+      if(ifHits.length>0){
+        totalHits+=ifHits.length;
+        results.appendChild(h("div",{style:{fontSize:"11px",fontWeight:700,color:"var(--textDim)",textTransform:"uppercase",letterSpacing:".06em",padding:"12px 8px 4px"}},"🔌 Interfaces ("+ifHits.length+")"));
+        ifHits.slice(0,8).forEach(i=>{
+          const row=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"8px 12px",borderRadius:"8px",cursor:"pointer",marginBottom:"2px"},onClick:()=>{S.selIfcId=i.id;S.showSearch=false;setState({view:"interfaces"});}});
+          row.addEventListener("mouseenter",()=>row.style.background="var(--surface)");row.addEventListener("mouseleave",()=>row.style.background="transparent");
+          row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:700,fontSize:"12px",minWidth:"65px"}},i.id));
+          row.appendChild(h("span",{className:"badge",style:{background:"var(--accentDim)",color:"var(--accent)",fontSize:"9px",flexShrink:0}},i.type));
+          row.appendChild(h("span",{style:{flex:1,fontSize:"13px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},i.name||"Unnamed"));
+          results.appendChild(row);
+        });
+      }
+
+      // Search use cases
+      const ucHits=S.useCases.filter(u=>u.id.toLowerCase().includes(q)||(u.title||"").toLowerCase().includes(q)||(u.actor||"").toLowerCase().includes(q)||(u.mainFlow||"").toLowerCase().includes(q)||(u.trigger||"").toLowerCase().includes(q));
+      if(ucHits.length>0){
+        totalHits+=ucHits.length;
+        results.appendChild(h("div",{style:{fontSize:"11px",fontWeight:700,color:"var(--textDim)",textTransform:"uppercase",letterSpacing:".06em",padding:"12px 8px 4px"}},"📐 Use Cases ("+ucHits.length+")"));
+        ucHits.slice(0,8).forEach(u=>{
+          const row=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"8px 12px",borderRadius:"8px",cursor:"pointer",marginBottom:"2px"},onClick:()=>{S.selUcId=u.id;S.showSearch=false;setState({view:"usecases"});}});
+          row.addEventListener("mouseenter",()=>row.style.background="var(--surface)");row.addEventListener("mouseleave",()=>row.style.background="transparent");
+          row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:700,fontSize:"12px",minWidth:"65px"}},u.id));
+          row.appendChild(h("span",{className:"badge",style:{background:"var(--accentDim)",color:"var(--accent)",fontSize:"9px",flexShrink:0}},u.type));
+          row.appendChild(h("span",{style:{flex:1,fontSize:"13px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},u.title||"Untitled"));
+          results.appendChild(row);
+        });
+      }
+
+      // Search glossary
+      const glHits=S.glossary.filter(g=>(g.term||"").toLowerCase().includes(q)||(g.def||"").toLowerCase().includes(q));
+      if(glHits.length>0){
+        totalHits+=glHits.length;
+        results.appendChild(h("div",{style:{fontSize:"11px",fontWeight:700,color:"var(--textDim)",textTransform:"uppercase",letterSpacing:".06em",padding:"12px 8px 4px"}},"📖 Glossary ("+glHits.length+")"));
+        glHits.slice(0,8).forEach(g=>{
+          const row=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"8px 12px",borderRadius:"8px",cursor:"pointer",marginBottom:"2px"},onClick:()=>{S.showSearch=false;setState({view:"glossary"});}});
+          row.addEventListener("mouseenter",()=>row.style.background="var(--surface)");row.addEventListener("mouseleave",()=>row.style.background="transparent");
+          row.appendChild(h("span",{style:{fontWeight:700,fontSize:"13px",color:"var(--accent)",minWidth:"100px"}},g.term));
+          row.appendChild(h("span",{style:{flex:1,fontSize:"13px",color:"var(--textMid)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},g.def));
+          results.appendChild(row);
+        });
+      }
+
+      if(totalHits===0){
+        const empty=h("div",{style:{textAlign:"center",padding:"48px 20px"}});
+        empty.appendChild(h("div",{style:{fontSize:"32px",opacity:.15,marginBottom:"8px"}},"🔍"));
+        empty.appendChild(h("div",{style:{color:"var(--textDim)",fontSize:"14px"}},"No results for \""+S.globalSearchQ+"\""));
+        empty.appendChild(h("div",{style:{color:"var(--textDim)",fontSize:"12px",marginTop:"4px"}},"Searches across requirements, risks, decisions, stakeholders, interfaces, use cases, and glossary"));
+        results.appendChild(empty);
+      }else{
+        results.appendChild(h("div",{style:{padding:"8px 12px",fontSize:"11px",color:"var(--textDim)",borderTop:"1px solid var(--border)",marginTop:"8px"}},totalHits+" result"+(totalHits!==1?"s":"")+" across all modules"));
+      }
+    }else{
+      const hint=h("div",{style:{textAlign:"center",padding:"48px 20px"}});
+      hint.appendChild(h("div",{style:{fontSize:"32px",opacity:.15,marginBottom:"8px"}},"🔍"));
+      hint.appendChild(h("div",{style:{color:"var(--textDim)",fontSize:"14px"}},"Type to search across all modules"));
+      hint.appendChild(h("div",{style:{color:"var(--textDim)",fontSize:"12px",marginTop:"8px",lineHeight:"1.8"}},"Requirements · Risks · Decisions · Stakeholders · Interfaces · Use Cases · Glossary"));
+      results.appendChild(hint);
+    }
+    modal.appendChild(results);
+    overlay.appendChild(modal);app.appendChild(overlay);
+  }
+
+  // ═══ REPORT CONFIGURATION MODAL ═══
+  if(S.showReportCfg){
+    const overlay=h("div",{className:"modal-overlay",onClick:()=>{S.showReportCfg=false;render();}});
+    const modal=h("div",{className:"modal",style:{width:"820px",maxHeight:"88vh",overflow:"auto",padding:0},onClick:e=>e.stopPropagation()});
+
+    // Header
+    const mHead=h("div",{style:{padding:"20px 24px 16px",borderBottom:"1px solid var(--border)"}});
+    mHead.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700,marginBottom:"4px"}},"📄 Generate Systems Engineering Report"));
+    mHead.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"13px"}},"Select sections to include and choose a layout, then generate your PDF report."));
+    modal.appendChild(mHead);
+
+    const mBody=h("div",{style:{padding:"20px 24px"}});
+
+    // ── Step 1: Section selection ──
+    mBody.appendChild(h("div",{style:{fontSize:"13px",fontWeight:700,color:"var(--accent)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:"12px"}},"Step 1 — Select Sections"));
+
+    const secDefs=[
+      {key:"execSummary",label:"Executive Summary",icon:"📊",desc:"Project overview, statistics, and quality metrics",always:true},
+      {key:"qualityStats",label:"Quality Statistics",icon:"★",desc:"Grade distribution, level/type/status breakdowns"},
+      {key:"stakeholders",label:"Stakeholder Register",icon:"👥",desc:S.stakeholders.length+" stakeholders",disabled:S.stakeholders.length===0},
+      {key:"useCases",label:"Use Cases & Scenarios",icon:"📐",desc:S.useCases.length+" use cases",disabled:S.useCases.length===0},
+      {key:"requirements",label:"Requirements Register",icon:"☰",desc:S.reqs.length+" requirements",always:true},
+      {key:"interfaces",label:"Interface Definitions",icon:"🔌",desc:S.interfaces.length+" interfaces",disabled:S.interfaces.length===0},
+      {key:"risks",label:"Risk Register",icon:"⚠",desc:S.risks.length+" risks",disabled:S.risks.length===0},
+      {key:"decisions",label:"Decision Log",icon:"📋",desc:S.decisions.length+" decisions",disabled:S.decisions.length===0},
+      {key:"hierarchy",label:"Traceability Tree",icon:"🌳",desc:"Parent-child requirement hierarchy"},
+      {key:"traceability",label:"Cross-Module Traceability",icon:"◫",desc:"Requirements linked across all modules"},
+      {key:"vv",label:"Verification & Validation",icon:"✓",desc:"V&V method assignments per requirement"},
+      {key:"glossary",label:"Glossary",icon:"📖",desc:S.glossary.length+" terms",disabled:S.glossary.length===0},
+    ];
+
+    const secGrid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px",marginBottom:"24px"}});
+    secDefs.forEach(sd=>{
+      const isOn=S.rptSections[sd.key];
+      const isDisabled=sd.disabled;
+      const card=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"10px 14px",borderRadius:"10px",border:"1px solid "+(isDisabled?"var(--border)":isOn?"var(--accent)":"var(--border)"),background:isDisabled?"transparent":isOn?"var(--accentDim)":"transparent",cursor:isDisabled?"not-allowed":"pointer",opacity:isDisabled?.4:1,transition:"all .15s ease"},onClick:()=>{
+        if(isDisabled||sd.always)return;
+        S.rptSections[sd.key]=!S.rptSections[sd.key];render();
+      }});
+      // Checkbox
+      const chk=h("div",{style:{width:"20px",height:"20px",borderRadius:"5px",border:"2px solid "+(isOn?"var(--accent)":"var(--border)"),background:isOn?"var(--accent)":"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,fontSize:"12px",color:"#fff",fontWeight:700}});
+      if(isOn)chk.textContent="✓";
+      if(sd.always){chk.style.opacity=".6";chk.title="Always included";}
+      card.appendChild(chk);
+      const info=h("div",{style:{flex:1,minWidth:0}});
+      info.appendChild(h("div",{style:{fontSize:"13px",fontWeight:600,display:"flex",alignItems:"center",gap:"6px"}},sd.icon+" "+sd.label));
+      info.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",marginTop:"1px"}},sd.desc));
+      card.appendChild(info);
+      if(!isDisabled){card.addEventListener("mouseenter",()=>{if(!sd.always)card.style.borderColor="var(--accent)";});card.addEventListener("mouseleave",()=>{if(!sd.always&&!S.rptSections[sd.key])card.style.borderColor="var(--border)";});}
+      secGrid.appendChild(card);
+    });
+    mBody.appendChild(secGrid);
+
+    // Quick actions
+    const qRow=h("div",{style:{display:"flex",gap:"8px",marginBottom:"24px"}});
+    qRow.appendChild(h("button",{className:"btn btn-sec",style:{fontSize:"11px",padding:"4px 12px"},onClick:()=>{Object.keys(S.rptSections).forEach(k=>S.rptSections[k]=true);render();}},"Select All"));
+    qRow.appendChild(h("button",{className:"btn btn-sec",style:{fontSize:"11px",padding:"4px 12px"},onClick:()=>{Object.keys(S.rptSections).forEach(k=>{const def=secDefs.find(d=>d.key===k);S.rptSections[k]=def?.always||false;});render();}},"Minimum"));
+    const selCount=Object.values(S.rptSections).filter(Boolean).length;
+    qRow.appendChild(h("span",{style:{fontSize:"11px",color:"var(--textDim)",alignSelf:"center",marginLeft:"8px"}},selCount+" of "+Object.keys(S.rptSections).length+" sections selected"));
+    mBody.appendChild(qRow);
+
+    // ── Step 2: Layout selection ──
+    mBody.appendChild(h("div",{style:{fontSize:"13px",fontWeight:700,color:"var(--accent)",textTransform:"uppercase",letterSpacing:".06em",marginBottom:"12px"}},"Step 2 — Choose Layout"));
+
+    const layouts=[
+      {id:"A",title:"ISO/INCOSE Standard",desc:"Stakeholders → Use Cases → Requirements → Interfaces → Risks → Decisions → Traceability → Glossary",tag:"Formal Reviews"},
+      {id:"B",title:"NASA-style Hybrid",desc:"Requirements → Use Cases → Interfaces → Stakeholders → Risks → Decisions → Traceability → Glossary",tag:"Aerospace / Defence"},
+      {id:"C",title:"Management-first",desc:"Exec Summary → Quality → Stakeholders → Use Cases → Requirements → Interfaces → Risks → Decisions → Traceability → Glossary",tag:"Leadership Audience"},
+    ];
+
+    const layGrid=h("div",{style:{display:"flex",gap:"10px",marginBottom:"24px"}});
+    layouts.forEach(lo=>{
+      const isSel=S.rptLayout===lo.id;
+      const lCard=h("div",{style:{flex:1,padding:"14px",borderRadius:"10px",border:"2px solid "+(isSel?"var(--accent)":"var(--border)"),background:isSel?"var(--accentDim)":"transparent",cursor:"pointer",transition:"all .15s ease"},onClick:()=>{S.rptLayout=lo.id;render();}});
+      const top=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"6px"}});
+      top.appendChild(h("div",{style:{fontSize:"14px",fontWeight:700,color:isSel?"var(--accent)":"var(--text)"}},"Option "+lo.id));
+      if(isSel)top.appendChild(h("div",{style:{width:"20px",height:"20px",borderRadius:"50%",background:"var(--accent)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"11px",color:"#fff",fontWeight:700}},"✓"));
+      else top.appendChild(h("div",{style:{width:"20px",height:"20px",borderRadius:"50%",border:"2px solid var(--border)"}}));
+      lCard.appendChild(top);
+      lCard.appendChild(h("div",{style:{fontSize:"13px",fontWeight:600,marginBottom:"4px"}},lo.title));
+      lCard.appendChild(h("div",{style:{fontSize:"10px",color:"var(--textDim)",lineHeight:"1.5",marginBottom:"6px"}},lo.desc));
+      lCard.appendChild(h("span",{className:"badge",style:{background:isSel?"var(--accent)22":"var(--surface)",color:isSel?"var(--accent)":"var(--textDim)",fontSize:"9px"}},lo.tag));
+      lCard.addEventListener("mouseenter",()=>{lCard.style.borderColor="var(--accent)";});
+      lCard.addEventListener("mouseleave",()=>{if(S.rptLayout!==lo.id)lCard.style.borderColor="var(--border)";});
+      layGrid.appendChild(lCard);
+    });
+    mBody.appendChild(layGrid);
+
+    modal.appendChild(mBody);
+
+    // Footer
+    const mFoot=h("div",{style:{padding:"16px 24px",borderTop:"1px solid var(--border)",display:"flex",justifyContent:"space-between",alignItems:"center"}});
+    mFoot.appendChild(h("span",{style:{fontSize:"11px",color:"var(--textDim)"}},"Report will open in a new tab — use Print → Save as PDF"));
+    const fBtns=h("div",{style:{display:"flex",gap:"8px"}});
+    fBtns.appendChild(h("button",{className:"btn btn-sec",onClick:()=>{S.showReportCfg=false;render();}},"Cancel"));
+    fBtns.appendChild(h("button",{className:"btn btn-pri",style:{padding:"10px 28px",fontSize:"14px"},onClick:()=>{S.showReportCfg=false;exportPDF();}},"📄 Generate Report"));
+    mFoot.appendChild(fBtns);
+    modal.appendChild(mFoot);
+
+    overlay.appendChild(modal);app.appendChild(overlay);
   }
 
   // ═══ IMPORT MODAL ═══
@@ -1410,33 +1712,22 @@ function render(){
 
   // ═══ HEADER ═══
   const header=h("header",{className:"header"});
+
+  // ── Row 1: Logo + Actions ──
+  const headerTop=h("div",{className:"header-top"});
   const logo=h("div",{style:{display:"flex",alignItems:"center",gap:"14px"}});
   logo.appendChild(h("div",{style:{width:"38px",height:"38px",borderRadius:"10px",background:"linear-gradient(135deg,var(--accent),var(--purple))",display:"flex",alignItems:"center",justifyContent:"center",fontSize:"15px",fontWeight:800}},"RR"));
   const logoText=h("div",{});
   logoText.appendChild(h("div",{style:{fontSize:"16px",fontWeight:700,letterSpacing:"-0.02em"}},"ReqRight"));
-  logoText.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",marginTop:"1px"}},"GtWR v4 · 42 Rules · AI Quality · ReqIF Export · Free & Open"));
-  logo.appendChild(logoText);header.appendChild(logo);
-
-  const nav=h("div",{className:"nav"});
-  const reqCount=S.reqs.length;
-  const glossCount=S.glossary.length;
-  const decCount=S.decisions.length;
-  const riskCount=S.risks.length;
-  const lowQualCount=S.reqs.filter(r=>analyze(r.text).score<60).length;
-  const navTabs=[{k:"dashboard",l:"◉ Dashboard",c:null},{k:"editor",l:"✎ Author",c:reqCount},{k:"requirements",l:"☰ Register",c:reqCount},{k:"traceability",l:"⊞ Trace",c:null},{k:"sep"},{k:"risks",l:"⚠ Risks",c:riskCount},{k:"decisions",l:"📋 Decisions",c:decCount},{k:"vv",l:"✓ V&V",c:null},{k:"rules",l:"⚙ Rules",c:null},{k:"glossary",l:"📖 Glossary",c:glossCount}];
-  navTabs.forEach(t=>{
-    if(t.k==="sep"){nav.appendChild(h("div",{className:"nav-sep"}));return;}
-    const btn=h("button",{className:S.view===t.k?"active":"",onClick:()=>setState({view:t.k})});
-    btn.appendChild(document.createTextNode(t.l));
-    if(t.c!==null&&t.c>0){
-      const badge=h("span",{style:{marginLeft:"6px",fontSize:"12px",padding:"1px 6px",borderRadius:"8px",background:S.view===t.k?"rgba(0,0,0,0.3)":"var(--border)",color:S.view===t.k?"#fff":"var(--textDim)",fontWeight:600}},String(t.c));
-      btn.appendChild(badge);
-    }
-    nav.appendChild(btn);
-  });
-  header.appendChild(nav);
+  logoText.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",marginTop:"1px"}},"Systems Engineering Workbench · INCOSE GtWR v4 · 42 Rules"));
+  logo.appendChild(logoText);headerTop.appendChild(logo);
 
   const hActions=h("div",{style:{display:"flex",gap:"6px",alignItems:"center"}});
+  // Global search button
+  const searchBtn=h("button",{className:"btn btn-sec",style:{borderColor:"var(--border)",display:"flex",alignItems:"center",gap:"6px",padding:"6px 12px"},onClick:()=>{S.showSearch=true;S.globalSearchQ="";render();setTimeout(()=>document.getElementById("global-search-input")?.focus(),50);}});
+  searchBtn.appendChild(h("span",{style:{fontSize:"14px"}},"🔍"));
+  searchBtn.appendChild(h("span",{style:{fontSize:"11px",color:"var(--textDim)",fontFamily:"var(--mono)"}},"⌘K"));
+  hActions.appendChild(searchBtn);
   hActions.appendChild(h("button",{className:"btn btn-pri",onClick:addReq},"+ New"));
 
   // File dropdown (Save/Load/Export consolidated)
@@ -1456,7 +1747,7 @@ function render(){
     dd.appendChild(loadLabel);
     dd.appendChild(h("div",{style:{borderTop:"1px solid var(--border)",margin:"4px 0"}}));
     // Exports
-    [{l:"📄 Export PDF Report",fn:exportPDF},{l:"📊 Export CSV",fn:exportCSV},{l:"🔗 Export ReqIF (DOORS)",fn:exportReqIF},{l:"💾 Export JSON Archive",fn:exportJSON}].forEach(({l,fn})=>{
+    [{l:"📄 Export Full Report (PDF)",fn:()=>{S.showReportCfg=true;S.showExport=false;render();}},{l:"📊 Export CSV",fn:exportCSV},{l:"🔗 Export ReqIF (DOORS)",fn:exportReqIF},{l:"💾 Export JSON Archive",fn:exportJSON}].forEach(({l,fn})=>{
       const item=h("button",{style:{display:"block",width:"100%",padding:"10px 16px",border:"none",background:"transparent",color:"var(--text)",fontSize:"13px",textAlign:"left",cursor:"pointer",borderRadius:"6px",fontFamily:"inherit"},onClick:()=>{fn();S.showExport=false;render();}},l);
       item.addEventListener("mouseenter",()=>item.style.background="var(--surfAlt)");item.addEventListener("mouseleave",()=>item.style.background="transparent");
       dd.appendChild(item);
@@ -1480,7 +1771,29 @@ function render(){
   const helpBtn=h("a",{href:"https://github.com/ssaleem74/reqright#readme",target:"_blank",className:"btn btn-sec",style:{borderColor:"#38bdf844",color:"var(--accent)",textDecoration:"none",display:"inline-flex",alignItems:"center"}},"?");
   hActions.appendChild(helpBtn);
   
-  header.appendChild(hActions);
+  headerTop.appendChild(hActions);
+  header.appendChild(headerTop);
+
+  // ── Row 2: Navigation Tabs ──
+  const headerNav=h("div",{className:"header-nav"});
+  const nav=h("div",{className:"nav"});
+  const reqCount=S.reqs.length;
+  const glossCount=S.glossary.length;
+  const decCount=S.decisions.length;
+  const riskCount=S.risks.length;
+  const navTabs=[{k:"dashboard",l:"◉ Dashboard",c:null},{k:"editor",l:"✎ Author",c:reqCount},{k:"requirements",l:"☰ Register",c:reqCount},{k:"traceability",l:"⊞ Trace",c:null},{k:"sep"},{k:"risks",l:"⚠ Risks",c:riskCount},{k:"decisions",l:"📋 Decisions",c:decCount},{k:"stakeholders",l:"👥 Stakeholders",c:S.stakeholders.length||null},{k:"interfaces",l:"🔌 Interfaces",c:S.interfaces.length||null},{k:"usecases",l:"📐 Use Cases",c:S.useCases.length||null},{k:"sep"},{k:"vv",l:"✓ V&V",c:null},{k:"rules",l:"⚙ Rules",c:null},{k:"glossary",l:"📖 Glossary",c:glossCount}];
+  navTabs.forEach(t=>{
+    if(t.k==="sep"){nav.appendChild(h("div",{className:"nav-sep"}));return;}
+    const btn=h("button",{className:S.view===t.k?"active":"",onClick:()=>setState({view:t.k})});
+    btn.appendChild(document.createTextNode(t.l));
+    if(t.c!==null&&t.c>0){
+      const badge=h("span",{style:{marginLeft:"6px",fontSize:"12px",padding:"1px 6px",borderRadius:"8px",background:S.view===t.k?"rgba(0,0,0,0.3)":"var(--border)",color:S.view===t.k?"#fff":"var(--textDim)",fontWeight:600}},String(t.c));
+      btn.appendChild(badge);
+    }
+    nav.appendChild(btn);
+  });
+  headerNav.appendChild(nav);
+  header.appendChild(headerNav);
   app.appendChild(header);
 
   const main=h("main",{style:{padding:"24px 28px",maxWidth:"1680px",margin:"0 auto"}});
@@ -1504,7 +1817,9 @@ function render(){
     main.appendChild(sg);
 
     // Risk + Decision summaries side by side
-    const summaryRow=h("div",{style:{display:"grid",gridTemplateColumns:S.risks.length>0&&S.decisions.length>0?"1fr 1fr":"1fr",gap:"16px",marginBottom:"16px"}});
+    const _sumCols=[S.risks.length>0,S.decisions.length>0,S.stakeholders.length>0,S.interfaces.length>0,S.useCases.length>0].filter(Boolean).length;
+    const _gridCols=_sumCols<=3?"repeat("+_sumCols+",1fr)":"repeat("+Math.min(_sumCols,3)+",1fr)";
+    const summaryRow=h("div",{style:{display:"grid",gridTemplateColumns:_gridCols,gap:"16px",marginBottom:"16px"}});
 
     // Risk Summary Card
     if(S.risks.length>0){
@@ -1557,7 +1872,96 @@ function render(){
       });
       summaryRow.appendChild(decCard);
     }
-    if(S.risks.length>0||S.decisions.length>0)main.appendChild(summaryRow);
+
+    // Stakeholder Summary
+    if(S.stakeholders.length>0){
+      const stkCard=h("div",{className:"card"});
+      const stkHdr=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px"}});
+      stkHdr.appendChild(h("h3",{style:{fontSize:"14px",fontWeight:600}},"👥 Stakeholder Summary"));
+      stkHdr.appendChild(h("button",{className:"btn btn-sec",style:{fontSize:"12px",padding:"4px 12px"},onClick:()=>setState({view:"stakeholders"})},"View All →"));
+      stkCard.appendChild(stkHdr);
+      const stkInflClr={Critical:"var(--danger)",High:"var(--orange)",Medium:"var(--warn)",Low:"var(--success)"};
+      const stkGrid=h("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"8px",marginBottom:"10px"}});
+      STK_INFLUENCE.forEach(level=>{
+        const cnt=S.stakeholders.filter(s=>s.influence===level).length;
+        const clr=stkInflClr[level];
+        const box=h("div",{style:{background:clr+"15",borderRadius:"8px",padding:"8px",textAlign:"center"}});
+        box.appendChild(h("div",{className:"mono",style:{fontSize:"18px",fontWeight:700,color:clr}},String(cnt)));
+        box.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)"}},level));
+        stkGrid.appendChild(box);
+      });
+      stkCard.appendChild(stkGrid);
+      // Show top stakeholders
+      S.stakeholders.slice(0,3).forEach(s=>{
+        const row=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"6px 10px",background:"var(--surface)",borderRadius:"6px",marginBottom:"4px",cursor:"pointer",fontSize:"12px"},onClick:()=>{S.selStkId=s.id;setState({view:"stakeholders"});}});
+        row.addEventListener("mouseenter",()=>row.style.background="var(--surfAlt)");row.addEventListener("mouseleave",()=>row.style.background="var(--surface)");
+        row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:700,minWidth:"60px"}},s.id));
+        row.appendChild(h("span",{style:{flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},s.name||"Unnamed"));
+        const ic=stkInflClr[s.influence]||"var(--textDim)";
+        row.appendChild(h("span",{className:"badge",style:{background:ic+"22",color:ic}},s.influence));
+        stkCard.appendChild(row);
+      });
+      summaryRow.appendChild(stkCard);
+    }
+
+    // Interface Summary
+    if(S.interfaces.length>0){
+      const ifcCard=h("div",{className:"card"});
+      const ifcHdr=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px"}});
+      ifcHdr.appendChild(h("h3",{style:{fontSize:"14px",fontWeight:600}},"🔌 Interface Summary"));
+      ifcHdr.appendChild(h("button",{className:"btn btn-sec",style:{fontSize:"12px",padding:"4px 12px"},onClick:()=>setState({view:"interfaces"})},"View All →"));
+      ifcCard.appendChild(ifcHdr);
+      const ifcStatusClr2={Draft:"var(--textDim)",Defined:"var(--accent)",Agreed:"var(--success)",Verified:"var(--success)",Deprecated:"var(--danger)"};
+      const ifcSGrid=h("div",{style:{display:"grid",gridTemplateColumns:"repeat("+Math.min(IFC_STATUSES.length,5)+",1fr)",gap:"6px",marginBottom:"10px"}});
+      IFC_STATUSES.forEach(st=>{
+        const cnt=S.interfaces.filter(i=>i.status===st).length;
+        const clr=ifcStatusClr2[st]||"var(--textDim)";
+        const box=h("div",{style:{background:clr+"15",borderRadius:"6px",padding:"6px",textAlign:"center"}});
+        box.appendChild(h("div",{className:"mono",style:{fontSize:"16px",fontWeight:700,color:clr}},String(cnt)));
+        box.appendChild(h("div",{style:{fontSize:"10px",color:"var(--textDim)"}},st));
+        ifcSGrid.appendChild(box);
+      });
+      ifcCard.appendChild(ifcSGrid);
+      S.interfaces.slice(0,3).forEach(i=>{
+        const row=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"6px 10px",background:"var(--surface)",borderRadius:"6px",marginBottom:"4px",cursor:"pointer",fontSize:"12px"},onClick:()=>{S.selIfcId=i.id;setState({view:"interfaces"});}});
+        row.addEventListener("mouseenter",()=>row.style.background="var(--surfAlt)");row.addEventListener("mouseleave",()=>row.style.background="var(--surface)");
+        row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:700,minWidth:"60px"}},i.id));
+        row.appendChild(h("span",{style:{flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},i.name||"Unnamed"));
+        row.appendChild(h("span",{className:"badge",style:{background:"var(--accentDim)",color:"var(--accent)",fontSize:"10px"}},i.type));
+        ifcCard.appendChild(row);
+      });
+      summaryRow.appendChild(ifcCard);
+    }
+
+    // Use Case Summary
+    if(S.useCases.length>0){
+      const ucCard=h("div",{className:"card"});
+      const ucHdr=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"14px"}});
+      ucHdr.appendChild(h("h3",{style:{fontSize:"14px",fontWeight:600}},"📐 Use Case Summary"));
+      ucHdr.appendChild(h("button",{className:"btn btn-sec",style:{fontSize:"12px",padding:"4px 12px"},onClick:()=>setState({view:"usecases"})},"View All →"));
+      ucCard.appendChild(ucHdr);
+      const ucPriClrD={Critical:"var(--danger)",High:"var(--orange)",Medium:"var(--warn)",Low:"var(--success)"};
+      const ucPriG=h("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"8px",marginBottom:"10px"}});
+      UC_PRIORITIES.forEach(p=>{
+        const cnt=S.useCases.filter(u=>u.priority===p).length;
+        const clr=ucPriClrD[p];
+        const box=h("div",{style:{background:clr+"15",borderRadius:"8px",padding:"8px",textAlign:"center"}});
+        box.appendChild(h("div",{className:"mono",style:{fontSize:"18px",fontWeight:700,color:clr}},String(cnt)));
+        box.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)"}},p));
+        ucPriG.appendChild(box);
+      });
+      ucCard.appendChild(ucPriG);
+      S.useCases.slice(0,3).forEach(u=>{
+        const row=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"6px 10px",background:"var(--surface)",borderRadius:"6px",marginBottom:"4px",cursor:"pointer",fontSize:"12px"},onClick:()=>{S.selUcId=u.id;setState({view:"usecases"});}});
+        row.addEventListener("mouseenter",()=>row.style.background="var(--surfAlt)");row.addEventListener("mouseleave",()=>row.style.background="var(--surface)");
+        row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:700,minWidth:"55px"}},u.id));
+        row.appendChild(h("span",{style:{flex:1,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},u.title||"Untitled"));
+        row.appendChild(h("span",{className:"badge",style:{background:"var(--accentDim)",color:"var(--accent)",fontSize:"10px"}},u.type));
+        ucCard.appendChild(row);
+      });
+      summaryRow.appendChild(ucCard);
+    }
+    if(S.risks.length>0||S.decisions.length>0||S.stakeholders.length>0||S.interfaces.length>0||S.useCases.length>0)main.appendChild(summaryRow);
     const pc=h("div",{className:"card"});
     pc.appendChild(h("h3",{style:{fontSize:"14px",fontWeight:600,marginBottom:"14px"}},"INCOSE Requirement Patterns — Click to create"));
     const pg=h("div",{style:{display:"grid",gridTemplateColumns:"repeat(auto-fill,minmax(260px,1fr))",gap:"10px"}});
@@ -1884,8 +2288,18 @@ function render(){
 
   // ═══ TRACEABILITY ═══
   if(S.view==="traceability"){
-    main.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700,marginBottom:"20px"}},"Traceability Matrix"));
-    if(S.reqs.length===0){
+    // Header with sub-tabs
+    const tHeader=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"20px"}});
+    tHeader.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700}},"Traceability"));
+    const subTabs=h("div",{style:{display:"flex",gap:"4px",background:"var(--surface)",borderRadius:"8px",padding:"3px"}});
+    [{k:"hierarchy",l:"⊞ Hierarchy"},{k:"matrix",l:"◫ Cross-Module Matrix"}].forEach(t=>{
+      const isActive=S.traceTab===t.k;
+      subTabs.appendChild(h("button",{className:"btn",style:{padding:"6px 14px",fontSize:"12px",fontWeight:600,background:isActive?"var(--accent)":"transparent",color:isActive?"#fff":"var(--textMid)",borderRadius:"6px",border:"none",cursor:"pointer"},onClick:()=>{S.traceTab=t.k;render();}},t.l));
+    });
+    tHeader.appendChild(subTabs);
+    main.appendChild(tHeader);
+
+    if(S.reqs.length===0&&S.traceTab==="hierarchy"){
       const emptyT=h("div",{className:"card",style:{textAlign:"center",padding:"48px 32px"}});
       emptyT.appendChild(h("div",{style:{fontSize:"40px",opacity:".1",marginBottom:"12px"}},"⊞"));
       emptyT.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"15px",fontWeight:600,marginBottom:"8px"}},"No Traceability Data"));
@@ -1893,8 +2307,9 @@ function render(){
       emptyT.appendChild(h("button",{className:"btn btn-pri",style:{padding:"8px 20px"},onClick:()=>setState({view:"editor"})},"Go to Author →"));
       main.appendChild(emptyT);
     }
-    else{
-      // Build tree helper
+
+    // ─── HIERARCHY SUB-TAB ───
+    if(S.traceTab==="hierarchy"&&S.reqs.length>0){
       function renderTreeNode(req,depth){
         const a=analyze(req.text);const sc=a.score>=80?"var(--success)":a.score>=60?"var(--warn)":"var(--danger)";
         const children=S.reqs.filter(c=>c.parent===req.id);
@@ -1902,11 +2317,9 @@ function render(){
         const row=h("div",{style:{display:"flex",alignItems:"center",gap:"10px",padding:"10px 14px",background:depth%2===0?"var(--card)":"var(--surface)",borderRadius:"8px",marginBottom:"4px",cursor:"pointer",border:"1px solid var(--border)",transition:"border-color .15s"},onClick:()=>{S.selId=req.id;setState({view:"editor"});}});
         row.addEventListener("mouseenter",()=>row.style.borderColor="var(--accent)");
         row.addEventListener("mouseleave",()=>row.style.borderColor="var(--border)");
-        // Indent indicator
         if(depth>0){
           row.insertBefore(h("span",{style:{color:"var(--textDim)",fontSize:"12px",marginRight:"-4px"}},"└"),row.firstChild);
         }
-        // Tree connector line
         if(children.length>0){
           row.appendChild(h("span",{style:{color:"var(--teal)",fontSize:"12px",fontWeight:600}},"▼"));
         }else{
@@ -1925,7 +2338,6 @@ function render(){
         return node;
       }
 
-      // Stats bar
       const tStats=h("div",{style:{display:"flex",gap:"16px",marginBottom:"20px",flexWrap:"wrap"}});
       REQ_LEVELS.forEach(level=>{
         const cnt=S.reqs.filter(r=>r.level===level).length;
@@ -1943,14 +2355,11 @@ function render(){
       }
       main.appendChild(tStats);
 
-      // Render tree from roots
       const treeCard=h("div",{className:"card",style:{padding:"16px"}});
       treeCard.appendChild(h("div",{style:{fontSize:"13px",fontWeight:600,marginBottom:"12px",display:"flex",alignItems:"center",gap:"8px"}},
         h("span",{},"Requirement Hierarchy"),
         h("span",{style:{fontSize:"11px",color:"var(--textDim)",fontWeight:400}},"Click any item to edit in Author view")));
-      // Find roots (no parent, or parent doesn't exist)
       const roots=S.reqs.filter(r=>!r.parent||!S.reqs.find(p=>p.id===r.parent));
-      // Group roots by level
       const rootsByLevel={};roots.forEach(r=>{
         if(!rootsByLevel[r.level])rootsByLevel[r.level]=[];
         rootsByLevel[r.level].push(r);
@@ -1965,7 +2374,6 @@ function render(){
       });
       main.appendChild(treeCard);
 
-      // Orphans warning
       const orphans=S.reqs.filter(r=>!r.parent&&r.level!=="Stakeholder Need"&&S.reqs.filter(c=>c.parent===r.id).length===0);
       if(orphans.length){
         const oc=h("div",{className:"card",style:{background:"var(--danger)08",borderColor:"var(--danger)22",marginTop:"14px"}});
@@ -1973,6 +2381,194 @@ function render(){
         const tags=h("div",{style:{display:"flex",flexWrap:"wrap",gap:"6px"}});
         orphans.forEach(r=>tags.appendChild(h("span",{className:"badge",style:{background:"var(--danger)22",color:"var(--danger)",cursor:"pointer"},onClick:()=>{S.selId=r.id;setState({view:"editor"});}},r.id)));
         oc.appendChild(tags);main.appendChild(oc);
+      }
+    }
+
+    // ─── CROSS-MODULE MATRIX SUB-TAB ───
+    if(S.traceTab==="matrix"){
+      // Build reverse lookup maps
+      const risksByReq={};S.risks.forEach(rk=>{/* risks don't directly link to reqs yet, check if req mentions risk */});
+      const decsByReq={};S.decisions.forEach(dc=>(dc.affectedReqs||[]).forEach(rid=>{if(!decsByReq[rid])decsByReq[rid]=[];decsByReq[rid].push(dc.id);}));
+      const stksByReq={};S.stakeholders.forEach(st=>(st.linkedNeeds||[]).forEach(rid=>{if(!stksByReq[rid])stksByReq[rid]=[];stksByReq[rid].push(st.id);}));
+      const ifcsByReq={};S.interfaces.forEach(ifc=>(ifc.linkedReqs||[]).forEach(rid=>{if(!ifcsByReq[rid])ifcsByReq[rid]=[];ifcsByReq[rid].push(ifc.id);}));
+      const ucsByReq={};S.useCases.forEach(uc=>(uc.derivedReqs||[]).forEach(rid=>{if(!ucsByReq[rid])ucsByReq[rid]=[];ucsByReq[rid].push(uc.id);}));
+
+      // Coverage summary
+      const modules=[
+        {key:"decisions",label:"📋 Decisions",map:decsByReq,count:S.decisions.length,view:"decisions",selKey:"selDecId"},
+        {key:"stakeholders",label:"👥 Stakeholders",map:stksByReq,count:S.stakeholders.length,view:"stakeholders",selKey:"selStkId"},
+        {key:"interfaces",label:"🔌 Interfaces",map:ifcsByReq,count:S.interfaces.length,view:"interfaces",selKey:"selIfcId"},
+        {key:"usecases",label:"📐 Use Cases",map:ucsByReq,count:S.useCases.length,view:"usecases",selKey:"selUcId"}
+      ];
+
+      // Coverage stats cards
+      const covStats=h("div",{style:{display:"grid",gridTemplateColumns:"repeat("+modules.length+",1fr)",gap:"12px",marginBottom:"20px"}});
+      modules.forEach(mod=>{
+        const linked=S.reqs.filter(r=>mod.map[r.id]&&mod.map[r.id].length>0).length;
+        const pct=S.reqs.length>0?Math.round(linked/S.reqs.length*100):0;
+        const clr=pct>=80?"var(--success)":pct>=50?"var(--warn)":"var(--danger)";
+        const cCard=h("div",{className:"card",style:{textAlign:"center",padding:"14px"}});
+        cCard.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",marginBottom:"6px"}},mod.label));
+        cCard.appendChild(h("div",{className:"mono",style:{fontSize:"28px",fontWeight:700,color:clr}},pct+"%"));
+        cCard.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",marginTop:"4px"}},linked+"/"+S.reqs.length+" reqs linked"));
+        // Mini bar
+        const bar=h("div",{style:{height:"4px",background:"var(--surface)",borderRadius:"2px",marginTop:"8px",overflow:"hidden"}});
+        bar.appendChild(h("div",{style:{height:"100%",width:pct+"%",background:clr,borderRadius:"2px"}}));
+        cCard.appendChild(bar);
+        covStats.appendChild(cCard);
+      });
+      main.appendChild(covStats);
+
+      if(S.reqs.length===0){
+        const emptyM=h("div",{className:"card",style:{textAlign:"center",padding:"48px 32px"}});
+        emptyM.appendChild(h("div",{style:{fontSize:"40px",opacity:".1",marginBottom:"12px"}},"◫"));
+        emptyM.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"15px",fontWeight:600,marginBottom:"8px"}},"No Requirements to Trace"));
+        emptyM.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"13px",marginBottom:"16px"}},"Add requirements first, then link them to other modules to build the cross-module traceability matrix."));
+        emptyM.appendChild(h("button",{className:"btn btn-pri",style:{padding:"8px 20px"},onClick:()=>setState({view:"editor"})},"Go to Author →"));
+        main.appendChild(emptyM);
+      }else{
+        // Matrix table
+        const tableWrap=h("div",{className:"card",style:{overflow:"auto",padding:"0"}});
+        const table=h("table",{style:{width:"100%",borderCollapse:"collapse",fontSize:"12px"}});
+
+        // Header
+        const thead=h("thead",{});
+        const hRow=h("tr",{});
+        [{l:"Requirement",w:"200px"},{l:"Level",w:"90px"},{l:"Status",w:"70px"}].forEach(c=>{
+          hRow.appendChild(h("th",{style:{padding:"10px 12px",textAlign:"left",background:"var(--surface)",borderBottom:"2px solid var(--border)",fontWeight:700,fontSize:"11px",textTransform:"uppercase",letterSpacing:".04em",color:"var(--textDim)",position:"sticky",top:0,minWidth:c.w}},c.l));
+        });
+        modules.forEach(mod=>{
+          hRow.appendChild(h("th",{style:{padding:"10px 12px",textAlign:"center",background:"var(--surface)",borderBottom:"2px solid var(--border)",fontWeight:700,fontSize:"11px",textTransform:"uppercase",letterSpacing:".04em",color:"var(--textDim)",position:"sticky",top:0,minWidth:"100px"}},mod.label));
+        });
+        hRow.appendChild(h("th",{style:{padding:"10px 12px",textAlign:"center",background:"var(--surface)",borderBottom:"2px solid var(--border)",fontWeight:700,fontSize:"11px",color:"var(--textDim)",position:"sticky",top:0,minWidth:"60px"}},"Coverage"));
+        thead.appendChild(hRow);
+        table.appendChild(thead);
+
+        // Body
+        const tbody=h("tbody",{});
+        const sortedReqs=[...S.reqs].sort((a,b)=>a.id.localeCompare(b.id));
+        sortedReqs.forEach((req,idx)=>{
+          const tr=h("tr",{style:{background:idx%2===0?"transparent":"var(--surface)06"}});
+          tr.addEventListener("mouseenter",()=>tr.style.background="var(--accentDim)11");
+          tr.addEventListener("mouseleave",()=>tr.style.background=idx%2===0?"transparent":"var(--surface)06");
+
+          // Req ID + text
+          const reqTd=h("td",{style:{padding:"8px 12px",borderBottom:"1px solid var(--border)",cursor:"pointer"},onClick:()=>{S.selId=req.id;setState({view:"editor"});}});
+          reqTd.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:700,marginRight:"8px"}},req.id));
+          reqTd.appendChild(h("span",{style:{color:"var(--text)",fontSize:"12px"}},req.text?req.text.substring(0,50)+(req.text.length>50?"...":""):"(empty)"));
+          tr.appendChild(reqTd);
+
+          // Level
+          const lvlShort=req.level.replace(" Requirement","").replace("Stakeholder ","STK ");
+          tr.appendChild(h("td",{style:{padding:"8px 12px",borderBottom:"1px solid var(--border)"}},h("span",{className:"badge",style:{background:"var(--accentDim)",color:"var(--accent)",fontSize:"10px"}},lvlShort)));
+
+          // Status
+          const stClr=req.status==="Approved"?"var(--success)":req.status==="Draft"?"var(--textDim)":"var(--accent)";
+          tr.appendChild(h("td",{style:{padding:"8px 12px",borderBottom:"1px solid var(--border)"}},h("span",{style:{fontSize:"11px",color:stClr}},req.status)));
+
+          // Module columns
+          let linkCount=0;
+          modules.forEach(mod=>{
+            const linked=mod.map[req.id]||[];
+            linkCount+=linked.length;
+            const td=h("td",{style:{padding:"6px 8px",borderBottom:"1px solid var(--border)",textAlign:"center"}});
+            if(linked.length===0){
+              td.appendChild(h("span",{style:{color:"var(--textDim)",opacity:.3}},"—"));
+            }else{
+              const tags=h("div",{style:{display:"flex",flexWrap:"wrap",gap:"3px",justifyContent:"center"}});
+              linked.forEach(id=>{
+                tags.appendChild(h("span",{className:"badge mono",style:{fontSize:"9px",background:"var(--accentDim)",color:"var(--accent)",cursor:"pointer",padding:"2px 6px"},onClick:e=>{e.stopPropagation();S[mod.selKey]=id;setState({view:mod.view});}},id));
+              });
+              td.appendChild(tags);
+            }
+            tr.appendChild(td);
+          });
+
+          // Coverage indicator
+          const covTd=h("td",{style:{padding:"8px 12px",borderBottom:"1px solid var(--border)",textAlign:"center"}});
+          const covClr=linkCount>=3?"var(--success)":linkCount>=1?"var(--warn)":"var(--danger)";
+          const covDots=h("div",{style:{display:"flex",gap:"3px",justifyContent:"center"}});
+          for(let i=0;i<4;i++){
+            covDots.appendChild(h("div",{style:{width:"8px",height:"8px",borderRadius:"50%",background:i<linkCount?covClr:"var(--border)"}}));
+          }
+          covTd.appendChild(covDots);
+          tr.appendChild(covTd);
+          tbody.appendChild(tr);
+        });
+        table.appendChild(tbody);
+        tableWrap.appendChild(table);
+        main.appendChild(tableWrap);
+
+        // Gaps analysis card
+        const gapCard=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"14px",marginTop:"16px"}});
+
+        // Fully unlinked requirements
+        const unlinked=S.reqs.filter(r=>{
+          return!(decsByReq[r.id]||[]).length&&!(stksByReq[r.id]||[]).length&&!(ifcsByReq[r.id]||[]).length&&!(ucsByReq[r.id]||[]).length;
+        });
+        if(unlinked.length>0){
+          const ulCard=h("div",{className:"card",style:{background:"var(--danger)08",borderColor:"var(--danger)22"}});
+          ulCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:700,color:"var(--danger)",marginBottom:"8px"}},"🔴 Fully Unlinked ("+unlinked.length+")"));
+          ulCard.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",marginBottom:"8px"}},"Requirements with no links to any module:"));
+          const tags=h("div",{style:{display:"flex",flexWrap:"wrap",gap:"4px"}});
+          unlinked.forEach(r=>tags.appendChild(h("span",{className:"badge mono",style:{background:"var(--danger)22",color:"var(--danger)",cursor:"pointer",fontSize:"10px"},onClick:()=>{S.selId=r.id;setState({view:"editor"});}},r.id)));
+          ulCard.appendChild(tags);
+          gapCard.appendChild(ulCard);
+        }else{
+          const allOk=h("div",{className:"card",style:{background:"var(--success)08",borderColor:"var(--success)22"}});
+          allOk.appendChild(h("div",{style:{fontSize:"12px",fontWeight:700,color:"var(--success)"}},"✓ All requirements linked to at least one module"));
+          gapCard.appendChild(allOk);
+        }
+
+        // Well-connected requirements (3+ modules)
+        const wellLinked=S.reqs.filter(r=>{
+          let c=0;
+          if((decsByReq[r.id]||[]).length)c++;
+          if((stksByReq[r.id]||[]).length)c++;
+          if((ifcsByReq[r.id]||[]).length)c++;
+          if((ucsByReq[r.id]||[]).length)c++;
+          return c>=3;
+        });
+        const wlCard=h("div",{className:"card"});
+        wlCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:700,color:"var(--accent)",marginBottom:"8px"}},"🟢 Well-Connected ("+wellLinked.length+")"));
+        wlCard.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",marginBottom:"8px"}},"Requirements linked to 3+ modules:"));
+        if(wellLinked.length===0){
+          wlCard.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",fontStyle:"italic"}},"None yet — link requirements across modules to improve traceability."));
+        }else{
+          const tags=h("div",{style:{display:"flex",flexWrap:"wrap",gap:"4px"}});
+          wellLinked.forEach(r=>tags.appendChild(h("span",{className:"badge mono",style:{background:"var(--accentDim)",color:"var(--accent)",cursor:"pointer",fontSize:"10px"},onClick:()=>{S.selId=r.id;setState({view:"editor"});}},r.id)));
+          wlCard.appendChild(tags);
+        }
+        gapCard.appendChild(wlCard);
+        main.appendChild(gapCard);
+
+        // Cross-module connections summary
+        const xCard=h("div",{className:"card",style:{marginTop:"14px"}});
+        xCard.appendChild(h("div",{style:{fontSize:"13px",fontWeight:700,marginBottom:"12px"}},"Module Connection Summary"));
+        const xGrid=h("div",{style:{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:"12px"}});
+        // UC ↔ Stakeholders
+        const ucStkLinks=new Set();S.useCases.forEach(uc=>(uc.linkedStakeholders||[]).forEach(sid=>ucStkLinks.add(uc.id+"→"+sid)));
+        const xBox1=h("div",{style:{background:"var(--surface)",borderRadius:"8px",padding:"12px",textAlign:"center"}});
+        xBox1.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",marginBottom:"4px"}},"📐 Use Cases ↔ 👥 Stakeholders"));
+        xBox1.appendChild(h("div",{className:"mono",style:{fontSize:"20px",fontWeight:700,color:"var(--accent)"}},String(ucStkLinks.size)));
+        xBox1.appendChild(h("div",{style:{fontSize:"10px",color:"var(--textDim)"}},"connections"));
+        xGrid.appendChild(xBox1);
+        // IFC ↔ Reqs
+        let ifcReqLinks=0;S.interfaces.forEach(i=>ifcReqLinks+=(i.linkedReqs||[]).length);
+        const xBox2=h("div",{style:{background:"var(--surface)",borderRadius:"8px",padding:"12px",textAlign:"center"}});
+        xBox2.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",marginBottom:"4px"}},"🔌 Interfaces ↔ ☰ Requirements"));
+        xBox2.appendChild(h("div",{className:"mono",style:{fontSize:"20px",fontWeight:700,color:"var(--accent)"}},String(ifcReqLinks)));
+        xBox2.appendChild(h("div",{style:{fontSize:"10px",color:"var(--textDim)"}},"connections"));
+        xGrid.appendChild(xBox2);
+        // DEC ↔ Reqs
+        let decReqLinks=0;S.decisions.forEach(d=>decReqLinks+=(d.affectedReqs||[]).length);
+        const xBox3=h("div",{style:{background:"var(--surface)",borderRadius:"8px",padding:"12px",textAlign:"center"}});
+        xBox3.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",marginBottom:"4px"}},"📋 Decisions ↔ ☰ Requirements"));
+        xBox3.appendChild(h("div",{className:"mono",style:{fontSize:"20px",fontWeight:700,color:"var(--accent)"}},String(decReqLinks)));
+        xBox3.appendChild(h("div",{style:{fontSize:"10px",color:"var(--textDim)"}},"connections"));
+        xGrid.appendChild(xBox3);
+        xCard.appendChild(xGrid);
+        main.appendChild(xCard);
       }
     }
   }
@@ -2409,6 +3005,772 @@ function render(){
     main.appendChild(grid);
   }
 
+  // ═══ STAKEHOLDERS ═══
+  if(S.view==="stakeholders"){
+    main.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700,marginBottom:"20px"}},"Stakeholder Register"));
+    const grid=h("div",{style:{display:"grid",gridTemplateColumns:"260px 1fr 300px",gap:"16px"}});
+
+    // ─── LEFT SIDEBAR ───
+    const sidebar=h("div",{style:{background:"var(--card)",borderRadius:"12px",border:"1px solid var(--border)",overflow:"hidden",display:"flex",flexDirection:"column",maxHeight:"calc(100vh - 120px)",position:"sticky",top:"80px"}});
+    const sbHead=h("div",{style:{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",gap:"6px",alignItems:"center"}});
+    sbHead.appendChild(h("span",{style:{fontSize:"14px",fontWeight:700,flexShrink:0}},"👥"));
+    sbHead.appendChild(h("input",{id:"stk-search-input",className:"input",style:{flex:1,fontSize:"12px",padding:"6px 10px"},placeholder:"Search stakeholders...",value:S.stkSearch||"",onInput:e=>{S.stkSearch=e.target.value;render();}}));
+    sbHead.appendChild(h("button",{className:"btn btn-pri",style:{padding:"6px 12px",fontSize:"14px",lineHeight:1,flexShrink:0},onClick:addStk,title:"Add stakeholder"},"+"));
+    sidebar.appendChild(sbHead);
+
+    // Sidebar filters
+    const sbFilters=h("div",{style:{padding:"6px 12px",borderBottom:"1px solid var(--border)",display:"flex",gap:"4px"}});
+    const sRoleSel=h("select",{id:"stk-filter-role",className:"input",style:{flex:1,fontSize:"11px",padding:"4px 6px"},onChange:e=>{S.stkFilterRole=e.target.value;render();}});
+    sRoleSel.appendChild(h("option",{value:"All"},"All Roles"));
+    STK_ROLES.forEach(r=>sRoleSel.appendChild(h("option",{value:r},r)));
+    sRoleSel.value=S.stkFilterRole;
+    sbFilters.appendChild(sRoleSel);
+    const sInflSel=h("select",{id:"stk-filter-infl",className:"input",style:{flex:1,fontSize:"11px",padding:"4px 6px"},onChange:e=>{S.stkFilterInfluence=e.target.value;render();}});
+    sInflSel.appendChild(h("option",{value:"All"},"All Influence"));
+    STK_INFLUENCE.forEach(i=>sInflSel.appendChild(h("option",{value:i},i)));
+    sInflSel.value=S.stkFilterInfluence;
+    sbFilters.appendChild(sInflSel);
+    sidebar.appendChild(sbFilters);
+
+    const stkInflClr={Critical:"var(--danger)",High:"var(--orange)",Medium:"var(--warn)",Low:"var(--success)"};
+
+    const filteredStks=S.stakeholders.filter(s=>{
+      if(S.stkFilterRole!=="All"&&s.role!==S.stkFilterRole)return false;
+      if(S.stkFilterInfluence!=="All"&&s.influence!==S.stkFilterInfluence)return false;
+      if(S.stkSearch){
+        const q=S.stkSearch.toLowerCase();
+        if(!s.id.toLowerCase().includes(q)&&!(s.name||"").toLowerCase().includes(q)&&!s.role.toLowerCase().includes(q)&&!(s.organization||"").toLowerCase().includes(q))return false;
+      }
+      return true;
+    });
+
+    const sbList=h("div",{style:{flex:1,overflowY:"auto"}});
+    if(filteredStks.length===0){
+      sbList.appendChild(h("div",{style:{padding:"24px 12px",textAlign:"center",color:"var(--textDim)",fontSize:"13px"}},S.stkSearch||S.stkFilterRole!=="All"||S.stkFilterInfluence!=="All"?"No matches":"No stakeholders yet"));
+    }
+    filteredStks.forEach(stk=>{
+      const isSel=S.selStkId===stk.id;
+      const item=h("div",{style:{padding:"10px 12px",borderBottom:"1px solid var(--border)",borderLeft:isSel?"3px solid var(--accent)":"3px solid transparent",background:isSel?"var(--accentDim)22":"transparent",cursor:"pointer",transition:"background .1s"},onClick:()=>{S.selStkId=stk.id;render();}});
+      item.addEventListener("mouseenter",()=>{if(!isSel)item.style.background="var(--cardHov)";});
+      item.addEventListener("mouseleave",()=>{item.style.background=isSel?"var(--accentDim)22":"transparent";});
+      const itemTop=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"3px"}});
+      itemTop.appendChild(h("span",{className:"mono",style:{fontSize:"12px",fontWeight:600,color:isSel?"var(--accent)":"var(--textMid)"}},stk.id));
+      const ic=stkInflClr[stk.influence]||"var(--textDim)";
+      itemTop.appendChild(h("span",{className:"badge",style:{background:ic+"22",color:ic,fontSize:"10px"}},stk.influence));
+      item.appendChild(itemTop);
+      item.appendChild(h("div",{style:{fontSize:"13px",color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",lineHeight:"1.4"}},stk.name||"Unnamed Stakeholder"));
+      item.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",marginTop:"2px"}},stk.role+(stk.organization?" · "+stk.organization:"")));
+      sbList.appendChild(item);
+    });
+    sidebar.appendChild(sbList);
+    const sbFoot=h("div",{style:{padding:"8px 12px",borderTop:"1px solid var(--border)",fontSize:"12px",color:"var(--textDim)",textAlign:"center"}});
+    sbFoot.textContent=filteredStks.length+(S.stkSearch||S.stkFilterRole!=="All"||S.stkFilterInfluence!=="All"?" of "+S.stakeholders.length:"")+" stakeholder"+(filteredStks.length!==1?"s":"");
+    sidebar.appendChild(sbFoot);
+    grid.appendChild(sidebar);
+
+    // ─── CENTER: Editor ───
+    const center=h("div",{});
+    const selStk=S.stakeholders.find(s=>s.id===S.selStkId);
+    if(!selStk){
+      const emptyS=h("div",{className:"card",style:{textAlign:"center",padding:"64px 32px"}});
+      emptyS.appendChild(h("div",{style:{fontSize:"48px",opacity:".1",marginBottom:"12px"}},"👥"));
+      emptyS.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"15px",fontWeight:600,marginBottom:"8px"}},"Select a Stakeholder"));
+      emptyS.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"13px",lineHeight:"1.6",marginBottom:"16px"}},"Choose from the sidebar or create a new stakeholder to define who has interest in your system requirements."));
+      emptyS.appendChild(h("button",{className:"btn btn-pri",style:{padding:"8px 20px"},onClick:addStk},"+ Add Stakeholder"));
+      center.appendChild(emptyS);
+    }else{
+      // Header
+      const eHead=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}});
+      const eHeadLeft=h("div",{style:{display:"flex",alignItems:"center",gap:"10px"}});
+      eHeadLeft.appendChild(h("span",{className:"mono",style:{fontSize:"16px",fontWeight:700,color:"var(--accent)"}},selStk.id));
+      const ic=stkInflClr[selStk.influence]||"var(--textDim)";
+      eHeadLeft.appendChild(h("span",{className:"badge",style:{background:ic+"22",color:ic}},selStk.influence+" Influence"));
+      eHeadLeft.appendChild(h("span",{className:"badge",style:{background:"var(--accentDim)",color:"var(--accent)"}},selStk.category));
+      eHead.appendChild(eHeadLeft);
+      eHead.appendChild(h("button",{className:"btn btn-danger",style:{padding:"6px 14px",fontSize:"12px"},onClick:()=>deleteStk(selStk.id)},"🗑 Delete"));
+      center.appendChild(eHead);
+
+      // Identity card
+      const idCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      idCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--textDim)",marginBottom:"10px",textTransform:"uppercase",letterSpacing:".06em"}},"Identity"));
+      const idGrid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px"}});
+      // Name
+      const nameG=h("div",{});nameG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Name *"));
+      nameG.appendChild(h("input",{id:"stk-name",className:"input",value:selStk.name||"",placeholder:"Stakeholder name",onInput:e=>updateStkSilent(selStk.id,{name:e.target.value})}));
+      idGrid.appendChild(nameG);
+      // Organization
+      const orgG=h("div",{});orgG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Organization"));
+      orgG.appendChild(h("input",{id:"stk-org",className:"input",value:selStk.organization||"",placeholder:"Company / department",onInput:e=>updateStkSilent(selStk.id,{organization:e.target.value})}));
+      idGrid.appendChild(orgG);
+      idCard.appendChild(idGrid);
+      // Row 2: Role, Influence, Category
+      const row2=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"10px",marginTop:"10px"}});
+      const roleG=h("div",{});roleG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Role"));
+      const roleSel=h("select",{id:"stk-role",className:"input",onChange:e=>updateStk(selStk.id,{role:e.target.value})});
+      STK_ROLES.forEach(r=>roleSel.appendChild(h("option",{value:r},r)));roleSel.value=selStk.role;
+      roleG.appendChild(roleSel);row2.appendChild(roleG);
+      const inflG=h("div",{});inflG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Influence"));
+      const inflSel=h("select",{id:"stk-infl",className:"input",onChange:e=>updateStk(selStk.id,{influence:e.target.value})});
+      STK_INFLUENCE.forEach(i=>inflSel.appendChild(h("option",{value:i},i)));inflSel.value=selStk.influence;
+      inflG.appendChild(inflSel);row2.appendChild(inflG);
+      const catG=h("div",{});catG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Category"));
+      const catSel=h("select",{id:"stk-cat",className:"input",onChange:e=>updateStk(selStk.id,{category:e.target.value})});
+      STK_CATEGORIES.forEach(c=>catSel.appendChild(h("option",{value:c},c)));catSel.value=selStk.category;
+      catG.appendChild(catSel);row2.appendChild(catG);
+      idCard.appendChild(row2);
+      // Contact
+      const contactG=h("div",{style:{marginTop:"10px"}});contactG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Contact Info"));
+      contactG.appendChild(h("input",{id:"stk-contact",className:"input",value:selStk.contactInfo||"",placeholder:"Email, phone, or other contact details",onInput:e=>updateStkSilent(selStk.id,{contactInfo:e.target.value})}));
+      idCard.appendChild(contactG);
+      center.appendChild(idCard);
+
+      // Concerns & Expectations card
+      const ceCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      ceCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--textDim)",marginBottom:"10px",textTransform:"uppercase",letterSpacing:".06em"}},"Concerns & Expectations"));
+      ceCard.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Key Concerns"));
+      ceCard.appendChild(h("textarea",{id:"stk-concerns",className:"input",style:{minHeight:"80px",resize:"vertical"},value:selStk.concerns||"",placeholder:"What matters most to this stakeholder? Safety, cost, schedule, usability...",onInput:e=>updateStkSilent(selStk.id,{concerns:e.target.value})}));
+      ceCard.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px",marginTop:"10px"}},"Expectations"));
+      ceCard.appendChild(h("textarea",{id:"stk-expectations",className:"input",style:{minHeight:"80px",resize:"vertical"},value:selStk.expectations||"",placeholder:"What does this stakeholder expect from the system?",onInput:e=>updateStkSilent(selStk.id,{expectations:e.target.value})}));
+      center.appendChild(ceCard);
+
+      // Linked Stakeholder Needs card
+      const lnCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      lnCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--textDim)",marginBottom:"10px",textTransform:"uppercase",letterSpacing:".06em"}},"Linked Stakeholder Needs"));
+      const stkNeeds=S.reqs.filter(r=>r.level==="Stakeholder Need");
+      if(stkNeeds.length===0){
+        lnCard.appendChild(h("div",{style:{padding:"16px",textAlign:"center",color:"var(--textDim)",fontSize:"13px"}},"No stakeholder needs defined yet. Create requirements with level \"Stakeholder Need\" in the Author view."));
+      }else{
+        const lnList=h("div",{style:{maxHeight:"200px",overflowY:"auto"}});
+        stkNeeds.forEach(r=>{
+          const isLinked=(selStk.linkedNeeds||[]).includes(r.id);
+          const row=h("div",{style:{display:"flex",alignItems:"center",gap:"8px",padding:"6px 8px",borderRadius:"6px",marginBottom:"2px",background:isLinked?"var(--accentDim)22":"transparent"}});
+          row.appendChild(h("input",{type:"checkbox",checked:isLinked,onChange:()=>{
+            const needs=[...(selStk.linkedNeeds||[])];
+            if(isLinked)needs.splice(needs.indexOf(r.id),1);else needs.push(r.id);
+            updateStk(selStk.id,{linkedNeeds:needs});
+          }}));
+          const lbl=h("span",{style:{flex:1,fontSize:"13px",cursor:"pointer"},onClick:()=>{S.selId=r.id;setState({view:"editor"});}});
+          lbl.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:600,marginRight:"8px"}},r.id));
+          lbl.appendChild(document.createTextNode(r.text?r.text.substring(0,80)+(r.text.length>80?"...":""):"(empty)"));
+          row.appendChild(lbl);
+          lnList.appendChild(row);
+        });
+        lnCard.appendChild(lnList);
+      }
+      const linkedCount=(selStk.linkedNeeds||[]).length;
+      if(linkedCount>0){
+        lnCard.appendChild(h("div",{style:{marginTop:"8px",fontSize:"12px",color:"var(--accent)"}},linkedCount+" linked need"+(linkedCount!==1?"s":"")));
+      }
+      center.appendChild(lnCard);
+
+      // Notes card
+      const notesCard=h("div",{className:"card"});
+      notesCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--textDim)",marginBottom:"10px",textTransform:"uppercase",letterSpacing:".06em"}},"Notes"));
+      notesCard.appendChild(h("textarea",{id:"stk-notes",className:"input",style:{minHeight:"60px",resize:"vertical"},value:selStk.notes||"",placeholder:"Additional notes about this stakeholder...",onInput:e=>updateStkSilent(selStk.id,{notes:e.target.value})}));
+      center.appendChild(notesCard);
+    }
+    grid.appendChild(center);
+
+    // ─── RIGHT: Summary Panel ───
+    const right=h("div",{});
+    const summaryPanel=h("div",{style:{position:"sticky",top:"80px"}});
+
+    // Influence Overview
+    const inflCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+    inflCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,marginBottom:"10px"}},"Influence Overview"));
+    const inflGrid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}});
+    STK_INFLUENCE.forEach(level=>{
+      const cnt=S.stakeholders.filter(s=>s.influence===level).length;
+      const clr=stkInflClr[level]||"var(--textDim)";
+      const box=h("div",{style:{background:clr+"15",borderRadius:"8px",padding:"10px",textAlign:"center"}});
+      box.appendChild(h("div",{className:"mono",style:{fontSize:"20px",fontWeight:700,color:clr}},String(cnt)));
+      box.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)"}},level));
+      inflGrid.appendChild(box);
+    });
+    inflCard.appendChild(inflGrid);
+    summaryPanel.appendChild(inflCard);
+
+    // Role Breakdown
+    const roleCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+    roleCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,marginBottom:"10px"}},"By Role"));
+    const roleCounts={};S.stakeholders.forEach(s=>{roleCounts[s.role]=(roleCounts[s.role]||0)+1;});
+    const sortedRoles=Object.entries(roleCounts).sort((a,b)=>b[1]-a[1]);
+    if(sortedRoles.length===0){
+      roleCard.appendChild(h("div",{style:{color:"var(--textDim)",fontSize:"12px",textAlign:"center",padding:"8px"}},"No data"));
+    }
+    sortedRoles.forEach(([role,cnt])=>{
+      const row=h("div",{style:{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:"12px"}});
+      row.appendChild(h("span",{style:{color:"var(--text)"}},role));
+      row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:600}},String(cnt)));
+      roleCard.appendChild(row);
+    });
+    summaryPanel.appendChild(roleCard);
+
+    // Category Breakdown
+    const catCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+    catCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,marginBottom:"10px"}},"By Category"));
+    const catCounts={};S.stakeholders.forEach(s=>{catCounts[s.category]=(catCounts[s.category]||0)+1;});
+    const sortedCats=Object.entries(catCounts).sort((a,b)=>b[1]-a[1]);
+    if(sortedCats.length===0){
+      catCard.appendChild(h("div",{style:{color:"var(--textDim)",fontSize:"12px",textAlign:"center",padding:"8px"}},"No data"));
+    }
+    sortedCats.forEach(([cat,cnt])=>{
+      const row=h("div",{style:{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:"12px"}});
+      row.appendChild(h("span",{style:{color:"var(--text)"}},cat));
+      row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:600}},String(cnt)));
+      catCard.appendChild(row);
+    });
+    summaryPanel.appendChild(catCard);
+
+    // Coverage — stakeholder needs without linked stakeholders
+    const stkNeeds2=S.reqs.filter(r=>r.level==="Stakeholder Need");
+    const linkedNeedIds=new Set();S.stakeholders.forEach(s=>(s.linkedNeeds||[]).forEach(id=>linkedNeedIds.add(id)));
+    const unlinked=stkNeeds2.filter(r=>!linkedNeedIds.has(r.id));
+    if(unlinked.length>0){
+      const covCard=h("div",{className:"card",style:{background:"var(--warn)11",borderColor:"var(--warn)33"}});
+      covCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--warn)",marginBottom:"8px"}},"⚠ Unlinked Needs ("+unlinked.length+")"));
+      covCard.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",marginBottom:"8px"}},"Stakeholder needs not linked to any stakeholder:"));
+      const tags=h("div",{style:{display:"flex",flexWrap:"wrap",gap:"4px"}});
+      unlinked.forEach(r=>tags.appendChild(h("span",{className:"badge",style:{background:"var(--warn)22",color:"var(--warn)",cursor:"pointer"},onClick:()=>{S.selId=r.id;setState({view:"editor"});}},r.id)));
+      covCard.appendChild(tags);
+      summaryPanel.appendChild(covCard);
+    }else if(stkNeeds2.length>0){
+      const covOk=h("div",{className:"card",style:{background:"var(--success)11",borderColor:"var(--success)33"}});
+      covOk.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--success)"}},"✓ All "+stkNeeds2.length+" stakeholder needs linked"));
+      summaryPanel.appendChild(covOk);
+    }
+
+    right.appendChild(summaryPanel);
+    grid.appendChild(right);
+    main.appendChild(grid);
+  }
+
+  // ═══ INTERFACES ═══
+  if(S.view==="interfaces"){
+    main.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700,marginBottom:"20px"}},"Interface Definitions"));
+    const grid=h("div",{style:{display:"grid",gridTemplateColumns:"260px 1fr 300px",gap:"16px"}});
+    const ifcStatusClr={Draft:"var(--textDim)",Defined:"var(--accent)",Agreed:"var(--success)",Verified:"var(--success)",Deprecated:"var(--danger)"};
+    const ifcDirIcon={"Unidirectional →":"→","Bidirectional ↔":"↔","Broadcast ⇉":"⇉"};
+
+    // ─── LEFT SIDEBAR ───
+    const sidebar=h("div",{style:{background:"var(--card)",borderRadius:"12px",border:"1px solid var(--border)",overflow:"hidden",display:"flex",flexDirection:"column",maxHeight:"calc(100vh - 120px)",position:"sticky",top:"80px"}});
+    const sbHead=h("div",{style:{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",gap:"6px",alignItems:"center"}});
+    sbHead.appendChild(h("span",{style:{fontSize:"14px",fontWeight:700,flexShrink:0}},"🔌"));
+    sbHead.appendChild(h("input",{id:"ifc-search-input",className:"input",style:{flex:1,fontSize:"12px",padding:"6px 10px"},placeholder:"Search interfaces...",value:S.ifcSearch||"",onInput:e=>{S.ifcSearch=e.target.value;render();}}));
+    sbHead.appendChild(h("button",{className:"btn btn-pri",style:{padding:"6px 12px",fontSize:"14px",lineHeight:1,flexShrink:0},onClick:addIfc,title:"Add interface"},"+"));
+    sidebar.appendChild(sbHead);
+
+    // Sidebar filters
+    const sbFilters=h("div",{style:{padding:"6px 12px",borderBottom:"1px solid var(--border)",display:"flex",gap:"4px"}});
+    const iTypeSel=h("select",{id:"ifc-filter-type",className:"input",style:{flex:1,fontSize:"11px",padding:"4px 6px"},onChange:e=>{S.ifcFilterType=e.target.value;render();}});
+    iTypeSel.appendChild(h("option",{value:"All"},"All Types"));
+    IFC_TYPES.forEach(t=>iTypeSel.appendChild(h("option",{value:t},t)));
+    iTypeSel.value=S.ifcFilterType;
+    sbFilters.appendChild(iTypeSel);
+    const iStatSel=h("select",{id:"ifc-filter-status",className:"input",style:{flex:1,fontSize:"11px",padding:"4px 6px"},onChange:e=>{S.ifcFilterStatus=e.target.value;render();}});
+    iStatSel.appendChild(h("option",{value:"All"},"All Status"));
+    IFC_STATUSES.forEach(s=>iStatSel.appendChild(h("option",{value:s},s)));
+    iStatSel.value=S.ifcFilterStatus;
+    sbFilters.appendChild(iStatSel);
+    sidebar.appendChild(sbFilters);
+
+    const filteredIfcs=S.interfaces.filter(i=>{
+      if(S.ifcFilterType!=="All"&&i.type!==S.ifcFilterType)return false;
+      if(S.ifcFilterStatus!=="All"&&i.status!==S.ifcFilterStatus)return false;
+      if(S.ifcSearch){
+        const q=S.ifcSearch.toLowerCase();
+        if(!i.id.toLowerCase().includes(q)&&!(i.name||"").toLowerCase().includes(q)&&!(i.source||"").toLowerCase().includes(q)&&!(i.destination||"").toLowerCase().includes(q))return false;
+      }
+      return true;
+    });
+
+    const sbList=h("div",{style:{flex:1,overflowY:"auto"}});
+    if(filteredIfcs.length===0){
+      sbList.appendChild(h("div",{style:{padding:"24px 12px",textAlign:"center",color:"var(--textDim)",fontSize:"13px"}},S.ifcSearch||S.ifcFilterType!=="All"||S.ifcFilterStatus!=="All"?"No matches":"No interfaces yet"));
+    }
+    filteredIfcs.forEach(ifc=>{
+      const isSel=S.selIfcId===ifc.id;
+      const item=h("div",{style:{padding:"10px 12px",borderBottom:"1px solid var(--border)",borderLeft:isSel?"3px solid var(--accent)":"3px solid transparent",background:isSel?"var(--accentDim)22":"transparent",cursor:"pointer",transition:"background .1s"},onClick:()=>{S.selIfcId=ifc.id;render();}});
+      item.addEventListener("mouseenter",()=>{if(!isSel)item.style.background="var(--cardHov)";});
+      item.addEventListener("mouseleave",()=>{item.style.background=isSel?"var(--accentDim)22":"transparent";});
+      const itemTop=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"3px"}});
+      itemTop.appendChild(h("span",{className:"mono",style:{fontSize:"12px",fontWeight:600,color:isSel?"var(--accent)":"var(--textMid)"}},ifc.id));
+      const sc=ifcStatusClr[ifc.status]||"var(--textDim)";
+      itemTop.appendChild(h("span",{className:"badge",style:{background:sc+"22",color:sc,fontSize:"10px"}},ifc.status));
+      item.appendChild(itemTop);
+      item.appendChild(h("div",{style:{fontSize:"13px",color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",lineHeight:"1.4"}},ifc.name||"Unnamed Interface"));
+      const dirTxt=(ifcDirIcon[ifc.direction]||"↔")+" "+(ifc.source||"?")+" — "+(ifc.destination||"?");
+      item.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",marginTop:"2px",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},ifc.type+" · "+dirTxt));
+      sbList.appendChild(item);
+    });
+    sidebar.appendChild(sbList);
+    const sbFoot=h("div",{style:{padding:"8px 12px",borderTop:"1px solid var(--border)",fontSize:"12px",color:"var(--textDim)",textAlign:"center"}});
+    sbFoot.textContent=filteredIfcs.length+(S.ifcSearch||S.ifcFilterType!=="All"||S.ifcFilterStatus!=="All"?" of "+S.interfaces.length:"")+" interface"+(filteredIfcs.length!==1?"s":"");
+    sidebar.appendChild(sbFoot);
+    grid.appendChild(sidebar);
+
+    // ─── CENTER: Editor ───
+    const center=h("div",{});
+    const selIfc=S.interfaces.find(i=>i.id===S.selIfcId);
+    if(!selIfc){
+      const emptyI=h("div",{className:"card",style:{textAlign:"center",padding:"64px 32px"}});
+      emptyI.appendChild(h("div",{style:{fontSize:"48px",opacity:".1",marginBottom:"12px"}},"🔌"));
+      emptyI.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"15px",fontWeight:600,marginBottom:"8px"}},"Select an Interface"));
+      emptyI.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"13px",lineHeight:"1.6",marginBottom:"16px"}},"Choose from the sidebar or create a new interface definition to specify how system elements communicate and interact."));
+      emptyI.appendChild(h("button",{className:"btn btn-pri",style:{padding:"8px 20px"},onClick:addIfc},"+ Add Interface"));
+      center.appendChild(emptyI);
+    }else{
+      // Header
+      const eHead=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}});
+      const eHeadLeft=h("div",{style:{display:"flex",alignItems:"center",gap:"10px"}});
+      eHeadLeft.appendChild(h("span",{className:"mono",style:{fontSize:"16px",fontWeight:700,color:"var(--accent)"}},selIfc.id));
+      eHeadLeft.appendChild(h("span",{className:"badge",style:{background:"var(--accentDim)",color:"var(--accent)"}},selIfc.type));
+      const sc=ifcStatusClr[selIfc.status]||"var(--textDim)";
+      eHeadLeft.appendChild(h("span",{className:"badge",style:{background:sc+"22",color:sc}},selIfc.status));
+      eHeadLeft.appendChild(h("span",{style:{fontSize:"18px"}},ifcDirIcon[selIfc.direction]||"↔"));
+      eHead.appendChild(eHeadLeft);
+      eHead.appendChild(h("button",{className:"btn btn-danger",style:{padding:"6px 14px",fontSize:"12px"},onClick:()=>deleteIfc(selIfc.id)},"🗑 Delete"));
+      center.appendChild(eHead);
+
+      // Identity card
+      const idCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      idCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--textDim)",marginBottom:"10px",textTransform:"uppercase",letterSpacing:".06em"}},"Interface Identity"));
+      const nameG=h("div",{style:{marginBottom:"10px"}});nameG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Interface Name *"));
+      nameG.appendChild(h("input",{id:"ifc-name",className:"input",value:selIfc.name||"",placeholder:"e.g. Sensor Hub ↔ Control Panel Data Link",onInput:e=>updateIfcSilent(selIfc.id,{name:e.target.value})}));
+      idCard.appendChild(nameG);
+      // Type, Direction, Status row
+      const row1=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:"10px",marginBottom:"10px"}});
+      const typeG=h("div",{});typeG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Type"));
+      const typeSel=h("select",{id:"ifc-type",className:"input",onChange:e=>updateIfc(selIfc.id,{type:e.target.value})});
+      IFC_TYPES.forEach(t=>typeSel.appendChild(h("option",{value:t},t)));typeSel.value=selIfc.type;
+      typeG.appendChild(typeSel);row1.appendChild(typeG);
+      const dirG=h("div",{});dirG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Direction"));
+      const dirSel=h("select",{id:"ifc-dir",className:"input",onChange:e=>updateIfc(selIfc.id,{direction:e.target.value})});
+      IFC_DIRECTIONS.forEach(d=>dirSel.appendChild(h("option",{value:d},d)));dirSel.value=selIfc.direction;
+      dirG.appendChild(dirSel);row1.appendChild(dirG);
+      const statG=h("div",{});statG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Status"));
+      const statSel=h("select",{id:"ifc-stat",className:"input",onChange:e=>updateIfc(selIfc.id,{status:e.target.value})});
+      IFC_STATUSES.forEach(s=>statSel.appendChild(h("option",{value:s},s)));statSel.value=selIfc.status;
+      statG.appendChild(statSel);row1.appendChild(statG);
+      idCard.appendChild(row1);
+      center.appendChild(idCard);
+
+      // Endpoints card
+      const epCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      epCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--textDim)",marginBottom:"10px",textTransform:"uppercase",letterSpacing:".06em"}},"Endpoints"));
+      const epGrid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr auto 1fr",gap:"10px",alignItems:"end"}});
+      const srcG=h("div",{});srcG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Source"));
+      srcG.appendChild(h("input",{id:"ifc-src",className:"input",value:selIfc.source||"",placeholder:"e.g. Sensor Hub Module",onInput:e=>updateIfcSilent(selIfc.id,{source:e.target.value})}));
+      epGrid.appendChild(srcG);
+      epGrid.appendChild(h("div",{style:{fontSize:"24px",textAlign:"center",padding:"0 8px 8px",color:"var(--accent)"}},ifcDirIcon[selIfc.direction]||"↔"));
+      const dstG=h("div",{});dstG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Destination"));
+      dstG.appendChild(h("input",{id:"ifc-dst",className:"input",value:selIfc.destination||"",placeholder:"e.g. Central Control Panel",onInput:e=>updateIfcSilent(selIfc.id,{destination:e.target.value})}));
+      epGrid.appendChild(dstG);
+      epCard.appendChild(epGrid);
+      // Protocol
+      const protoG=h("div",{style:{marginTop:"10px"}});protoG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Protocol / Standard"));
+      const protoSel=h("select",{id:"ifc-proto",className:"input",onChange:e=>updateIfc(selIfc.id,{protocol:e.target.value})});
+      protoSel.appendChild(h("option",{value:""},"— Select Protocol —"));
+      IFC_PROTOCOLS.forEach(p=>protoSel.appendChild(h("option",{value:p},p)));protoSel.value=selIfc.protocol||"";
+      protoG.appendChild(protoSel);epCard.appendChild(protoG);
+      center.appendChild(epCard);
+
+      // Technical Specs card
+      const specCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      specCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--textDim)",marginBottom:"10px",textTransform:"uppercase",letterSpacing:".06em"}},"Technical Specifications"));
+      specCard.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Data Items / Signals"));
+      specCard.appendChild(h("textarea",{id:"ifc-data",className:"input",style:{minHeight:"80px",resize:"vertical"},value:selIfc.dataItems||"",placeholder:"List the data items, signals, or messages exchanged:\ne.g. sensor_reading (float32), timestamp (uint64), alert_flag (bool)",onInput:e=>updateIfcSilent(selIfc.id,{dataItems:e.target.value})}));
+      const specRow=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"10px",marginTop:"10px"}});
+      const rateG=h("div",{});rateG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Data Rate / Bandwidth"));
+      rateG.appendChild(h("input",{id:"ifc-rate",className:"input",value:selIfc.dataRate||"",placeholder:"e.g. 115200 baud, 100 Mbps",onInput:e=>updateIfcSilent(selIfc.id,{dataRate:e.target.value})}));
+      specRow.appendChild(rateG);
+      const physG=h("div",{});physG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Physical Characteristics"));
+      physG.appendChild(h("input",{id:"ifc-phys",className:"input",value:selIfc.physicalChar||"",placeholder:"e.g. RJ-45, 9-pin D-Sub, 2.4GHz",onInput:e=>updateIfcSilent(selIfc.id,{physicalChar:e.target.value})}));
+      specRow.appendChild(physG);
+      specCard.appendChild(specRow);
+      center.appendChild(specCard);
+
+      // Linked Requirements card
+      const lrCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      lrCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--textDim)",marginBottom:"10px",textTransform:"uppercase",letterSpacing:".06em"}},"Linked Requirements"));
+      const ifcReqs=S.reqs.filter(r=>r.type==="Interface");
+      if(S.reqs.length===0){
+        lrCard.appendChild(h("div",{style:{padding:"16px",textAlign:"center",color:"var(--textDim)",fontSize:"13px"}},"No requirements defined yet."));
+      }else{
+        const lrList=h("div",{style:{maxHeight:"200px",overflowY:"auto"}});
+        // Show interface-type reqs first, then others
+        const sortedReqs=[...ifcReqs,...S.reqs.filter(r=>r.type!=="Interface")];
+        sortedReqs.forEach(r=>{
+          const isLinked=(selIfc.linkedReqs||[]).includes(r.id);
+          const row=h("div",{style:{display:"flex",alignItems:"center",gap:"8px",padding:"6px 8px",borderRadius:"6px",marginBottom:"2px",background:isLinked?"var(--accentDim)22":"transparent"}});
+          row.appendChild(h("input",{type:"checkbox",checked:isLinked,onChange:()=>{
+            const reqs=[...(selIfc.linkedReqs||[])];
+            if(isLinked)reqs.splice(reqs.indexOf(r.id),1);else reqs.push(r.id);
+            updateIfc(selIfc.id,{linkedReqs:reqs});
+          }}));
+          const lbl=h("span",{style:{flex:1,fontSize:"13px",cursor:"pointer"},onClick:()=>{S.selId=r.id;setState({view:"editor"});}});
+          lbl.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:600,marginRight:"8px"}},r.id));
+          lbl.appendChild(document.createTextNode(r.text?r.text.substring(0,70)+(r.text.length>70?"...":""):"(empty)"));
+          if(r.type==="Interface")lbl.appendChild(h("span",{className:"badge",style:{marginLeft:"6px",background:"var(--accentDim)",color:"var(--accent)",fontSize:"9px"}},"INTERFACE"));
+          row.appendChild(lbl);
+          lrList.appendChild(row);
+        });
+        lrCard.appendChild(lrList);
+      }
+      const linkedCnt=(selIfc.linkedReqs||[]).length;
+      if(linkedCnt>0)lrCard.appendChild(h("div",{style:{marginTop:"8px",fontSize:"12px",color:"var(--accent)"}},linkedCnt+" linked requirement"+(linkedCnt!==1?"s":"")));
+      center.appendChild(lrCard);
+
+      // Notes card
+      const notesCard=h("div",{className:"card"});
+      notesCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--textDim)",marginBottom:"10px",textTransform:"uppercase",letterSpacing:".06em"}},"Notes"));
+      notesCard.appendChild(h("textarea",{id:"ifc-notes",className:"input",style:{minHeight:"60px",resize:"vertical"},value:selIfc.notes||"",placeholder:"Additional notes, constraints, or references (e.g. ICD document number)...",onInput:e=>updateIfcSilent(selIfc.id,{notes:e.target.value})}));
+      center.appendChild(notesCard);
+    }
+    grid.appendChild(center);
+
+    // ─── RIGHT: Summary Panel ───
+    const right=h("div",{});
+    const summaryPanel=h("div",{style:{position:"sticky",top:"80px"}});
+
+    // Type Overview
+    const typeCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+    typeCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,marginBottom:"10px"}},"By Type"));
+    const typeCounts={};S.interfaces.forEach(i=>{typeCounts[i.type]=(typeCounts[i.type]||0)+1;});
+    const sortedTypes=Object.entries(typeCounts).sort((a,b)=>b[1]-a[1]);
+    if(sortedTypes.length===0){
+      typeCard.appendChild(h("div",{style:{color:"var(--textDim)",fontSize:"12px",textAlign:"center",padding:"8px"}},"No data"));
+    }
+    sortedTypes.forEach(([type,cnt])=>{
+      const row=h("div",{style:{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:"12px"}});
+      row.appendChild(h("span",{style:{color:"var(--text)"}},type));
+      row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:600}},String(cnt)));
+      typeCard.appendChild(row);
+    });
+    summaryPanel.appendChild(typeCard);
+
+    // Status Breakdown
+    const statCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+    statCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,marginBottom:"10px"}},"By Status"));
+    const sGrid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}});
+    IFC_STATUSES.forEach(st=>{
+      const cnt=S.interfaces.filter(i=>i.status===st).length;
+      const clr=ifcStatusClr[st]||"var(--textDim)";
+      const box=h("div",{style:{background:clr+"15",borderRadius:"8px",padding:"8px",textAlign:"center"}});
+      box.appendChild(h("div",{className:"mono",style:{fontSize:"18px",fontWeight:700,color:clr}},String(cnt)));
+      box.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)"}},st));
+      sGrid.appendChild(box);
+    });
+    statCard.appendChild(sGrid);
+    summaryPanel.appendChild(statCard);
+
+    // Direction Breakdown
+    const dirCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+    dirCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,marginBottom:"10px"}},"By Direction"));
+    IFC_DIRECTIONS.forEach(dir=>{
+      const cnt=S.interfaces.filter(i=>i.direction===dir).length;
+      const row=h("div",{style:{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:"12px"}});
+      row.appendChild(h("span",{style:{color:"var(--text)"}},dir));
+      row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:600}},String(cnt)));
+      dirCard.appendChild(row);
+    });
+    summaryPanel.appendChild(dirCard);
+
+    // Interface-type reqs without linked interfaces
+    const ifcTypeReqs=S.reqs.filter(r=>r.type==="Interface");
+    const linkedReqIds=new Set();S.interfaces.forEach(i=>(i.linkedReqs||[]).forEach(id=>linkedReqIds.add(id)));
+    const unlinkedIfcReqs=ifcTypeReqs.filter(r=>!linkedReqIds.has(r.id));
+    if(unlinkedIfcReqs.length>0){
+      const covCard=h("div",{className:"card",style:{background:"var(--warn)11",borderColor:"var(--warn)33"}});
+      covCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--warn)",marginBottom:"8px"}},"⚠ Unlinked Interface Reqs ("+unlinkedIfcReqs.length+")"));
+      covCard.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",marginBottom:"8px"}},"Interface-type requirements not linked to any interface definition:"));
+      const tags=h("div",{style:{display:"flex",flexWrap:"wrap",gap:"4px"}});
+      unlinkedIfcReqs.forEach(r=>tags.appendChild(h("span",{className:"badge",style:{background:"var(--warn)22",color:"var(--warn)",cursor:"pointer"},onClick:()=>{S.selId=r.id;setState({view:"editor"});}},r.id)));
+      covCard.appendChild(tags);
+      summaryPanel.appendChild(covCard);
+    }else if(ifcTypeReqs.length>0){
+      const covOk=h("div",{className:"card",style:{background:"var(--success)11",borderColor:"var(--success)33"}});
+      covOk.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--success)"}},"✓ All "+ifcTypeReqs.length+" interface requirements linked"));
+      summaryPanel.appendChild(covOk);
+    }
+
+    right.appendChild(summaryPanel);
+    grid.appendChild(right);
+    main.appendChild(grid);
+  }
+
+  // ═══ USE CASES ═══
+  if(S.view==="usecases"){
+    main.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700,marginBottom:"20px"}},"Use Cases & Scenarios"));
+    const grid=h("div",{style:{display:"grid",gridTemplateColumns:"260px 1fr 300px",gap:"16px"}});
+    const ucStatClr={Draft:"var(--textDim)",Reviewed:"var(--accent)",Validated:"var(--success)",Approved:"var(--success)",Deprecated:"var(--danger)"};
+    const ucPriClr={Critical:"var(--danger)",High:"var(--orange)",Medium:"var(--warn)",Low:"var(--success)"};
+
+    // ─── LEFT SIDEBAR ───
+    const sidebar=h("div",{style:{background:"var(--card)",borderRadius:"12px",border:"1px solid var(--border)",overflow:"hidden",display:"flex",flexDirection:"column",maxHeight:"calc(100vh - 120px)",position:"sticky",top:"80px"}});
+    const sbHead=h("div",{style:{padding:"10px 12px",borderBottom:"1px solid var(--border)",display:"flex",gap:"6px",alignItems:"center"}});
+    sbHead.appendChild(h("span",{style:{fontSize:"14px",fontWeight:700,flexShrink:0}},"📐"));
+    sbHead.appendChild(h("input",{id:"uc-search-input",className:"input",style:{flex:1,fontSize:"12px",padding:"6px 10px"},placeholder:"Search use cases...",value:S.ucSearch||"",onInput:e=>{S.ucSearch=e.target.value;render();}}));
+    sbHead.appendChild(h("button",{className:"btn btn-pri",style:{padding:"6px 12px",fontSize:"14px",lineHeight:1,flexShrink:0},onClick:addUc,title:"Add use case"},"+"));
+    sidebar.appendChild(sbHead);
+
+    const sbFilters=h("div",{style:{padding:"6px 12px",borderBottom:"1px solid var(--border)",display:"flex",gap:"4px"}});
+    const uTypeSel=h("select",{id:"uc-filter-type",className:"input",style:{flex:1,fontSize:"11px",padding:"4px 6px"},onChange:e=>{S.ucFilterType=e.target.value;render();}});
+    uTypeSel.appendChild(h("option",{value:"All"},"All Types"));
+    UC_TYPES.forEach(t=>uTypeSel.appendChild(h("option",{value:t},t)));
+    uTypeSel.value=S.ucFilterType;
+    sbFilters.appendChild(uTypeSel);
+    const uStatSel=h("select",{id:"uc-filter-stat",className:"input",style:{flex:1,fontSize:"11px",padding:"4px 6px"},onChange:e=>{S.ucFilterStat=e.target.value;render();}});
+    uStatSel.appendChild(h("option",{value:"All"},"All Status"));
+    UC_STATUSES.forEach(s=>uStatSel.appendChild(h("option",{value:s},s)));
+    uStatSel.value=S.ucFilterStat;
+    sbFilters.appendChild(uStatSel);
+    sidebar.appendChild(sbFilters);
+
+    const filteredUcs=S.useCases.filter(u=>{
+      if(S.ucFilterType!=="All"&&u.type!==S.ucFilterType)return false;
+      if(S.ucFilterStat!=="All"&&u.status!==S.ucFilterStat)return false;
+      if(S.ucSearch){
+        const q=S.ucSearch.toLowerCase();
+        if(!u.id.toLowerCase().includes(q)&&!(u.title||"").toLowerCase().includes(q)&&!(u.actor||"").toLowerCase().includes(q))return false;
+      }
+      return true;
+    });
+
+    const sbList=h("div",{style:{flex:1,overflowY:"auto"}});
+    if(filteredUcs.length===0){
+      sbList.appendChild(h("div",{style:{padding:"24px 12px",textAlign:"center",color:"var(--textDim)",fontSize:"13px"}},S.ucSearch||S.ucFilterType!=="All"||S.ucFilterStat!=="All"?"No matches":"No use cases yet"));
+    }
+    filteredUcs.forEach(uc=>{
+      const isSel=S.selUcId===uc.id;
+      const item=h("div",{style:{padding:"10px 12px",borderBottom:"1px solid var(--border)",borderLeft:isSel?"3px solid var(--accent)":"3px solid transparent",background:isSel?"var(--accentDim)22":"transparent",cursor:"pointer",transition:"background .1s"},onClick:()=>{S.selUcId=uc.id;render();}});
+      item.addEventListener("mouseenter",()=>{if(!isSel)item.style.background="var(--cardHov)";});
+      item.addEventListener("mouseleave",()=>{item.style.background=isSel?"var(--accentDim)22":"transparent";});
+      const itemTop=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"3px"}});
+      itemTop.appendChild(h("span",{className:"mono",style:{fontSize:"12px",fontWeight:600,color:isSel?"var(--accent)":"var(--textMid)"}},uc.id));
+      const pc=ucPriClr[uc.priority]||"var(--textDim)";
+      itemTop.appendChild(h("span",{className:"badge",style:{background:pc+"22",color:pc,fontSize:"10px"}},uc.priority));
+      item.appendChild(itemTop);
+      item.appendChild(h("div",{style:{fontSize:"13px",color:"var(--text)",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap",lineHeight:"1.4"}},uc.title||"Untitled Use Case"));
+      item.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",marginTop:"2px"}},uc.type+(uc.actor?" · "+uc.actor:"")));
+      sbList.appendChild(item);
+    });
+    sidebar.appendChild(sbList);
+    const sbFoot=h("div",{style:{padding:"8px 12px",borderTop:"1px solid var(--border)",fontSize:"12px",color:"var(--textDim)",textAlign:"center"}});
+    sbFoot.textContent=filteredUcs.length+(S.ucSearch||S.ucFilterType!=="All"||S.ucFilterStat!=="All"?" of "+S.useCases.length:"")+" use case"+(filteredUcs.length!==1?"s":"");
+    sidebar.appendChild(sbFoot);
+    grid.appendChild(sidebar);
+
+    // ─── CENTER: Editor ───
+    const center=h("div",{});
+    const selUc=S.useCases.find(u=>u.id===S.selUcId);
+    if(!selUc){
+      const emptyU=h("div",{className:"card",style:{textAlign:"center",padding:"64px 32px"}});
+      emptyU.appendChild(h("div",{style:{fontSize:"48px",opacity:".1",marginBottom:"12px"}},"📐"));
+      emptyU.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"15px",fontWeight:600,marginBottom:"8px"}},"Select a Use Case"));
+      emptyU.appendChild(h("p",{style:{color:"var(--textDim)",fontSize:"13px",lineHeight:"1.6",marginBottom:"16px"}},"Choose from the sidebar or create a new use case to capture how actors interact with your system in specific scenarios."));
+      emptyU.appendChild(h("button",{className:"btn btn-pri",style:{padding:"8px 20px"},onClick:addUc},"+ Add Use Case"));
+      center.appendChild(emptyU);
+    }else{
+      // Header
+      const eHead=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"16px"}});
+      const eHeadLeft=h("div",{style:{display:"flex",alignItems:"center",gap:"10px"}});
+      eHeadLeft.appendChild(h("span",{className:"mono",style:{fontSize:"16px",fontWeight:700,color:"var(--accent)"}},selUc.id));
+      eHeadLeft.appendChild(h("span",{className:"badge",style:{background:"var(--accentDim)",color:"var(--accent)"}},selUc.type));
+      const sc=ucStatClr[selUc.status]||"var(--textDim)";
+      eHeadLeft.appendChild(h("span",{className:"badge",style:{background:sc+"22",color:sc}},selUc.status));
+      const pc=ucPriClr[selUc.priority]||"var(--textDim)";
+      eHeadLeft.appendChild(h("span",{className:"badge",style:{background:pc+"22",color:pc}},selUc.priority));
+      eHead.appendChild(eHeadLeft);
+      eHead.appendChild(h("button",{className:"btn btn-danger",style:{padding:"6px 14px",fontSize:"12px"},onClick:()=>deleteUc(selUc.id)},"🗑 Delete"));
+      center.appendChild(eHead);
+
+      // Identity card
+      const idCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      idCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--textDim)",marginBottom:"10px",textTransform:"uppercase",letterSpacing:".06em"}},"Use Case Identity"));
+      const titleG=h("div",{style:{marginBottom:"10px"}});titleG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Title *"));
+      titleG.appendChild(h("input",{id:"uc-title",className:"input",value:selUc.title||"",placeholder:"e.g. Homeowner Arms System Remotely",onInput:e=>updateUcSilent(selUc.id,{title:e.target.value})}));
+      idCard.appendChild(titleG);
+      const row1=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:"10px",marginBottom:"10px"}});
+      const typeG=h("div",{});typeG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Type"));
+      const typeSel=h("select",{id:"uc-type",className:"input",onChange:e=>updateUc(selUc.id,{type:e.target.value})});
+      UC_TYPES.forEach(t=>typeSel.appendChild(h("option",{value:t},t)));typeSel.value=selUc.type;
+      typeG.appendChild(typeSel);row1.appendChild(typeG);
+      const priG=h("div",{});priG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Priority"));
+      const priSel=h("select",{id:"uc-pri",className:"input",onChange:e=>updateUc(selUc.id,{priority:e.target.value})});
+      UC_PRIORITIES.forEach(p=>priSel.appendChild(h("option",{value:p},p)));priSel.value=selUc.priority;
+      priG.appendChild(priSel);row1.appendChild(priG);
+      const statG=h("div",{});statG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Status"));
+      const statSel=h("select",{id:"uc-stat",className:"input",onChange:e=>updateUc(selUc.id,{status:e.target.value})});
+      UC_STATUSES.forEach(s=>statSel.appendChild(h("option",{value:s},s)));statSel.value=selUc.status;
+      statG.appendChild(statSel);row1.appendChild(statG);
+      const actG=h("div",{});actG.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Primary Actor"));
+      actG.appendChild(h("input",{id:"uc-actor",className:"input",value:selUc.actor||"",placeholder:"e.g. Homeowner",onInput:e=>updateUcSilent(selUc.id,{actor:e.target.value})}));
+      row1.appendChild(actG);
+      idCard.appendChild(row1);
+      center.appendChild(idCard);
+
+      // Scenario card
+      const scCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      scCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--textDim)",marginBottom:"10px",textTransform:"uppercase",letterSpacing:".06em"}},"Scenario"));
+      scCard.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Trigger"));
+      scCard.appendChild(h("input",{id:"uc-trigger",className:"input",style:{marginBottom:"10px"},value:selUc.trigger||"",placeholder:"What initiates this use case? e.g. Homeowner opens mobile app",onInput:e=>updateUcSilent(selUc.id,{trigger:e.target.value})}));
+      scCard.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Preconditions"));
+      scCard.appendChild(h("textarea",{id:"uc-pre",className:"input",style:{minHeight:"60px",resize:"vertical",marginBottom:"10px"},value:selUc.preconditions||"",placeholder:"What must be true before this use case begins?\ne.g. System is in Armed state, User has valid credentials",onInput:e=>updateUcSilent(selUc.id,{preconditions:e.target.value})}));
+      scCard.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Main Flow (step by step)"));
+      scCard.appendChild(h("textarea",{id:"uc-flow",className:"input",style:{minHeight:"120px",resize:"vertical",fontFamily:"var(--mono)",fontSize:"12px",marginBottom:"10px"},value:selUc.mainFlow||"",placeholder:"1. Actor opens the mobile application\n2. System displays current arm/disarm status\n3. Actor taps 'Arm Away' button\n4. System verifies all sensors are in ready state\n5. System arms and confirms via push notification",onInput:e=>updateUcSilent(selUc.id,{mainFlow:e.target.value})}));
+      scCard.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Alternative / Exception Flows"));
+      scCard.appendChild(h("textarea",{id:"uc-alt",className:"input",style:{minHeight:"80px",resize:"vertical",fontFamily:"var(--mono)",fontSize:"12px",marginBottom:"10px"},value:selUc.alternativeFlows||"",placeholder:"4a. If sensor not ready: System displays which sensor is open\n4b. If network unavailable: System queues command for retry",onInput:e=>updateUcSilent(selUc.id,{alternativeFlows:e.target.value})}));
+      scCard.appendChild(h("label",{style:{fontSize:"11px",color:"var(--textDim)",display:"block",marginBottom:"4px"}},"Postconditions"));
+      scCard.appendChild(h("textarea",{id:"uc-post",className:"input",style:{minHeight:"60px",resize:"vertical"},value:selUc.postconditions||"",placeholder:"What is true after this use case completes?\ne.g. System is in Armed Away mode, all sensors actively monitored",onInput:e=>updateUcSilent(selUc.id,{postconditions:e.target.value})}));
+      center.appendChild(scCard);
+
+      // Derived Requirements card
+      const drCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      drCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--textDim)",marginBottom:"10px",textTransform:"uppercase",letterSpacing:".06em"}},"Derived Requirements"));
+      if(S.reqs.length===0){
+        drCard.appendChild(h("div",{style:{padding:"16px",textAlign:"center",color:"var(--textDim)",fontSize:"13px"}},"No requirements defined yet."));
+      }else{
+        const drList=h("div",{style:{maxHeight:"200px",overflowY:"auto"}});
+        S.reqs.forEach(r=>{
+          const isLinked=(selUc.derivedReqs||[]).includes(r.id);
+          const row=h("div",{style:{display:"flex",alignItems:"center",gap:"8px",padding:"6px 8px",borderRadius:"6px",marginBottom:"2px",background:isLinked?"var(--accentDim)22":"transparent"}});
+          row.appendChild(h("input",{type:"checkbox",checked:isLinked,onChange:()=>{
+            const reqs=[...(selUc.derivedReqs||[])];
+            if(isLinked)reqs.splice(reqs.indexOf(r.id),1);else reqs.push(r.id);
+            updateUc(selUc.id,{derivedReqs:reqs});
+          }}));
+          const lbl=h("span",{style:{flex:1,fontSize:"13px",cursor:"pointer"},onClick:()=>{S.selId=r.id;setState({view:"editor"});}});
+          lbl.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:600,marginRight:"8px"}},r.id));
+          lbl.appendChild(document.createTextNode(r.text?r.text.substring(0,70)+(r.text.length>70?"...":""):"(empty)"));
+          row.appendChild(lbl);
+          drList.appendChild(row);
+        });
+        drCard.appendChild(drList);
+      }
+      const drCnt=(selUc.derivedReqs||[]).length;
+      if(drCnt>0)drCard.appendChild(h("div",{style:{marginTop:"8px",fontSize:"12px",color:"var(--accent)"}},drCnt+" derived requirement"+(drCnt!==1?"s":"")));
+      center.appendChild(drCard);
+
+      // Linked Stakeholders card
+      const lsCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      lsCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--textDim)",marginBottom:"10px",textTransform:"uppercase",letterSpacing:".06em"}},"Linked Stakeholders"));
+      if(S.stakeholders.length===0){
+        lsCard.appendChild(h("div",{style:{padding:"16px",textAlign:"center",color:"var(--textDim)",fontSize:"13px"}},"No stakeholders defined yet. Add stakeholders in the Stakeholder Register."));
+      }else{
+        const lsList=h("div",{style:{maxHeight:"160px",overflowY:"auto"}});
+        S.stakeholders.forEach(s=>{
+          const isLinked=(selUc.linkedStakeholders||[]).includes(s.id);
+          const row=h("div",{style:{display:"flex",alignItems:"center",gap:"8px",padding:"6px 8px",borderRadius:"6px",marginBottom:"2px",background:isLinked?"var(--accentDim)22":"transparent"}});
+          row.appendChild(h("input",{type:"checkbox",checked:isLinked,onChange:()=>{
+            const stks=[...(selUc.linkedStakeholders||[])];
+            if(isLinked)stks.splice(stks.indexOf(s.id),1);else stks.push(s.id);
+            updateUc(selUc.id,{linkedStakeholders:stks});
+          }}));
+          row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:600,fontSize:"12px",minWidth:"60px"}},s.id));
+          row.appendChild(h("span",{style:{flex:1,fontSize:"13px"}},s.name||"Unnamed"));
+          row.appendChild(h("span",{className:"badge",style:{fontSize:"10px",background:"var(--accentDim)",color:"var(--accent)"}},s.role));
+          lsList.appendChild(row);
+        });
+        lsCard.appendChild(lsList);
+      }
+      center.appendChild(lsCard);
+
+      // Notes card
+      const notesCard=h("div",{className:"card"});
+      notesCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--textDim)",marginBottom:"10px",textTransform:"uppercase",letterSpacing:".06em"}},"Notes"));
+      notesCard.appendChild(h("textarea",{id:"uc-notes",className:"input",style:{minHeight:"60px",resize:"vertical"},value:selUc.notes||"",placeholder:"Additional notes, assumptions, or open questions...",onInput:e=>updateUcSilent(selUc.id,{notes:e.target.value})}));
+      center.appendChild(notesCard);
+    }
+    grid.appendChild(center);
+
+    // ─── RIGHT: Summary Panel ───
+    const right=h("div",{});
+    const summaryPanel=h("div",{style:{position:"sticky",top:"80px"}});
+
+    // Type Overview
+    const typeCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+    typeCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,marginBottom:"10px"}},"By Type"));
+    const ucTypeCounts={};S.useCases.forEach(u=>{ucTypeCounts[u.type]=(ucTypeCounts[u.type]||0)+1;});
+    const sortedUcTypes=Object.entries(ucTypeCounts).sort((a,b)=>b[1]-a[1]);
+    if(sortedUcTypes.length===0){
+      typeCard.appendChild(h("div",{style:{color:"var(--textDim)",fontSize:"12px",textAlign:"center",padding:"8px"}},"No data"));
+    }
+    sortedUcTypes.forEach(([type,cnt])=>{
+      const row=h("div",{style:{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:"12px"}});
+      row.appendChild(h("span",{style:{color:"var(--text)"}},type));
+      row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:600}},String(cnt)));
+      typeCard.appendChild(row);
+    });
+    summaryPanel.appendChild(typeCard);
+
+    // Status grid
+    const statCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+    statCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,marginBottom:"10px"}},"By Status"));
+    const sGrid=h("div",{style:{display:"grid",gridTemplateColumns:"1fr 1fr",gap:"8px"}});
+    UC_STATUSES.forEach(st=>{
+      const cnt=S.useCases.filter(u=>u.status===st).length;
+      const clr=ucStatClr[st]||"var(--textDim)";
+      const box=h("div",{style:{background:clr+"15",borderRadius:"8px",padding:"8px",textAlign:"center"}});
+      box.appendChild(h("div",{className:"mono",style:{fontSize:"18px",fontWeight:700,color:clr}},String(cnt)));
+      box.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)"}},st));
+      sGrid.appendChild(box);
+    });
+    statCard.appendChild(sGrid);
+    summaryPanel.appendChild(statCard);
+
+    // Priority grid
+    const priCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+    priCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,marginBottom:"10px"}},"By Priority"));
+    const pGrid=h("div",{style:{display:"grid",gridTemplateColumns:"repeat(4,1fr)",gap:"6px"}});
+    UC_PRIORITIES.forEach(p=>{
+      const cnt=S.useCases.filter(u=>u.priority===p).length;
+      const clr=ucPriClr[p]||"var(--textDim)";
+      const box=h("div",{style:{background:clr+"15",borderRadius:"8px",padding:"8px",textAlign:"center"}});
+      box.appendChild(h("div",{className:"mono",style:{fontSize:"16px",fontWeight:700,color:clr}},String(cnt)));
+      box.appendChild(h("div",{style:{fontSize:"10px",color:"var(--textDim)"}},p));
+      pGrid.appendChild(box);
+    });
+    priCard.appendChild(pGrid);
+    summaryPanel.appendChild(priCard);
+
+    // Actor summary
+    const actorCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+    actorCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,marginBottom:"10px"}},"Actors"));
+    const actorCounts={};S.useCases.forEach(u=>{if(u.actor)actorCounts[u.actor]=(actorCounts[u.actor]||0)+1;});
+    const sortedActors=Object.entries(actorCounts).sort((a,b)=>b[1]-a[1]);
+    if(sortedActors.length===0){
+      actorCard.appendChild(h("div",{style:{color:"var(--textDim)",fontSize:"12px",textAlign:"center",padding:"8px"}},"No actors defined"));
+    }
+    sortedActors.forEach(([actor,cnt])=>{
+      const row=h("div",{style:{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:"12px"}});
+      row.appendChild(h("span",{style:{color:"var(--text)"}},actor));
+      row.appendChild(h("span",{className:"mono",style:{color:"var(--accent)",fontWeight:600}},String(cnt)));
+      actorCard.appendChild(row);
+    });
+    summaryPanel.appendChild(actorCard);
+
+    // Coverage — use cases without derived requirements
+    const noReqUcs=S.useCases.filter(u=>(u.derivedReqs||[]).length===0);
+    if(noReqUcs.length>0){
+      const covCard=h("div",{className:"card",style:{background:"var(--warn)11",borderColor:"var(--warn)33"}});
+      covCard.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--warn)",marginBottom:"8px"}},"⚠ No Derived Reqs ("+noReqUcs.length+")"));
+      covCard.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",marginBottom:"8px"}},"Use cases not linked to any requirements:"));
+      const tags=h("div",{style:{display:"flex",flexWrap:"wrap",gap:"4px"}});
+      noReqUcs.forEach(u=>tags.appendChild(h("span",{className:"badge",style:{background:"var(--warn)22",color:"var(--warn)",cursor:"pointer"},onClick:()=>{S.selUcId=u.id;render();}},u.id)));
+      covCard.appendChild(tags);
+      summaryPanel.appendChild(covCard);
+    }else if(S.useCases.length>0){
+      const covOk=h("div",{className:"card",style:{background:"var(--success)11",borderColor:"var(--success)33"}});
+      covOk.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--success)"}},"✓ All "+S.useCases.length+" use cases have derived requirements"));
+      summaryPanel.appendChild(covOk);
+    }
+
+    right.appendChild(summaryPanel);
+    grid.appendChild(right);
+    main.appendChild(grid);
+  }
+
   // ═══ V&V ═══
   if(S.view==="vv"){
     main.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700,marginBottom:"20px"}},"Verification & Validation Planning"));
@@ -2544,17 +3906,17 @@ function render(){
   if(S.view!=="welcome"){
     const footer=h("footer",{style:{padding:"14px 28px",borderTop:"1px solid var(--borderHi)",display:"flex",justifyContent:"space-between",fontSize:"12px",color:"var(--textMid)"}});
     const footerLeft=h("div",{});
-    footerLeft.appendChild(document.createTextNode("ReqRight v2.2.0-beta · Based on INCOSE® GtWR v4 · ISO/IEC/IEEE 29148 · 15288 · "));
+    footerLeft.appendChild(document.createTextNode("ReqRight v2.5.0 · Based on INCOSE® GtWR v4 · ISO/IEC/IEEE 29148 · 15288 · "));
     const helpLink=h("a",{href:"https://github.com/ssaleem74/reqright#readme",target:"_blank",style:{color:"var(--accent)",textDecoration:"none"}},"Help & Tutorial");
     footerLeft.appendChild(helpLink);
     footerLeft.appendChild(document.createTextNode(" · "));
-    const discLink=h("a",{href:"DISCLAIMER.md",style:{color:"var(--textMid)",textDecoration:"none"}},"Disclaimer");
+    const discLink=h("a",{href:"https://github.com/ssaleem74/reqright/blob/main/DISCLAIMER.md",target:"_blank",style:{color:"var(--textMid)",textDecoration:"none"}},"Disclaimer");
     footerLeft.appendChild(discLink);
     footerLeft.appendChild(document.createTextNode(" · "));
-    const privLink=h("a",{href:"PRIVACY.md",style:{color:"var(--textMid)",textDecoration:"none"}},"Privacy");
+    const privLink=h("a",{href:"https://github.com/ssaleem74/reqright/blob/main/PRIVACY.md",target:"_blank",style:{color:"var(--textMid)",textDecoration:"none"}},"Privacy");
     footerLeft.appendChild(privLink);
     footer.appendChild(footerLeft);
-    footer.appendChild(h("div",{},S.reqs.length+" requirement"+(S.reqs.length!==1?"s":"")+(S.risks.length?" · "+S.risks.length+" risk"+(S.risks.length!==1?"s":""):"")+(S.decisions.length?" · "+S.decisions.length+" decision"+(S.decisions.length!==1?"s":""):"")+" · Auto-saved in browser"));
+    footer.appendChild(h("div",{},S.reqs.length+" requirement"+(S.reqs.length!==1?"s":"")+(S.risks.length?" · "+S.risks.length+" risk"+(S.risks.length!==1?"s":""):"")+(S.decisions.length?" · "+S.decisions.length+" decision"+(S.decisions.length!==1?"s":""):"")+(S.stakeholders.length?" · "+S.stakeholders.length+" stakeholder"+(S.stakeholders.length!==1?"s":""):"")+(S.interfaces.length?" · "+S.interfaces.length+" interface"+(S.interfaces.length!==1?"s":""):"")+(S.useCases.length?" · "+S.useCases.length+" use case"+(S.useCases.length!==1?"s":""):"")+" · Auto-saved in browser"));
     app.appendChild(footer);
   }
 
