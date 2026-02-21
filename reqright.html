@@ -386,7 +386,7 @@ ${hier}
 // ─── HELPERS ──────────────────────────────────────────────
 let _id=0;
 function gid(p="REQ"){_id++;return p+"-"+String(_id).padStart(4,"0");}
-function mkReq(o={}){return{id:gid(),text:"",type:"Functional",level:"System Requirement",priority:"Medium",verification:"Test",rationale:"",parent:"",status:"Draft",source:"",risk:"Medium",created:new Date().toISOString(),modified:new Date().toISOString(),...o};}
+function mkReq(o={}){return{id:gid(),text:"",type:"Functional",level:"System Requirement",priority:"Medium",verification:"Test",rationale:"",parent:"",status:"Draft",source:"",risk:"Medium",comments:[],history:[],created:new Date().toISOString(),modified:new Date().toISOString(),...o};}
 let _riskId=0;
 function gridRisk(){
   // Gap-filling: find first available RSK-NNNN
@@ -472,6 +472,10 @@ const S={
   rptLayout:"A",
   showTemplates:false,
   xlsxPreview:null,
+  reviewer:localStorage.getItem("reqright_reviewer")||"Reviewer",
+  showComments:true,
+  showHistory:false,
+  commentText:"",
   aiLoading:null,toast:null,
   autoSaveKey:"reqright_autosave"
 };
@@ -778,29 +782,60 @@ function addReq(){History.save();const r=mkReq();S.reqs.push(r);S.selId=r.id;S.v
 // Silent update - updates data and quality panel without full re-render (fixes input focus loss)
 // Note: We use debounced history save for silent updates to avoid saving on every keystroke
 let _historyTimer=null;
+// ─── VERSION HISTORY TRACKING ─────────────────────────────
+const TRACKED_FIELDS={text:"Statement",type:"Type",level:"Level",priority:"Priority",status:"Status",verification:"Verification",rationale:"Rationale",source:"Source",parent:"Parent",risk:"Risk"};
+let _pendingTextHistory=null;
+
+function trackChanges(r,u){
+  if(!r.history)r.history=[];
+  for(const[k,v]of Object.entries(u)){
+    if(k in TRACKED_FIELDS&&r[k]!==v&&v!==undefined){
+      if(k==="text"){
+        // Debounce text changes — only record when user pauses
+        if(!_pendingTextHistory||_pendingTextHistory.id!==r.id){
+          _pendingTextHistory={id:r.id,oldValue:r[k],timestamp:new Date().toISOString()};
+        }
+      }else{
+        r.history.push({timestamp:new Date().toISOString(),field:TRACKED_FIELDS[k],oldValue:String(r[k]||""),newValue:String(v||""),author:S.reviewer});
+      }
+    }
+  }
+}
+
+function flushTextHistory(r){
+  if(_pendingTextHistory&&_pendingTextHistory.id===r.id&&r.text!==_pendingTextHistory.oldValue){
+    if(!r.history)r.history=[];
+    const oldSnip=(_pendingTextHistory.oldValue||"").substring(0,60);
+    const newSnip=(r.text||"").substring(0,60);
+    r.history.push({timestamp:_pendingTextHistory.timestamp,field:"Statement",oldValue:oldSnip+((_pendingTextHistory.oldValue||"").length>60?"…":""),newValue:newSnip+((r.text||"").length>60?"…":""),author:S.reviewer});
+  }
+  _pendingTextHistory=null;
+}
+
 function updateReqSilent(id,u){
   const r=S.reqs.find(x=>x.id===id);
   if(r){
-    // Save history only once when user starts typing (debounced)
     clearTimeout(_historyTimer);
-    _historyTimer=setTimeout(()=>History.save(),1000);
+    _historyTimer=setTimeout(()=>{History.save();flushTextHistory(r);},1000);
+    trackChanges(r,u);
     Object.assign(r,u,{modified:new Date().toISOString()});
     autoSave();
-    // Update quality panel only (debounced to avoid lag while typing)
     debounce(()=>updateQualityPanel(id),150);
   }
 }
 
 // Full update with re-render (for dropdowns, structural changes)
-function updateReq(id,u){History.save();const r=S.reqs.find(x=>x.id===id);if(r){Object.assign(r,u,{modified:new Date().toISOString()});autoSave();render();}}
+function updateReq(id,u){History.save();const r=S.reqs.find(x=>x.id===id);if(r){if(_pendingTextHistory&&_pendingTextHistory.id===id)flushTextHistory(r);trackChanges(r,u);Object.assign(r,u,{modified:new Date().toISOString()});autoSave();render();}}
 function deleteReq(id){History.save();S.reqs=S.reqs.filter(r=>r.id!==id);if(S.selId===id)S.selId=null;autoSave();toast("Deleted","info");render();}
-function dupReq(id){History.save();const o=S.reqs.find(r=>r.id===id);if(!o)return;const n={...o,id:gid(),status:"Draft",created:new Date().toISOString(),modified:new Date().toISOString()};S.reqs.push(n);autoSave();toast("Duplicated → "+n.id,"success");render();}
+function dupReq(id){History.save();const o=S.reqs.find(r=>r.id===id);if(!o)return;const n={...o,id:gid(),status:"Draft",comments:[],history:[],created:new Date().toISOString(),modified:new Date().toISOString()};S.reqs.push(n);autoSave();toast("Duplicated → "+n.id,"success");render();}
 function doAI(id){
   History.save();
   const r=S.reqs.find(x=>x.id===id);if(!r||!r.text.trim())return;
   S.aiLoading=id;render();
   setTimeout(()=>{
-    const a=analyze(r.text);const improved=aiRewrite(r.text,a);
+    const a=analyze(r.text);const oldText=r.text;const improved=aiRewrite(r.text,a);
+    if(!r.history)r.history=[];
+    r.history.push({timestamp:new Date().toISOString(),field:"Statement (AI Improve)",oldValue:oldText.substring(0,60)+(oldText.length>60?"…":""),newValue:improved.substring(0,60)+(improved.length>60?"…":""),author:"AI Engine"});
     r.text=improved;r.modified=new Date().toISOString();
     S.aiLoading=null;autoSave();
     const ns=analyze(improved).score;toast(`AI: ${a.score}% → ${ns}%`,"success");render();
@@ -2061,7 +2096,7 @@ function render(){
     main.appendChild(h("div",{style:{marginBottom:"28px"}},pnInput,h("p",{style:{color:"var(--textDim)",fontSize:"13px",marginTop:"2px"}},"INCOSE GtWR v4 · ISO/IEC/IEEE 29148 · ISO/IEC/IEEE 15288 · Your data stays on your machine")));
 
     const sg=h("div",{className:"grid-stats"});
-    [{l:"Total",v:stats.total,c:"var(--accent)",i:"☰"},{l:"Draft",v:stats.draft,c:"var(--warn)",i:"✎"},{l:"Reviewed",v:stats.reviewed,c:"var(--purple)",i:"◎"},{l:"Approved",v:stats.approved,c:"var(--success)",i:"✓"},{l:"Low Quality",v:stats.low,c:"var(--danger)",i:"⚠"},{l:"Avg Score",v:stats.avg+"%",c:stats.avg>=80?"var(--success)":stats.avg>=60?"var(--warn)":"var(--danger)",i:"★"}].forEach(s=>{
+    [{l:"Total",v:stats.total,c:"var(--accent)",i:"☰"},{l:"Draft",v:stats.draft,c:"var(--warn)",i:"✎"},{l:"Reviewed",v:stats.reviewed,c:"var(--purple)",i:"◎"},{l:"Approved",v:stats.approved,c:"var(--success)",i:"✓"},{l:"Low Quality",v:stats.low,c:"var(--danger)",i:"⚠"},{l:"Avg Score",v:stats.avg+"%",c:stats.avg>=80?"var(--success)":stats.avg>=60?"var(--warn)":"var(--danger)",i:"★"},{l:"Comments",v:S.reqs.reduce((s,r)=>s+(r.comments||[]).length,0),c:"var(--purple)",i:"💬"},{l:"Changes",v:S.reqs.reduce((s,r)=>s+(r.history||[]).length,0),c:"var(--accent)",i:"🕐"}].forEach(s=>{
       const card=h("div",{className:"card stat-card"});
       card.appendChild(h("div",{className:"icon",style:{color:s.c}},s.i));
       card.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",textTransform:"uppercase",letterSpacing:".08em",fontWeight:600}},s.l));
@@ -2298,6 +2333,7 @@ function render(){
       const itemScore=h("div",{style:{display:"flex",alignItems:"center",gap:"5px"}});
       itemScore.appendChild(h("span",{className:"mono",style:{fontSize:"11px",color:sc,fontWeight:700}},a.score+"%"));
       itemScore.appendChild(h("span",{style:{width:"7px",height:"7px",borderRadius:"50%",background:sc,display:"inline-block"}}));
+      if((r.comments||[]).length>0)itemScore.appendChild(h("span",{style:{fontSize:"9px",color:"var(--purple)",marginLeft:"2px"}},"💬"+r.comments.length));
       itemTop.appendChild(itemScore);item.appendChild(itemTop);
       item.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textDim)",lineHeight:"1.4",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}},r.text||"(empty)"));
       sbList.appendChild(item);
@@ -2413,6 +2449,130 @@ function render(){
       ratDiv.appendChild(h("label",{className:"label"},"Rationale (per R20 — purpose goes here, not in statement)"));
       ratDiv.appendChild(h("textarea",{className:"input",style:{height:"auto",resize:"vertical",lineHeight:"1.6"},rows:3,value:cur.rationale||"",placeholder:"Why is this requirement necessary?",onInput:e=>updateReqSilent(cur.id,{rationale:e.target.value})}));
       attrCard.appendChild(ratDiv);center.appendChild(attrCard);
+
+      // ═══ COMMENTS & REVIEW ═══
+      const cmtCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      const cmtHdr=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",marginBottom:S.showComments?"14px":"0"},onClick:()=>{S.showComments=!S.showComments;render();}});
+      const cmtLeft=h("div",{style:{display:"flex",alignItems:"center",gap:"8px"}});
+      cmtLeft.appendChild(h("span",{style:{fontSize:"13px",fontWeight:600,color:"var(--accent)"}},(S.showComments?"▾":"▸")+" 💬 Comments & Review"));
+      const cmtCount=(cur.comments||[]).length;
+      if(cmtCount>0)cmtLeft.appendChild(h("span",{className:"badge",style:{background:"var(--accent)22",color:"var(--accent)"}},String(cmtCount)));
+      cmtHdr.appendChild(cmtLeft);
+      // Reviewer name
+      const rvName=h("div",{style:{display:"flex",alignItems:"center",gap:"6px"},onClick:e=>e.stopPropagation()});
+      rvName.appendChild(h("span",{style:{fontSize:"11px",color:"var(--textDim)"}},"As:"));
+      rvName.appendChild(h("input",{className:"input",style:{width:"120px",fontSize:"11px",padding:"3px 8px"},value:S.reviewer,onInput:e=>{S.reviewer=e.target.value;localStorage.setItem("reqright_reviewer",e.target.value);},placeholder:"Your name"}));
+      cmtHdr.appendChild(rvName);
+      cmtCard.appendChild(cmtHdr);
+
+      if(S.showComments){
+        const comments=cur.comments||[];
+        // Comment list
+        if(comments.length>0){
+          const cmtList=h("div",{style:{marginBottom:"14px",maxHeight:"300px",overflowY:"auto"}});
+          comments.forEach((c,ci)=>{
+            const typeColors={"comment":"var(--textMid)","review":"var(--purple)","approval":"var(--success)","rejection":"var(--danger)"};
+            const typeIcons={"comment":"💬","review":"📝","approval":"✅","rejection":"❌"};
+            const typeLabels={"comment":"Comment","review":"Review Note","approval":"Approved","rejection":"Changes Requested"};
+            const tc=typeColors[c.type]||"var(--textMid)";
+            const cDiv=h("div",{style:{padding:"10px 12px",borderRadius:"8px",border:"1px solid "+tc+"33",background:tc+"08",marginBottom:"8px"}});
+            const cHead=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"6px"}});
+            const cInfo=h("div",{style:{display:"flex",alignItems:"center",gap:"6px"}});
+            cInfo.appendChild(h("span",{style:{fontSize:"13px"}},(typeIcons[c.type]||"💬")));
+            cInfo.appendChild(h("span",{style:{fontSize:"12px",fontWeight:600,color:tc}},c.author||"Unknown"));
+            cInfo.appendChild(h("span",{className:"badge",style:{fontSize:"9px",background:tc+"22",color:tc}},typeLabels[c.type]||"Comment"));
+            cHead.appendChild(cInfo);
+            const cRight=h("div",{style:{display:"flex",alignItems:"center",gap:"8px"}});
+            cRight.appendChild(h("span",{style:{fontSize:"10px",color:"var(--textDim)"}},new Date(c.timestamp).toLocaleString()));
+            const delBtn=h("button",{style:{border:"none",background:"transparent",color:"var(--textDim)",cursor:"pointer",fontSize:"12px",padding:"2px 4px"},onClick:()=>{History.save();cur.comments.splice(ci,1);autoSave();render();}},"✕");
+            delBtn.addEventListener("mouseenter",()=>delBtn.style.color="var(--danger)");
+            delBtn.addEventListener("mouseleave",()=>delBtn.style.color="var(--textDim)");
+            cRight.appendChild(delBtn);
+            cHead.appendChild(cRight);
+            cDiv.appendChild(cHead);
+            cDiv.appendChild(h("div",{style:{fontSize:"13px",color:"var(--text)",lineHeight:"1.5"}},c.text));
+            cmtList.appendChild(cDiv);
+          });
+          cmtCard.appendChild(cmtList);
+        }else{
+          cmtCard.appendChild(h("div",{style:{padding:"12px",textAlign:"center",color:"var(--textDim)",fontSize:"12px",marginBottom:"14px"}},"No comments yet. Add a comment or review below."));
+        }
+
+        // Add comment form
+        const cmtForm=h("div",{style:{borderTop:"1px solid var(--border)",paddingTop:"12px"}});
+        const cmtInput=h("textarea",{className:"input",style:{height:"auto",resize:"vertical",fontSize:"13px",marginBottom:"8px"},rows:2,value:S.commentText||"",placeholder:"Write a comment or review note...",onInput:e=>{S.commentText=e.target.value;}});
+        cmtForm.appendChild(cmtInput);
+        const cmtBtns=h("div",{style:{display:"flex",gap:"6px",flexWrap:"wrap"}});
+        [{type:"comment",label:"💬 Comment",color:"var(--textMid)"},{type:"review",label:"📝 Review Note",color:"var(--purple)"},{type:"approval",label:"✅ Approve",color:"var(--success)"},{type:"rejection",label:"❌ Request Changes",color:"var(--danger)"}].forEach(ct=>{
+          cmtBtns.appendChild(h("button",{className:"btn btn-sec",style:{fontSize:"11px",padding:"5px 12px",borderColor:ct.color+"44",color:ct.color},onClick:()=>{
+            const text=(S.commentText||"").trim();
+            if(!text&&ct.type==="comment")return;
+            if(!cur.comments)cur.comments=[];
+            History.save();
+            const commentText=text||(ct.type==="approval"?"Requirement approved.":"Changes requested.");
+            cur.comments.push({id:Date.now(),text:commentText,author:S.reviewer,timestamp:new Date().toISOString(),type:ct.type});
+            // Auto-update status for approval/rejection
+            if(ct.type==="approval"&&cur.status!=="Approved"){
+              if(!cur.history)cur.history=[];
+              cur.history.push({timestamp:new Date().toISOString(),field:"Status",oldValue:cur.status,newValue:"Approved",author:S.reviewer});
+              cur.status="Approved";
+            }else if(ct.type==="rejection"&&cur.status!=="Under Review"){
+              if(!cur.history)cur.history=[];
+              cur.history.push({timestamp:new Date().toISOString(),field:"Status",oldValue:cur.status,newValue:"Under Review",author:S.reviewer});
+              cur.status="Under Review";
+            }
+            cur.modified=new Date().toISOString();
+            S.commentText="";autoSave();render();
+          }},ct.label));
+        });
+        cmtForm.appendChild(cmtBtns);
+        cmtCard.appendChild(cmtForm);
+      }
+      center.appendChild(cmtCard);
+
+      // ═══ VERSION HISTORY ═══
+      const histCard=h("div",{className:"card",style:{marginBottom:"14px"}});
+      const histHdr=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",cursor:"pointer",marginBottom:S.showHistory?"14px":"0"},onClick:()=>{S.showHistory=!S.showHistory;render();}});
+      const histLeft=h("div",{style:{display:"flex",alignItems:"center",gap:"8px"}});
+      const histEntries=(cur.history||[]);
+      histLeft.appendChild(h("span",{style:{fontSize:"13px",fontWeight:600,color:"var(--purple)"}},(S.showHistory?"▾":"▸")+" 🕐 Version History"));
+      if(histEntries.length>0)histLeft.appendChild(h("span",{className:"badge",style:{background:"var(--purple)22",color:"var(--purple)"}},String(histEntries.length)));
+      histHdr.appendChild(histLeft);
+      histHdr.appendChild(h("span",{style:{fontSize:"10px",color:"var(--textDim)"}},"Created: "+new Date(cur.created).toLocaleDateString()));
+      histCard.appendChild(histHdr);
+
+      if(S.showHistory){
+        if(histEntries.length>0){
+          const timeline=h("div",{style:{maxHeight:"350px",overflowY:"auto"}});
+          // Show newest first
+          [...histEntries].reverse().forEach((entry,ei)=>{
+            const isAI=entry.author==="AI Engine";
+            const eDiv=h("div",{style:{display:"flex",gap:"10px",marginBottom:"10px",paddingBottom:"10px",borderBottom:ei<histEntries.length-1?"1px solid var(--border)":"none"}});
+            // Timeline dot
+            eDiv.appendChild(h("div",{style:{width:"8px",height:"8px",borderRadius:"50%",background:isAI?"var(--purple)":"var(--accent)",marginTop:"5px",flexShrink:0}}));
+            const eContent=h("div",{style:{flex:1,minWidth:0}});
+            const eHead=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:"4px"}});
+            const eInfo=h("div",{style:{display:"flex",alignItems:"center",gap:"6px"}});
+            eInfo.appendChild(h("span",{style:{fontSize:"12px",fontWeight:600,color:isAI?"var(--purple)":"var(--text)"}},entry.field));
+            eInfo.appendChild(h("span",{style:{fontSize:"10px",color:"var(--textDim)"}},"by "+entry.author));
+            eHead.appendChild(eInfo);
+            eHead.appendChild(h("span",{style:{fontSize:"10px",color:"var(--textDim)"}},new Date(entry.timestamp).toLocaleString()));
+            eContent.appendChild(eHead);
+            const eDiff=h("div",{style:{fontSize:"11px",lineHeight:"1.5"}});
+            if(entry.oldValue){
+              eDiff.appendChild(h("span",{style:{color:"var(--danger)",textDecoration:"line-through",background:"var(--danger)0a",padding:"1px 4px",borderRadius:"3px",marginRight:"4px"}},entry.oldValue));
+            }
+            eDiff.appendChild(h("span",{style:{color:"var(--success)",background:"var(--success)0a",padding:"1px 4px",borderRadius:"3px"}},entry.newValue||"(empty)"));
+            eContent.appendChild(eDiff);
+            eDiv.appendChild(eContent);
+            timeline.appendChild(eDiv);
+          });
+          histCard.appendChild(timeline);
+        }else{
+          histCard.appendChild(h("div",{style:{padding:"12px",textAlign:"center",color:"var(--textDim)",fontSize:"12px"}},"No changes recorded yet. Edit fields to start tracking history."));
+        }
+      }
+      center.appendChild(histCard);
     }else{
       // Improved empty state
       const empty=h("div",{className:"card",style:{textAlign:"center",padding:"64px 32px"}});
