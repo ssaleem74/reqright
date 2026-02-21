@@ -250,17 +250,49 @@ const REQ_TEMPLATES=[
 // ─── ANALYSIS ──────────────────────────────────────────────
 function analyze(text){
   if(!text||!text.trim())return{score:0,results:[],grade:"N/A",passed:0,failed:0,warnings:0};
-  const results=RULES.map(r=>{const res=r.ck(text);return{...r,...res};});
-  const passed=results.filter(r=>r.pass&&!r.warn).length;
-  const failed=results.filter(r=>!r.pass).length;
+  const w=S.ruleWeights||{};
+  const results=RULES.map(r=>{const res=r.ck(text);return{...r,...res,weight:w[r.id]??1};});
+  const passed=results.filter(r=>r.pass&&!r.warn&&(w[r.id]??1)>0).length;
+  const failed=results.filter(r=>!r.pass&&(w[r.id]??1)>0).length;
   const warnings=results.filter(r=>r.warn).length;
-  const total=passed+failed;
-  const score=total>0?Math.round(passed/total*100):50;
+  // Weighted scoring: sum(weight*pass) / sum(weight) for non-warn rules with weight > 0
+  const scorable=results.filter(r=>!r.warn&&(r.weight||0)>0);
+  let wPassed=0,wTotal=0;
+  scorable.forEach(r=>{wTotal+=r.weight;if(r.pass)wPassed+=r.weight;});
+  const score=wTotal>0?Math.round(wPassed/wTotal*100):50;
   let grade="F";
   if(score>=95)grade="A+";else if(score>=90)grade="A";else if(score>=85)grade="B+";
   else if(score>=80)grade="B";else if(score>=75)grade="C+";else if(score>=70)grade="C";else if(score>=60)grade="D";
   return{score,results,grade,passed,failed,warnings};
 }
+
+// ─── RULE WEIGHT PRESETS ─────────────────────────────────
+const WEIGHT_LABELS={0:"Off",0.5:"Low",1:"Normal",2:"High",3:"Critical"};
+const WEIGHT_COLORS={0:"var(--textDim)",0.5:"var(--warn)",1:"var(--text)",2:"var(--accent)",3:"var(--danger)"};
+const WEIGHT_PRESETS={
+  equal:{name:"Equal (Default)",desc:"All rules weighted equally",weights:Object.fromEntries(RULES.map(r=>[r.id,1]))},
+  safety:{name:"Safety-Critical",desc:"Emphasizes accuracy, completeness, measurability",weights:Object.fromEntries(RULES.map(r=>{
+    const hi=["R1","R2","R7","R8","R9","R16","R18","R24","R26","R31","R33","R34"];
+    const med=["R3","R5","R6","R10","R14","R15","R17","R19","R20","R27","R32","R35"];
+    return[r.id,hi.includes(r.id)?3:med.includes(r.id)?2:1];
+  }))},
+  performance:{name:"Performance-Focused",desc:"Emphasizes measurability, tolerances, quantification",weights:Object.fromEntries(RULES.map(r=>{
+    const hi=["R6","R7","R33","R34","R35"];
+    const med=["R1","R8","R9","R10","R18","R26","R31","R32"];
+    return[r.id,hi.includes(r.id)?3:med.includes(r.id)?2:1];
+  }))},
+  strict:{name:"Compliance-Strict",desc:"Maximum weight on all automatable rules, warnings ignored",weights:Object.fromEntries(RULES.map(r=>{
+    // Rules that are just warnings (always pass with warn:true) get 0
+    const warnOnly=["R4","R11","R12","R13","R22","R23","R25","R28","R29","R30","R36","R37","R39","R40","R41","R42"];
+    return[r.id,warnOnly.includes(r.id)?0:2];
+  }))},
+  minimal:{name:"Minimal Check",desc:"Only core rules — shall, vague terms, escape clauses",weights:Object.fromEntries(RULES.map(r=>{
+    const on=["R1","R7","R8","R9","R18","R24"];
+    return[r.id,on.includes(r.id)?2:0];
+  }))}
+};
+
+function saveRuleWeights(){localStorage.setItem("reqright_ruleWeights",JSON.stringify(S.ruleWeights));}
 
 // ─── AI REWRITE ──────────────────────────────────────────
 function aiRewrite(text,analysis){
@@ -476,6 +508,7 @@ const S={
   showComments:true,
   showHistory:false,
   commentText:"",
+  ruleWeights:JSON.parse(localStorage.getItem("reqright_ruleWeights")||"null")||Object.fromEntries(RULES.map(r=>[r.id,1])),
   aiLoading:null,toast:null,
   autoSaveKey:"reqright_autosave"
 };
@@ -939,7 +972,7 @@ function deleteUc(id){History.save();S.useCases=S.useCases.filter(u=>u.id!==id);
 // ─── EXPORTS ──────────────────────────────────────────────
 function exportJSON(){
   const data={project:S.project,version:"2.2",standard:"INCOSE GtWR v4",exportDate:new Date().toISOString(),
-    requirements:S.reqs.map(r=>({...r,qualityScore:analyze(r.text).score,qualityGrade:analyze(r.text).grade})),decisions:S.decisions,risks:S.risks,stakeholders:S.stakeholders||[],interfaces:S.interfaces||[],useCases:S.useCases||[],glossary:S.glossary};
+    requirements:S.reqs.map(r=>({...r,qualityScore:analyze(r.text).score,qualityGrade:analyze(r.text).grade})),decisions:S.decisions,risks:S.risks,stakeholders:S.stakeholders||[],interfaces:S.interfaces||[],useCases:S.useCases||[],glossary:S.glossary,ruleWeights:S.ruleWeights};
   dl(JSON.stringify(data,null,2),"application/json",S.project.replace(/\s/g,"_")+"_requirements.json");
   toast("Saved project JSON","success");
 }
@@ -1341,6 +1374,7 @@ function importFile(file,type){
           if(d.interfaces)d.interfaces.forEach(i=>{S.interfaces.push({...mkIfc(),...i});});
           if(d.useCases)d.useCases.forEach(u=>{S.useCases.push({...mkUc(),...u});});
           if(d.project)S.project=d.project;
+          if(d.ruleWeights){S.ruleWeights={...S.ruleWeights,...d.ruleWeights};saveRuleWeights();}
           autoSave();
           let msg="Loaded";
           if(d.requirements&&d.requirements.length)msg+=" "+d.requirements.length+" requirements";
@@ -2610,6 +2644,8 @@ function render(){
         const rh=h("div",{style:{display:"flex",justifyContent:"space-between",marginBottom:"3px"}});
         rh.appendChild(h("span",{className:"mono",style:{fontSize:"12px",color:"var(--danger)",fontWeight:600}},r.id));
         rh.appendChild(h("span",{className:"badge",style:{background:"var(--danger)22",color:"var(--danger)"}},"FAIL"));
+        const rWeight=S.ruleWeights[r.id]??1;
+        if(rWeight!==1)rh.appendChild(h("span",{className:"badge",style:{fontSize:"9px",background:WEIGHT_COLORS[rWeight]+"22",color:WEIGHT_COLORS[rWeight]}},rWeight+"×"));
         ri.appendChild(rh);ri.appendChild(h("div",{style:{fontSize:"12px",fontWeight:600,color:"var(--text)"}},r.nm));
         ri.appendChild(h("div",{style:{fontSize:"12px",color:"var(--textMid)",lineHeight:"1.5",marginTop:"2px"}},r.msg));
         ruleCard.appendChild(ri);
@@ -4249,8 +4285,49 @@ function render(){
 
   // ═══ RULES REF ═══
   if(S.view==="rules"){
-    main.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700,marginBottom:"4px"}},"INCOSE GtWR v4 — 42 Rules Reference"));
-    main.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"13px",marginBottom:"20px"}},"Complete reference: 14 categories, 15 characteristics."));
+    const rulesHdr=h("div",{style:{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:"20px"}});
+    const rulesLeft=h("div",{});
+    rulesLeft.appendChild(h("h2",{style:{fontSize:"20px",fontWeight:700,marginBottom:"4px"}},"INCOSE GtWR v4 — 42 Rules Reference"));
+    rulesLeft.appendChild(h("p",{style:{color:"var(--textMid)",fontSize:"13px"}},"14 categories · Adjust weights to prioritize rules for your project context."));
+    rulesHdr.appendChild(rulesLeft);
+
+    // Active/disabled count
+    const activeCount=RULES.filter(r=>(S.ruleWeights[r.id]||0)>0).length;
+    const customCount=RULES.filter(r=>S.ruleWeights[r.id]!==1).length;
+    const statBadges=h("div",{style:{display:"flex",gap:"6px",alignItems:"center"}});
+    statBadges.appendChild(h("span",{className:"badge",style:{background:"var(--accent)22",color:"var(--accent)"}},activeCount+"/42 active"));
+    if(customCount>0)statBadges.appendChild(h("span",{className:"badge",style:{background:"var(--purple)22",color:"var(--purple)"}},customCount+" customized"));
+    rulesHdr.appendChild(statBadges);
+    main.appendChild(rulesHdr);
+
+    // Preset profiles card
+    const presetCard=h("div",{className:"card",style:{marginBottom:"16px"}});
+    presetCard.appendChild(h("div",{style:{fontSize:"13px",fontWeight:600,marginBottom:"10px",color:"var(--accent)"}},"⚡ Weight Presets"));
+    const presetGrid=h("div",{style:{display:"grid",gridTemplateColumns:"repeat(5,1fr)",gap:"8px"}});
+    Object.entries(WEIGHT_PRESETS).forEach(([key,preset])=>{
+      const isActive=JSON.stringify(S.ruleWeights)===JSON.stringify(preset.weights);
+      const pBtn=h("div",{style:{padding:"12px",borderRadius:"10px",border:"1px solid "+(isActive?"var(--accent)":"var(--border)"),background:isActive?"var(--accentDim)22":"transparent",cursor:"pointer",transition:"all .15s"},onClick:()=>{S.ruleWeights={...preset.weights};saveRuleWeights();render();}});
+      pBtn.addEventListener("mouseenter",()=>{if(!isActive)pBtn.style.borderColor="var(--accent)";});
+      pBtn.addEventListener("mouseleave",()=>{if(!isActive)pBtn.style.borderColor="var(--border)";});
+      pBtn.appendChild(h("div",{style:{fontSize:"12px",fontWeight:700,color:isActive?"var(--accent)":"var(--text)",marginBottom:"4px"}},preset.name));
+      pBtn.appendChild(h("div",{style:{fontSize:"10px",color:"var(--textDim)",lineHeight:"1.4"}},preset.desc));
+      presetGrid.appendChild(pBtn);
+    });
+    presetCard.appendChild(presetGrid);
+    main.appendChild(presetCard);
+
+    // Legend
+    const legend=h("div",{style:{display:"flex",gap:"12px",marginBottom:"16px",fontSize:"11px",alignItems:"center"}});
+    legend.appendChild(h("span",{style:{color:"var(--textDim)",fontWeight:600}},"Weights:"));
+    Object.entries(WEIGHT_LABELS).forEach(([val,label])=>{
+      const lItem=h("div",{style:{display:"flex",alignItems:"center",gap:"4px"}});
+      lItem.appendChild(h("div",{style:{width:"8px",height:"8px",borderRadius:"2px",background:WEIGHT_COLORS[val]}}));
+      lItem.appendChild(h("span",{style:{color:WEIGHT_COLORS[val]}},label+" ("+val+"×)"));
+      legend.appendChild(lItem);
+    });
+    main.appendChild(legend);
+
+    // Rules by category
     CATS.forEach(cat=>{
       const cr=RULES.filter(r=>r.cat===cat.nm);if(!cr.length)return;
       const card=h("div",{className:"card",style:{marginBottom:"12px"}});
@@ -4258,12 +4335,25 @@ function render(){
       ch.appendChild(h("div",{style:{width:"3px",height:"22px",borderRadius:"2px",background:cat.c}}));
       ch.appendChild(h("h3",{style:{fontSize:"15px",fontWeight:700}},cat.nm));
       ch.appendChild(h("span",{className:"mono",style:{fontSize:"12px",color:"var(--textDim)"}},cat.r));
+      // Category avg weight
+      const catAvg=cr.reduce((s,r)=>s+(S.ruleWeights[r.id]??1),0)/cr.length;
+      ch.appendChild(h("span",{className:"badge",style:{fontSize:"9px",background:catAvg>1.5?"var(--accent)22":catAvg===0?"var(--textDim)22":"var(--text)22",color:catAvg>1.5?"var(--accent)":catAvg===0?"var(--textDim)":"var(--text)"}},catAvg.toFixed(1)+"× avg"));
       card.appendChild(ch);
       cr.forEach(rule=>{
-        const row=h("div",{style:{display:"grid",gridTemplateColumns:"60px 160px 1fr",gap:"14px",padding:"10px 14px",background:"var(--surface)",borderRadius:"8px",alignItems:"center",marginBottom:"4px"}});
+        const rw=S.ruleWeights[rule.id]??1;
+        const row=h("div",{style:{display:"grid",gridTemplateColumns:"50px 150px 1fr 180px",gap:"10px",padding:"8px 14px",background:rw===0?"var(--surface)55":"var(--surface)",borderRadius:"8px",alignItems:"center",marginBottom:"4px",opacity:rw===0?.5:1,transition:"opacity .15s"}});
         row.appendChild(h("span",{className:"mono",style:{fontSize:"12px",color:cat.c,fontWeight:700}},rule.id));
         row.appendChild(h("span",{style:{fontSize:"12px",fontWeight:600,color:"var(--text)"}},rule.nm));
         row.appendChild(h("span",{style:{fontSize:"12px",color:"var(--textMid)"}},rule.desc));
+        // Weight selector
+        const wSel=h("div",{style:{display:"flex",gap:"2px"}});
+        [0,0.5,1,2,3].forEach(wv=>{
+          const isW=rw===wv;
+          const btn=h("button",{style:{padding:"3px 8px",borderRadius:"5px",border:"1px solid "+(isW?WEIGHT_COLORS[wv]+"88":"var(--border)"),background:isW?WEIGHT_COLORS[wv]+"22":"transparent",color:isW?WEIGHT_COLORS[wv]:"var(--textDim)",fontSize:"10px",fontWeight:isW?700:400,cursor:"pointer",transition:"all .1s",fontFamily:"inherit"},onClick:()=>{S.ruleWeights[rule.id]=wv;saveRuleWeights();render();}},WEIGHT_LABELS[wv]);
+          if(!isW){btn.addEventListener("mouseenter",()=>{btn.style.borderColor=WEIGHT_COLORS[wv];});btn.addEventListener("mouseleave",()=>{btn.style.borderColor="var(--border)";});}
+          wSel.appendChild(btn);
+        });
+        row.appendChild(wSel);
         card.appendChild(row);
       });
       main.appendChild(card);
