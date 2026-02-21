@@ -1722,7 +1722,26 @@ function render(){
   logoText.appendChild(h("div",{style:{fontSize:"11px",color:"var(--textDim)",marginTop:"1px"}},"Systems Engineering Workbench · INCOSE GtWR v4 · 42 Rules"));
   logo.appendChild(logoText);headerTop.appendChild(logo);
 
+  const reqCount=S.reqs.length;
+  const glossCount=S.glossary.length;
+  const decCount=S.decisions.length;
+  const riskCount=S.risks.length;
+
   const hActions=h("div",{style:{display:"flex",gap:"6px",alignItems:"center"}});
+
+  // Reference tabs (moved from nav to save space)
+  const refTabs=[{k:"vv",l:"✓ V&V"},{k:"rules",l:"⚙ Rules"},{k:"glossary",l:"📖 Glossary",c:glossCount}];
+  const refGroup=h("div",{style:{display:"flex",gap:"2px",background:"var(--surface)",borderRadius:"8px",padding:"2px",border:"1px solid var(--border)",marginRight:"4px"}});
+  refTabs.forEach(t=>{
+    const btn=h("button",{style:{padding:"5px 10px",borderRadius:"6px",border:"none",cursor:"pointer",fontSize:"12px",fontWeight:S.view===t.k?600:500,background:S.view===t.k?"var(--accent)":"transparent",color:S.view===t.k?"var(--bg)":"var(--textMid)",transition:"all .15s",whiteSpace:"nowrap"},onClick:()=>setState({view:t.k})});
+    btn.appendChild(document.createTextNode(t.l));
+    if(t.c&&t.c>0){btn.appendChild(h("span",{style:{marginLeft:"4px",fontSize:"10px",padding:"1px 5px",borderRadius:"6px",background:S.view===t.k?"rgba(0,0,0,0.3)":"var(--border)",color:S.view===t.k?"#fff":"var(--textDim)",fontWeight:600}},String(t.c)));}
+    btn.addEventListener("mouseenter",()=>{if(S.view!==t.k)btn.style.background="var(--card)";});
+    btn.addEventListener("mouseleave",()=>{if(S.view!==t.k)btn.style.background="transparent";});
+    refGroup.appendChild(btn);
+  });
+  hActions.appendChild(refGroup);
+
   // Global search button
   const searchBtn=h("button",{className:"btn btn-sec",style:{borderColor:"var(--border)",display:"flex",alignItems:"center",gap:"6px",padding:"6px 12px"},onClick:()=>{S.showSearch=true;S.globalSearchQ="";render();setTimeout(()=>document.getElementById("global-search-input")?.focus(),50);}});
   searchBtn.appendChild(h("span",{style:{fontSize:"14px"}},"🔍"));
@@ -1777,11 +1796,7 @@ function render(){
   // ── Row 2: Navigation Tabs ──
   const headerNav=h("div",{className:"header-nav"});
   const nav=h("div",{className:"nav"});
-  const reqCount=S.reqs.length;
-  const glossCount=S.glossary.length;
-  const decCount=S.decisions.length;
-  const riskCount=S.risks.length;
-  const navTabs=[{k:"dashboard",l:"◉ Dashboard",c:null},{k:"editor",l:"✎ Author",c:reqCount},{k:"requirements",l:"☰ Register",c:reqCount},{k:"traceability",l:"⊞ Trace",c:null},{k:"sep"},{k:"risks",l:"⚠ Risks",c:riskCount},{k:"decisions",l:"📋 Decisions",c:decCount},{k:"stakeholders",l:"👥 Stakeholders",c:S.stakeholders.length||null},{k:"interfaces",l:"🔌 Interfaces",c:S.interfaces.length||null},{k:"usecases",l:"📐 Use Cases",c:S.useCases.length||null},{k:"sep"},{k:"vv",l:"✓ V&V",c:null},{k:"rules",l:"⚙ Rules",c:null},{k:"glossary",l:"📖 Glossary",c:glossCount}];
+  const navTabs=[{k:"dashboard",l:"◉ Dashboard",c:null},{k:"editor",l:"✎ Author",c:reqCount},{k:"requirements",l:"☰ Register",c:reqCount},{k:"traceability",l:"⊞ Trace",c:null},{k:"sep"},{k:"risks",l:"⚠ Risks",c:riskCount},{k:"decisions",l:"📋 Decisions",c:decCount},{k:"stakeholders",l:"👥 Stakeholders",c:S.stakeholders.length||null},{k:"interfaces",l:"🔌 Interfaces",c:S.interfaces.length||null},{k:"usecases",l:"📐 Use Cases",c:S.useCases.length||null}];
   navTabs.forEach(t=>{
     if(t.k==="sep"){nav.appendChild(h("div",{className:"nav-sep"}));return;}
     const btn=h("button",{className:S.view===t.k?"active":"",onClick:()=>setState({view:t.k})});
