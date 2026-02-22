@@ -117,20 +117,55 @@ Build a free, browser-based systems engineering workbench that implements INCOSE
 - README.md rewritten for full SE workbench
 - PROJECT-JOURNAL.md updated (this file)
 
+### February 22, 2026 (Session 4 — Batch Features + Release Prep)
+**Batch 1: Excel Import + Templates Library**
+- SheetJS CDN integration for .xlsx/.xls parsing
+- Column mapping modal with auto-detection of common headers
+- Multi-sheet workbook support with tab selector
+- Preview table showing first 5 rows before import
+- 36 pre-built requirement templates across 9 categories
+- Click-to-insert with pre-filled type, level, and V&V method
+
+**Batch 2: Comments/Review Mode + Version History**
+- 4 comment types: Comment, Review Note, Approve, Request Changes
+- Reviewer name persisted across sessions
+- Auto-status updates on approval/rejection
+- Automatic tracking of all field changes
+- Text changes tracked with debounced snapshots
+- AI rewrites logged in history timeline
+- Color-coded diff display
+
+**Batch 3: Custom Rule Weights**
+- 5 weight levels per rule (Off, Low, Normal, High, Critical)
+- Weighted scoring formula: sum(weight × pass) / sum(weight) × 100
+- 5 built-in presets: Equal, Safety-Critical, Performance, Compliance-Strict, Minimal
+- Enhanced Rules view with inline weight selectors
+- Weights persisted in localStorage and JSON export
+
+**Release Prep:**
+- CHANGELOG.md updated for v2.6.0
+- README.md updated (version badge, 5 new features, export formats)
+- index.html landing page updated (features, hero, workflow, version refs)
+- PROJECT-JOURNAL.md updated (this file)
+- Test data updated with sample comments, history, and rule weights
+- Version bumped to v2.6.0 everywhere, tagged on GitHub
+
 ---
 
-## 📊 Current Statistics (v2.5.0)
+## 📊 Current Statistics (v2.6.0)
 
 | Metric | Value |
 |--------|-------|
-| HTML file size | ~3,900 lines |
+| HTML file size | ~4,436 lines |
 | Modules | 6 (Requirements, Risks, Decisions, Stakeholders, Interfaces, Use Cases) |
-| Views | 14+ (Dashboard, Author, Register, Trace ×2, V&V, Rules, Glossary, + 6 module views) |
-| Quality rules | 42 (INCOSE GtWR v4) |
-| Export formats | 4 (JSON, CSV, ReqIF, PDF) |
+| Views | 16+ (Dashboard, Author, Register, Trace ×2, V&V, Rules, Glossary, + 6 module views) |
+| Quality rules | 42 (INCOSE GtWR v4) with custom weights |
+| Requirement templates | 36 across 9 categories |
+| Export formats | 5 (JSON, CSV, Excel, ReqIF, PDF) |
+| Import formats | 5 (JSON, CSV/TSV, Excel .xlsx/.xls, Text/Markdown) |
 | Report layouts | 3 (ISO/INCOSE, NASA, Management) |
 | Keyboard shortcuts | 6 |
-| Dependencies | 0 |
+| Dependencies | 1 (SheetJS CDN for Excel) |
 
 ---
 
@@ -145,12 +180,10 @@ Build a free, browser-based systems engineering workbench that implements INCOSE
 7. **Release Announcement** — Share with INCOSE community
 
 ### Future Feature Ideas
-- Excel/CSV Import (.xlsx)
-- Custom Rule Weights
-- Comments/Review Mode
-- Version History
-- Requirement Templates Library
-- Real LLM Integration (optional API key)
+- Real LLM Integration (optional API key for Claude/GPT)
+- Baseline Comparison (diff between requirement versions)
+- Multi-user collaboration (WebRTC or server sync)
+- S1000D technical publication integration
 
 ---
 

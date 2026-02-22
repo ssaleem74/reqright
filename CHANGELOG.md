@@ -6,6 +6,49 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ---
 
+## [2.6.0] — 2026-02-22
+
+### Added
+- **Excel Import (.xlsx/.xls)** — Full spreadsheet import via SheetJS
+  - Column mapping modal with auto-detection of common header names
+  - Multi-sheet workbook support with tab selector
+  - Preview table showing first 5 rows before import
+  - Maps to all requirement fields (type, level, priority, status, V&V, rationale, source, parent)
+- **Requirement Templates Library** — 36 pre-built templates across 9 categories
+  - Categories: Functional, Performance, Interface, Safety, Security, Reliability, Environmental, Maintainability, Regulatory
+  - Templates follow INCOSE GtWR v4 best practices with [placeholder] syntax
+  - Click-to-insert creates requirement pre-filled with type, level, and V&V method
+  - Accessible via 📋 Templates button in header
+- **Comments & Review Mode** — Collaborative review workflow
+  - 4 comment types: 💬 Comment, 📝 Review Note, ✅ Approve, ❌ Request Changes
+  - Approve auto-sets requirement status to "Approved"
+  - Request Changes auto-sets status to "Under Review"
+  - Reviewer name persisted across sessions
+  - Comment count badge on sidebar items and dashboard
+  - Collapsible panel in Author view
+- **Version History** — Automatic change tracking
+  - Tracks all field changes (type, level, priority, status, V&V, rationale, source, parent, risk)
+  - Text changes tracked with debounced snapshots
+  - AI rewrites logged as "AI Engine" with before/after snippets
+  - Timeline view with newest-first ordering and color-coded diffs
+  - Change count on dashboard
+- **Custom Rule Weights** — Configurable scoring engine
+  - 5 weight levels per rule: Off (0×), Low (0.5×), Normal (1×), High (2×), Critical (3×)
+  - Weighted scoring: sum(weight × pass) / sum(weight) × 100
+  - 5 built-in presets: Equal, Safety-Critical, Performance-Focused, Compliance-Strict, Minimal
+  - Enhanced Rules view with inline weight selectors and preset cards
+  - Weights persisted in localStorage and included in JSON export/import
+  - Weight badge shown on failing rules in quality panel
+
+### Changed
+- Version bumped from 2.5.0 to 2.6.0 across all references
+- File import inputs now accept .xlsx/.xls in addition to .json/.csv/.tsv/.md
+- Import menu label updated to "Import Excel/CSV/Document"
+- Welcome screen file label updated for Excel support
+- Duplicate requirement now clears comments and history
+- Dashboard stats grid now shows Comments and Changes counts
+- JSON export now includes ruleWeights configuration
+
 ## [2.5.0] — 2026-02-21
 
 ### Added

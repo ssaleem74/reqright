@@ -1,8 +1,8 @@
 {
   "project": "Smart Home Security System \u2014 AegisGuard Pro",
-  "version": "2.2",
+  "version": "2.6.0",
   "standard": "INCOSE GtWR v4",
-  "exportDate": "2026-02-19T12:00:00.000Z",
+  "exportDate": "2026-02-22T12:00:00Z",
   "requirements": [
     {
       "id": "STK-0001",
@@ -15,7 +15,46 @@
       "parent": "",
       "status": "Approved",
       "source": "Customer Survey CS-2025-041",
-      "risk": "Critical"
+      "risk": "Critical",
+      "comments": [
+        {
+          "id": 1,
+          "text": "Core requirement \u2014 verified against ISO 62443 security standards.",
+          "author": "Sarah Chen",
+          "timestamp": "2026-02-15T10:30:00Z",
+          "type": "review"
+        },
+        {
+          "id": 2,
+          "text": "Requirement approved after security architecture review.",
+          "author": "David Park",
+          "timestamp": "2026-02-16T14:15:00Z",
+          "type": "approval"
+        }
+      ],
+      "history": [
+        {
+          "timestamp": "2026-02-10T09:00:00Z",
+          "field": "Statement",
+          "oldValue": "The system shall detect intrusion\u2026",
+          "newValue": "The AegisGuard_System shall detect each\u2026",
+          "author": "Sarah Chen"
+        },
+        {
+          "timestamp": "2026-02-12T11:20:00Z",
+          "field": "Status",
+          "oldValue": "Draft",
+          "newValue": "Under Review",
+          "author": "Sarah Chen"
+        },
+        {
+          "timestamp": "2026-02-16T14:15:00Z",
+          "field": "Status",
+          "oldValue": "Under Review",
+          "newValue": "Approved",
+          "author": "David Park"
+        }
+      ]
     },
     {
       "id": "STK-0002",
@@ -28,7 +67,46 @@
       "parent": "",
       "status": "Approved",
       "source": "Market Research MR-2025-017",
-      "risk": "High"
+      "risk": "High",
+      "comments": [
+        {
+          "id": 3,
+          "text": "200ms threshold validated with hardware team. Sensor polling rate supports this.",
+          "author": "Mike Torres",
+          "timestamp": "2026-02-14T09:45:00Z",
+          "type": "comment"
+        },
+        {
+          "id": 4,
+          "text": "Performance requirement approved for CDR baseline.",
+          "author": "David Park",
+          "timestamp": "2026-02-17T16:00:00Z",
+          "type": "approval"
+        }
+      ],
+      "history": [
+        {
+          "timestamp": "2026-02-08T14:00:00Z",
+          "field": "Priority",
+          "oldValue": "High",
+          "newValue": "Critical",
+          "author": "Sarah Chen"
+        },
+        {
+          "timestamp": "2026-02-11T10:30:00Z",
+          "field": "Statement (AI Improve)",
+          "oldValue": "The system shall process sensor data quickly\u2026",
+          "newValue": "The Sensor_Hub shall process each sensor input within 200 \u00b1 20 ms\u2026",
+          "author": "AI Engine"
+        },
+        {
+          "timestamp": "2026-02-17T16:00:00Z",
+          "field": "Status",
+          "oldValue": "Reviewed",
+          "newValue": "Approved",
+          "author": "David Park"
+        }
+      ]
     },
     {
       "id": "STK-0003",
@@ -41,7 +119,9 @@
       "parent": "",
       "status": "Approved",
       "source": "Insurance Partner IP-2025-003",
-      "risk": "Medium"
+      "risk": "Medium",
+      "comments": [],
+      "history": []
     },
     {
       "id": "STK-0004",
@@ -54,7 +134,31 @@
       "parent": "",
       "status": "Approved",
       "source": "Regulatory Requirement REG-2025-008",
-      "risk": "High"
+      "risk": "High",
+      "comments": [
+        {
+          "id": 5,
+          "text": "Need to verify 128-bit AES is sufficient or if 256-bit is required by compliance.",
+          "author": "Sarah Chen",
+          "timestamp": "2026-02-13T11:00:00Z",
+          "type": "review"
+        },
+        {
+          "id": 6,
+          "text": "Updated to AES-256 per compliance review. Please re-review.",
+          "author": "Mike Torres",
+          "timestamp": "2026-02-14T15:30:00Z",
+          "type": "comment"
+        },
+        {
+          "id": 7,
+          "text": "AES-256 confirmed. Changes look good.",
+          "author": "Sarah Chen",
+          "timestamp": "2026-02-15T09:00:00Z",
+          "type": "approval"
+        }
+      ],
+      "history": []
     },
     {
       "id": "STK-0005",
@@ -67,7 +171,9 @@
       "parent": "",
       "status": "Approved",
       "source": "User Story US-2025-022",
-      "risk": "Medium"
+      "risk": "Medium",
+      "comments": [],
+      "history": []
     },
     {
       "id": "STK-0006",
@@ -80,7 +186,25 @@
       "parent": "",
       "status": "Reviewed",
       "source": "Legal Department LD-2025-011",
-      "risk": "High"
+      "risk": "High",
+      "comments": [
+        {
+          "id": 8,
+          "text": "Battery life target may be aggressive. Requesting hardware team input.",
+          "author": "David Park",
+          "timestamp": "2026-02-12T13:00:00Z",
+          "type": "rejection"
+        }
+      ],
+      "history": [
+        {
+          "timestamp": "2026-02-12T13:00:00Z",
+          "field": "Status",
+          "oldValue": "Reviewed",
+          "newValue": "Under Review",
+          "author": "David Park"
+        }
+      ]
     },
     {
       "id": "SYS-0001",
@@ -93,7 +217,9 @@
       "parent": "STK-0001",
       "status": "Approved",
       "source": "System Architecture SA-001",
-      "risk": "Critical"
+      "risk": "Critical",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SYS-0002",
@@ -106,7 +232,9 @@
       "parent": "STK-0002",
       "status": "Approved",
       "source": "System Architecture SA-001",
-      "risk": "High"
+      "risk": "High",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SYS-0003",
@@ -119,7 +247,9 @@
       "parent": "STK-0002",
       "status": "Approved",
       "source": "System Architecture SA-001",
-      "risk": "Medium"
+      "risk": "Medium",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SYS-0004",
@@ -132,7 +262,9 @@
       "parent": "STK-0003",
       "status": "Approved",
       "source": "Architecture Decision DEC-0003",
-      "risk": "Medium"
+      "risk": "Medium",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SYS-0005",
@@ -145,7 +277,9 @@
       "parent": "STK-0003",
       "status": "Reviewed",
       "source": "Architecture Decision DEC-0004",
-      "risk": "Medium"
+      "risk": "Medium",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SYS-0006",
@@ -158,7 +292,9 @@
       "parent": "STK-0004",
       "status": "Approved",
       "source": "Power Budget Analysis PBA-001",
-      "risk": "High"
+      "risk": "High",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SYS-0007",
@@ -171,7 +307,9 @@
       "parent": "STK-0005",
       "status": "Reviewed",
       "source": "System Architecture SA-001",
-      "risk": "Medium"
+      "risk": "Medium",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SYS-0008",
@@ -184,7 +322,9 @@
       "parent": "STK-0006",
       "status": "Approved",
       "source": "Security Architecture SecA-001",
-      "risk": "Critical"
+      "risk": "Critical",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SYS-0009",
@@ -197,7 +337,9 @@
       "parent": "STK-0006",
       "status": "Approved",
       "source": "Security Architecture SecA-001",
-      "risk": "High"
+      "risk": "High",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SYS-0010",
@@ -210,7 +352,9 @@
       "parent": "STK-0001",
       "status": "Approved",
       "source": "Threat Model TM-001",
-      "risk": "High"
+      "risk": "High",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SUB-0001",
@@ -223,7 +367,9 @@
       "parent": "SYS-0001",
       "status": "Approved",
       "source": "Interface Control Document ICD-001",
-      "risk": "Medium"
+      "risk": "Medium",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SUB-0002",
@@ -236,7 +382,9 @@
       "parent": "SYS-0001",
       "status": "Reviewed",
       "source": "System Architecture SA-001",
-      "risk": "Medium"
+      "risk": "Medium",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SUB-0003",
@@ -249,7 +397,9 @@
       "parent": "SYS-0002",
       "status": "Approved",
       "source": "Interface Control Document ICD-003",
-      "risk": "Medium"
+      "risk": "Medium",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SUB-0004",
@@ -262,7 +412,9 @@
       "parent": "SYS-0004",
       "status": "Draft",
       "source": "Camera Specification CAM-001",
-      "risk": "Low"
+      "risk": "Low",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SUB-0005",
@@ -275,7 +427,9 @@
       "parent": "SYS-0006",
       "status": "Approved",
       "source": "Battery Safety Analysis BSA-001",
-      "risk": "Critical"
+      "risk": "Critical",
+      "comments": [],
+      "history": []
     },
     {
       "id": "CMP-0001",
@@ -288,7 +442,9 @@
       "parent": "SUB-0001",
       "status": "Approved",
       "source": "Component Specification CMP-S-001",
-      "risk": "Low"
+      "risk": "Low",
+      "comments": [],
+      "history": []
     },
     {
       "id": "CMP-0002",
@@ -301,7 +457,9 @@
       "parent": "SUB-0001",
       "status": "Reviewed",
       "source": "RF Link Budget Analysis RF-001",
-      "risk": "Medium"
+      "risk": "Medium",
+      "comments": [],
+      "history": []
     },
     {
       "id": "CMP-0003",
@@ -314,7 +472,9 @@
       "parent": "SUB-0005",
       "status": "Approved",
       "source": "Power Budget Analysis PBA-001",
-      "risk": "Medium"
+      "risk": "Medium",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SYS-0011",
@@ -327,7 +487,9 @@
       "parent": "STK-0005",
       "status": "Draft",
       "source": "Product Manager",
-      "risk": "Low"
+      "risk": "Low",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SYS-0012",
@@ -340,7 +502,9 @@
       "parent": "STK-0001",
       "status": "Draft",
       "source": "Engineering Team",
-      "risk": "Medium"
+      "risk": "Medium",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SYS-0013",
@@ -353,7 +517,9 @@
       "parent": "STK-0006",
       "status": "Draft",
       "source": "Software Architecture",
-      "risk": "Low"
+      "risk": "Low",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SYS-0014",
@@ -366,7 +532,9 @@
       "parent": "",
       "status": "Draft",
       "source": "Product Roadmap",
-      "risk": "Low"
+      "risk": "Low",
+      "comments": [],
+      "history": []
     },
     {
       "id": "SUB-0006",
@@ -379,7 +547,9 @@
       "parent": "SYS-0005",
       "status": "Draft",
       "source": "Cloud Architecture",
-      "risk": "Medium"
+      "risk": "Medium",
+      "comments": [],
+      "history": []
     }
   ],
   "risks": [
@@ -1180,5 +1350,49 @@
       "created": "2026-02-15T08:00:00.000Z",
       "modified": "2026-02-19T10:00:00.000Z"
     }
-  ]
+  ],
+  "ruleWeights": {
+    "R1": 3,
+    "R2": 3,
+    "R3": 2,
+    "R4": 1,
+    "R5": 2,
+    "R6": 2,
+    "R7": 3,
+    "R8": 3,
+    "R9": 3,
+    "R10": 2,
+    "R11": 1,
+    "R12": 1,
+    "R13": 1,
+    "R14": 2,
+    "R15": 2,
+    "R16": 3,
+    "R17": 2,
+    "R18": 3,
+    "R19": 2,
+    "R20": 2,
+    "R21": 1,
+    "R22": 1,
+    "R23": 1,
+    "R24": 3,
+    "R25": 1,
+    "R26": 3,
+    "R27": 2,
+    "R28": 1,
+    "R29": 1,
+    "R30": 1,
+    "R31": 3,
+    "R32": 2,
+    "R33": 3,
+    "R34": 3,
+    "R35": 2,
+    "R36": 1,
+    "R37": 1,
+    "R38": 1,
+    "R39": 1,
+    "R40": 1,
+    "R41": 1,
+    "R42": 1
+  }
 }

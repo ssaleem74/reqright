@@ -5,7 +5,7 @@
 INCOSE GtWR v4 · 42 Quality Rules · 6 Integrated Modules · Cross-Module Traceability · Configurable PDF Reports
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.5.0-brightgreen.svg)](CHANGELOG.md)
+[![Version](https://img.shields.io/badge/version-2.6.0-brightgreen.svg)](CHANGELOG.md)
 [![Standard](https://img.shields.io/badge/standard-INCOSE%20GtWR%20v4-orange.svg)]()
 
 ---
@@ -37,10 +37,15 @@ ReqRight is a browser-based systems engineering workbench that helps you write, 
 
 - **🔍 Project-Wide Search (⌘K)** — Command-palette style search across all modules
 - **📊 Quality Analysis** — Every requirement scored against 42 INCOSE GtWR v4 rules (A–F grading)
+- **⚖️ Custom Rule Weights** — 5 weight levels per rule with 5 presets (Equal, Safety-Critical, Performance, Compliance, Minimal)
 - **🤖 AI Improvement** — Rule-based rewriting engine that fixes common quality issues (offline, no LLM)
+- **💬 Comments & Review** — 4 comment types (Comment, Review, Approve, Request Changes) with auto-status updates
+- **🕐 Version History** — Automatic tracking of all field changes with timeline display
+- **📋 Templates Library** — 36 pre-built requirement templates across 9 categories
+- **📥 Excel Import** — Import .xlsx/.xls files with column mapping modal and multi-sheet support
 - **🌳 Traceability** — Parent-child hierarchy with orphan detection + cross-module traceability matrix
 - **📄 Configurable PDF Reports** — Select sections, choose layout (ISO/INCOSE, NASA, Management), generate
-- **💾 Export/Import** — JSON, CSV, ReqIF (DOORS-compatible), PDF
+- **💾 Export/Import** — JSON, CSV, Excel, ReqIF (DOORS-compatible), PDF
 - **⌨️ Keyboard Shortcuts** — Ctrl+Z/Y (undo/redo), Ctrl+N (new), Ctrl+S (save), ⌘K (search)
 - **🌙 Dark/Light Theme** — Toggle between dark and light modes
 - **🔒 Privacy-First** — Everything runs in your browser. Zero data leaves your machine.
@@ -75,7 +80,7 @@ The core module with 6 views:
 - **Register** — Sortable table of all requirements with search and filtering
 - **Trace** — Hierarchy tree + cross-module traceability matrix
 - **V&V** — Verification method assignment (Test, Analysis, Inspection, Demonstration)
-- **Rules** — Reference view of all 42 INCOSE GtWR v4 rules with examples
+- **Rules** — Reference view of all 42 INCOSE GtWR v4 rules with custom weight configuration
 - **Glossary** — Project terminology management
 
 Each requirement is scored against 42 quality rules checking for:
@@ -133,8 +138,9 @@ Reports include cover page, dynamic table of contents, cross-module traceability
 
 | Format | Use Case |
 |--------|----------|
-| **JSON** | Save/load projects. Full fidelity — all 6 modules preserved. |
+| **JSON** | Save/load projects. Full fidelity — all 6 modules, comments, history, and rule weights preserved. |
 | **CSV** | Import into Excel, Google Sheets, databases |
+| **Excel (.xlsx)** | Import requirements from spreadsheets with column mapping |
 | **ReqIF** | Import into IBM DOORS, Polarion, Jama, or any ReqIF-compatible tool |
 | **PDF** | Configurable reports for reviews, audits, and documentation |
 
@@ -142,7 +148,7 @@ Reports include cover page, dynamic table of contents, cross-module traceability
 
 ## Test Data
 
-A complete example project is included: **AegisGuard Pro Smart Home Security System** with 20+ requirements, risks, decisions, stakeholders, interfaces, and use cases pre-populated across all 6 modules. Load it from `SmartHome_Security_System_TestData.json`.
+A complete example project is included: **AegisGuard Pro Smart Home Security System** with 29 requirements, 10 risks, 8 decisions, 8 stakeholders, 6 interfaces, and 6 use cases pre-populated across all modules — including sample comments, review history, and custom rule weights. Load it from `SmartHome_Security_System_TestData.json`.
 
 ---
 
