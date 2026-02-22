@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ReqRight v2.6.0 — User Guide</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{--ink:#0b0e14;--surface:#10141e;--panel:#161c2c;--border:#1e2640;--chalk:#e2e8f0;--mid:#8892a8;--dim:#4a5370;--cyan:#38bdf8;--green:#10b981;--amber:#f59e0b;--red:#ef4444;--purple:#8b5cf6;}
+body{background:var(--ink);color:var(--chalk);font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;line-height:1.7;-webkit-font-smoothing:antialiased;}
+::selection{background:var(--cyan);color:var(--ink);}
+a{color:var(--cyan);text-decoration:none;}
+a:hover{text-decoration:underline;}
+
+/* Layout */
+.wrapper{display:grid;grid-template-columns:260px 1fr;min-height:100vh;}
+nav{position:sticky;top:0;height:100vh;overflow-y:auto;padding:24px 20px;background:var(--surface);border-right:1px solid var(--border);}
+main{max-width:880px;padding:40px 56px 80px;}
+
+/* Nav */
+.nav-logo{font-size:18px;font-weight:700;margin-bottom:24px;display:flex;align-items:center;gap:8px;}
+.nav-logo span{color:var(--cyan);}
+.nav-section{font-size:10px;font-weight:700;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;margin:20px 0 8px;padding-top:12px;border-top:1px solid var(--border);}
+.nav-section:first-of-type{border-top:none;padding-top:0;}
+nav a{display:block;padding:5px 12px;font-size:13px;color:var(--mid);border-radius:6px;margin-bottom:2px;transition:all .15s;}
+nav a:hover{background:var(--border);color:var(--chalk);text-decoration:none;}
+
+/* Content */
+h1{font-size:32px;font-weight:700;margin-bottom:8px;color:var(--chalk);}
+h1 span{color:var(--cyan);}
+.subtitle{font-size:15px;color:var(--mid);margin-bottom:40px;}
+h2{font-size:22px;font-weight:700;margin:48px 0 16px;padding-top:24px;border-top:1px solid var(--border);color:var(--chalk);}
+h2:first-of-type{margin-top:0;border-top:none;padding-top:0;}
+h3{font-size:16px;font-weight:600;margin:28px 0 12px;color:var(--cyan);}
+p{margin-bottom:14px;color:var(--chalk);font-size:14.5px;}
+ul,ol{margin:8px 0 16px 24px;font-size:14.5px;}
+li{margin-bottom:6px;color:var(--chalk);}
+li strong{color:var(--cyan);}
+
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;margin:16px 0;}
+.card h4{font-size:13px;font-weight:600;color:var(--cyan);margin-bottom:10px;}
+
+/* Tables */
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px;}
+th{background:var(--surface);color:var(--dim);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;padding:10px 14px;text-align:left;border-bottom:1px solid var(--border);}
+td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--chalk);}
+tr:hover td{background:var(--surface);}
+
+/* Code */
+code{background:var(--surface);padding:2px 6px;border-radius:4px;font-size:13px;font-family:'JetBrains Mono','Courier New',monospace;color:var(--cyan);}
+kbd{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:2px 6px;font-size:12px;font-family:inherit;color:var(--chalk);}
+
+/* Tip/Warning boxes */
+.tip,.warn,.info{padding:14px 18px;border-radius:8px;margin:14px 0;font-size:13px;line-height:1.6;}
+.tip{background:#10b98112;border-left:3px solid var(--green);color:var(--green);}
+.warn{background:#f59e0b12;border-left:3px solid var(--amber);color:var(--amber);}
+.info{background:#38bdf812;border-left:3px solid var(--cyan);color:var(--cyan);}
+
+/* Image placeholder */
+.screenshot{background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:16px 0;}
+.screenshot img{width:100%;display:block;}
+.screenshot .caption{padding:10px 16px;font-size:11px;color:var(--dim);text-align:center;}
+
+/* Badge */
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600;}
+.badge-cyan{background:#38bdf822;color:var(--cyan);}
+.badge-green{background:#10b98122;color:var(--green);}
+.badge-amber{background:#f59e0b22;color:var(--amber);}
+.badge-red{background:#ef444422;color:var(--red);}
+.badge-purple{background:#8b5cf622;color:var(--purple);}
+
+/* Responsive */
+@media(max-width:900px){
+  .wrapper{grid-template-columns:1fr;}
+  nav{position:static;height:auto;border-right:none;border-bottom:1px solid var(--border);}
+  main{padding:24px 20px 60px;}
+}
+</style>
+</head>
+<body>
+<div class="wrapper">
+
+<nav>
+  <div class="nav-logo"><span>RR</span> User Guide</div>
+  <div class="nav-section">Getting Started</div>
+  <a href="#overview">Overview</a>
+  <a href="#quickstart">Quick Start</a>
+  <a href="#interface">Interface Layout</a>
+  <div class="nav-section">Requirements</div>
+  <a href="#authoring">Authoring Requirements</a>
+  <a href="#templates">Templates Library</a>
+  <a href="#quality">Quality Analysis</a>
+  <a href="#ai-improve">AI Improvement</a>
+  <a href="#rule-weights">Custom Rule Weights</a>
+  <a href="#comments">Comments & Review</a>
+  <a href="#history">Version History</a>
+  <div class="nav-section">Modules</div>
+  <a href="#risks">Risk Register</a>
+  <a href="#decisions">Decision Log</a>
+  <a href="#stakeholders">Stakeholders</a>
+  <a href="#interfaces">Interfaces</a>
+  <a href="#usecases">Use Cases</a>
+  <div class="nav-section">Cross-Cutting</div>
+  <a href="#traceability">Traceability</a>
+  <a href="#search">Global Search</a>
+  <a href="#glossary">Glossary</a>
+  <a href="#vv">V&V Planning</a>
+  <div class="nav-section">Data Management</div>
+  <a href="#import">Import (Excel, CSV, JSON)</a>
+  <a href="#export">Export & Reports</a>
+  <a href="#autosave">Auto-Save & Storage</a>
+  <div class="nav-section">Reference</div>
+  <a href="#shortcuts">Keyboard Shortcuts</a>
+  <a href="#rules-ref">42 INCOSE Rules</a>
+  <a href="#faq">FAQ</a>
+</nav>
+
+<main>
+<h1>ReqRight <span>v2.6.0</span></h1>
+<p class="subtitle">User Guide — Systems Engineering Workbench · INCOSE GtWR v4</p>
+
+<!-- OVERVIEW -->
+<h2 id="overview">Overview</h2>
+<p>ReqRight is a browser-based systems engineering workbench that helps you write, analyse, and manage requirements using the INCOSE Guide to Writing Requirements (GtWR) version 4 standard. It includes six integrated modules covering the full requirements lifecycle.</p>
+
+<div class="card">
+<h4>Key Capabilities</h4>
+<table>
+<tr><td><strong>42-Rule Quality Engine</strong></td><td>Real-time scoring against INCOSE GtWR v4 rules with custom weights</td></tr>
+<tr><td><strong>36 Templates</strong></td><td>Pre-built requirement templates across 9 categories</td></tr>
+<tr><td><strong>Excel Import</strong></td><td>Import .xlsx/.xls with column mapping and multi-sheet support</td></tr>
+<tr><td><strong>Comments & Review</strong></td><td>Collaborative review workflow with auto-status updates</td></tr>
+<tr><td><strong>Version History</strong></td><td>Automatic change tracking with timeline display</td></tr>
+<tr><td><strong>6 Modules</strong></td><td>Requirements, Risks, Decisions, Stakeholders, Interfaces, Use Cases</td></tr>
+<tr><td><strong>PDF Reports</strong></td><td>Configurable reports with 3 layout options</td></tr>
+<tr><td><strong>Privacy-First</strong></td><td>Everything runs in your browser — no server, no tracking</td></tr>
+</table>
+</div>
+
+<!-- QUICK START -->
+<h2 id="quickstart">Quick Start</h2>
+<p>ReqRight requires no installation. Open <code>reqright.html</code> in any modern browser (Chrome, Firefox, Edge, Safari) and you're ready to go.</p>
+
+<h3>First Steps</h3>
+<ol>
+<li><strong>Create a requirement</strong> — Click <kbd>+ New</kbd> or press <kbd>Ctrl+N</kbd></li>
+<li><strong>Write your statement</strong> — Type in the editor, using "shall" as the obligation keyword</li>
+<li><strong>Check the quality score</strong> — The right panel shows your INCOSE score in real-time</li>
+<li><strong>Fix violations</strong> — Click <kbd>⚡ AI Improve</kbd> to auto-fix common issues</li>
+<li><strong>Save your work</strong> — Press <kbd>Ctrl+S</kbd> to export as JSON (auto-save is always active)</li>
+</ol>
+
+<div class="tip">💡 Load the included example project (AegisGuard Smart Home Security System) to explore all features with realistic data.</div>
+
+<!-- INTERFACE -->
+<h2 id="interface">Interface Layout</h2>
+
+<h3>Two-Row Header</h3>
+<p><strong>Row 1</strong> contains the ReqRight logo, global action buttons (V&V, Rules, Glossary, Search, New, Templates, File menu, and theme toggle). <strong>Row 2</strong> contains module navigation tabs: Dashboard, Author, Register, Trace for requirements, plus Risks, Decisions, Stakeholders, Interfaces, and Use Cases.</p>
+
+<h3>Dashboard</h3>
+<p>The Dashboard provides a project overview with stat cards showing total requirements, status breakdown (Draft, Reviewed, Approved), quality metrics, comment counts, and change counts. Below the stats, you'll find quality score distribution and requirement type distribution charts, plus cross-module summary counts.</p>
+
+<div class="screenshot">
+<img src="images/01-dashboard.svg" alt="Dashboard view"/>
+<div class="caption">Dashboard — Project overview with stats, quality distribution, and cross-module summary</div>
+</div>
+
+<h3>Author View (3-Panel Editor)</h3>
+<p>The Author view uses a three-panel layout:</p>
+<ul>
+<li><strong>Left sidebar</strong> — Scrollable list of all requirements with search, filters (type, level, status), quality scores, and comment count badges</li>
+<li><strong>Centre editor</strong> — Requirement statement editor, attribute fields (type, level, priority, V&V, status, risk), rationale, INCOSE patterns, Comments & Review panel, and Version History panel</li>
+<li><strong>Right quality panel</strong> — Large quality score display (0–100), grade (A+–F), pass/fail/warning counts, and detailed rule-by-rule analysis</li>
+</ul>
+
+<div class="screenshot">
+<img src="images/02-author-editor.svg" alt="Author editor view"/>
+<div class="caption">Author view — 3-panel editor with sidebar, statement editor, and quality analysis</div>
+</div>
+
+<!-- AUTHORING -->
+<h2 id="authoring">Authoring Requirements</h2>
+
+<h3>Writing Good Requirements</h3>
+<p>ReqRight supports the INCOSE requirement patterns. Click any pattern button below the statement editor to insert a template structure:</p>
+
+<table>
+<tr><th>Pattern</th><th>Structure</th></tr>
+<tr><td>Basic</td><td><code>The [entity] shall [action] [object].</code></td></tr>
+<tr><td>Conditional</td><td><code>When [condition], the [entity] shall [action] [object].</code></td></tr>
+<tr><td>Performance</td><td><code>The [entity] shall [action] [object] within [measure ± tolerance].</code></td></tr>
+<tr><td>Cond+Perf</td><td><code>When [condition], the [entity] shall [action] within [measure ± tolerance].</code></td></tr>
+<tr><td>While</td><td><code>While [state], the [entity] shall [action] [object] [qualification].</code></td></tr>
+<tr><td>Interface</td><td><code>The [entity] shall [send/receive] [data] [to/from] the [ext entity] via [interface].</code></td></tr>
+</table>
+
+<h3>Requirement Attributes</h3>
+<p>Each requirement has these fields:</p>
+<ul>
+<li><strong>Type</strong> — Functional, Performance, Interface, Safety, Security, Reliability, etc. (16 types)</li>
+<li><strong>Level</strong> — Stakeholder Need, System Requirement, Subsystem Requirement, Component Requirement</li>
+<li><strong>Priority</strong> — Critical, High, Medium, Low</li>
+<li><strong>Verification</strong> — Test, Analysis, Inspection, Demonstration</li>
+<li><strong>Status</strong> — Draft, Under Review, Reviewed, Approved, Rejected, Deferred</li>
+<li><strong>Risk</strong> — Link to an associated risk level</li>
+<li><strong>Parent</strong> — Link to a parent requirement for traceability</li>
+<li><strong>Rationale</strong> — Free text explaining why this requirement exists</li>
+<li><strong>Source</strong> — Where the requirement originated</li>
+</ul>
+
+<!-- TEMPLATES -->
+<h2 id="templates">Templates Library</h2>
+<p>The Templates Library contains 36 pre-built requirement templates across 9 categories. Access it via the <kbd>📋 Templates</kbd> button in the header.</p>
+
+<div class="card">
+<h4>9 Template Categories</h4>
+<table>
+<tr><td><span class="badge badge-cyan">Functional</span></td><td>6 templates — Data Processing, Authentication, Storage, Notification, Conversion, State Transition</td></tr>
+<tr><td><span class="badge badge-amber">Performance</span></td><td>5 templates — Response Time, Throughput, Capacity, Startup Time, Latency</td></tr>
+<tr><td><span class="badge badge-purple">Interface</span></td><td>4 templates — Protocol Compliance, Data Exchange, API Endpoint, Connector</td></tr>
+<tr><td><span class="badge badge-red">Safety</span></td><td>4 templates — Fault Detection, Safe State, Redundancy, Emergency Shutdown</td></tr>
+<tr><td><span class="badge badge-red">Security</span></td><td>4 templates — Encryption, Access Control, Audit Logging, Session Timeout</td></tr>
+<tr><td><span class="badge badge-green">Reliability</span></td><td>3 templates — MTBF, Availability, Error Recovery</td></tr>
+<tr><td><span class="badge badge-cyan">Environmental</span></td><td>4 templates — Temperature, Humidity, Vibration, Ingress Protection</td></tr>
+<tr><td><span class="badge badge-amber">Maintainability</span></td><td>3 templates — MTTR, Module Replacement, Diagnostics</td></tr>
+<tr><td><span class="badge badge-purple">Regulatory</span></td><td>3 templates — Standard Compliance, Data Privacy, Certification</td></tr>
+</table>
+</div>
+
+<p>Click any template to insert it as a new requirement. Placeholders like <code>[System_Name]</code> are highlighted in the accent colour — replace them with your specific values. Each template pre-fills the Type, Level, and Verification method.</p>
+
+<div class="screenshot">
+<img src="images/03-templates.svg" alt="Templates library"/>
+<div class="caption">Templates Library — 36 templates across 9 categories with placeholder highlighting</div>
+</div>
+
+<!-- QUALITY -->
+<h2 id="quality">Quality Analysis</h2>
+<p>Every requirement is scored in real-time against all 42 INCOSE GtWR v4 rules. The quality panel shows:</p>
+<ul>
+<li><strong>Score</strong> — 0–100% based on weighted pass/fail results</li>
+<li><strong>Grade</strong> — A+ (95+), A (90+), B+ (85+), B (80+), C+ (75+), C (70+), D (60+), F (&lt;60)</li>
+<li><strong>Rule-by-rule breakdown</strong> — Each rule shows pass (✓), fail (✕), or review (⚠)</li>
+</ul>
+
+<p>Rules are grouped into 14 categories: Accuracy, Concision, Non-Ambiguity, Singularity, Completeness, Realism, Conditions, Uniqueness, Abstraction, Quantifiers, Tolerance, Quantification, Uniformity, and Modularity.</p>
+
+<div class="info">ℹ️ Some rules (like R4 "Defined Terms" and R12 "Grammar") are flagged as manual review items (⚠) because they cannot be fully automated. These don't affect the pass/fail score.</div>
+
+<!-- AI IMPROVE -->
+<h2 id="ai-improve">AI Improvement</h2>
+<p>Click <kbd>⚡ AI Improve</kbd> to automatically rewrite a requirement to fix common quality violations. The rule-based engine handles:</p>
+<ul>
+<li>Passive voice → Active voice</li>
+<li>Vague terms ("adequate", "fast", "reliable") → Specific placeholders</li>
+<li>Escape clauses ("where possible", "as needed") → Removal</li>
+<li>Superfluous infinitives ("shall be able to") → Simplified</li>
+<li>Absolutes ("always", "never") → Achievable targets</li>
+<li>Abbreviations → Full words</li>
+<li>Missing "shall" keyword → Inserted</li>
+<li>Missing period → Added</li>
+</ul>
+
+<div class="warn">⚠ The AI engine is rule-based and runs entirely offline — no LLM or API key required. Always review AI-improved text to ensure it captures your intent.</div>
+
+<!-- RULE WEIGHTS -->
+<h2 id="rule-weights">Custom Rule Weights</h2>
+<p>Different project contexts require different scoring emphasis. The Custom Rule Weights system lets you assign importance levels to each of the 42 rules.</p>
+
+<h3>Weight Levels</h3>
+<table>
+<tr><th>Weight</th><th>Multiplier</th><th>Effect</th></tr>
+<tr><td><span class="badge" style="background:#4a537022;color:#4a5370;">Off</span></td><td>0×</td><td>Rule excluded from scoring entirely</td></tr>
+<tr><td><span class="badge badge-amber">Low</span></td><td>0.5×</td><td>Rule contributes half weight</td></tr>
+<tr><td><span class="badge" style="background:#e2e8f022;color:#e2e8f0;">Normal</span></td><td>1×</td><td>Default weight</td></tr>
+<tr><td><span class="badge badge-cyan">High</span></td><td>2×</td><td>Rule counts double</td></tr>
+<tr><td><span class="badge badge-red">Critical</span></td><td>3×</td><td>Rule counts triple</td></tr>
+</table>
+
+<h3>Built-in Presets</h3>
+<ul>
+<li><strong>Equal (Default)</strong> — All 42 rules at 1× weight</li>
+<li><strong>Safety-Critical</strong> — Emphasises accuracy (R1, R2, R7), completeness (R24), measurability (R33, R34), and absolutes (R26) at 3×</li>
+<li><strong>Performance-Focused</strong> — Emphasises units (R6), tolerances (R33), quantification (R34), and timing (R35) at 3×</li>
+<li><strong>Compliance-Strict</strong> — Maximum weight on all automatable rules, manual-review rules turned off</li>
+<li><strong>Minimal Check</strong> — Only core rules active: structured statements, vague terms, escape clauses, single thought, pronouns</li>
+</ul>
+
+<p>Access rule weights via the <kbd>⚙ Rules</kbd> view. Each rule has inline weight selector buttons. Select a preset to apply a complete profile in one click. Weights are saved to localStorage and included in JSON exports.</p>
+
+<div class="screenshot">
+<img src="images/04-rules-weights.svg" alt="Rules with custom weights"/>
+<div class="caption">Rules view — Custom weight selectors per rule with 5 preset profiles</div>
+</div>
+
+<!-- COMMENTS -->
+<h2 id="comments">Comments & Review</h2>
+<p>The Comments & Review panel sits below the rationale field in the Author view. It supports a collaborative review workflow with four comment types:</p>
+
+<table>
+<tr><th>Type</th><th>Icon</th><th>Auto-Status Effect</th></tr>
+<tr><td>Comment</td><td>💬</td><td>None</td></tr>
+<tr><td>Review Note</td><td>📝</td><td>None</td></tr>
+<tr><td>Approve</td><td>✅</td><td>Sets requirement status to "Approved"</td></tr>
+<tr><td>Request Changes</td><td>❌</td><td>Sets requirement status to "Under Review"</td></tr>
+</table>
+
+<p>Set your reviewer name in the top-right of the panel — it persists across sessions via localStorage. Comment count badges appear on sidebar items (e.g., <span class="badge badge-purple">💬 3</span>) and on the Dashboard.</p>
+
+<div class="screenshot">
+<img src="images/07-comments-history.svg" alt="Comments and version history"/>
+<div class="caption">Comments & Review panel with approval workflow, plus Version History timeline</div>
+</div>
+
+<!-- VERSION HISTORY -->
+<h2 id="history">Version History</h2>
+<p>ReqRight automatically tracks all changes to requirement fields. The Version History panel shows a timeline (newest first) with:</p>
+<ul>
+<li><strong>Field name</strong> — Which field changed (Statement, Type, Level, Priority, Status, etc.)</li>
+<li><strong>Author</strong> — Who made the change (your reviewer name, or "AI Engine" for AI rewrites)</li>
+<li><strong>Timestamp</strong> — When the change occurred</li>
+<li><strong>Diff</strong> — <span style="color:var(--red);text-decoration:line-through;">old value</span> → <span style="color:var(--green);">new value</span></li>
+</ul>
+
+<p>Text/statement changes are tracked with a 1-second debounce to avoid logging every keystroke. AI rewrites are logged with before/after snippets and colour-coded in purple.</p>
+
+<!-- RISKS -->
+<h2 id="risks">Risk Register</h2>
+<p>The Risk Register provides a complete risk management workflow with a 5×5 likelihood × impact scoring matrix.</p>
+
+<h3>Risk Fields</h3>
+<p>Each risk has: title, description, category (Technical, Schedule, Cost, Resource, External, Safety, Security), likelihood (1–5), impact (1–5), status (Open, Mitigated, Accepted, Closed), mitigation plan, and linked requirements.</p>
+
+<h3>Severity Levels</h3>
+<table>
+<tr><td><span class="badge badge-red">Critical (15–25)</span></td><td>Immediate action required</td></tr>
+<tr><td><span class="badge badge-amber">High (10–14)</span></td><td>Priority mitigation needed</td></tr>
+<tr><td><span class="badge" style="background:#eab30822;color:#eab308;">Medium (5–9)</span></td><td>Monitor and plan mitigation</td></tr>
+<tr><td><span class="badge badge-green">Low (1–4)</span></td><td>Accept or monitor</td></tr>
+</table>
+
+<div class="screenshot">
+<img src="images/05-risk-register.svg" alt="Risk register"/>
+<div class="caption">Risk Register — 5×5 heat matrix with risk list, severity colour coding, and status tracking</div>
+</div>
+
+<!-- DECISIONS -->
+<h2 id="decisions">Decision Log</h2>
+<p>Track design decisions with full rationale. Each decision includes: title, description, category (Architectural, Design, Technology, Process, Interface, etc.), status (Proposed, Approved, Superseded, Rejected, Deferred), decision date, decision maker, rationale, and affected requirements.</p>
+
+<!-- STAKEHOLDERS -->
+<h2 id="stakeholders">Stakeholder Register</h2>
+<p>Document stakeholders with: name, role (End User, Operator, Maintainer, Sponsor, Regulator, etc.), organisation, category (Internal, External, Customer, Supplier, Regulatory), influence level (Critical, High, Medium, Low), concerns, expectations, and linked stakeholder needs.</p>
+
+<!-- INTERFACES -->
+<h2 id="interfaces">Interface Definitions</h2>
+<p>Define ICD-style interface specifications with: name, type (Data, Electrical, Mechanical, Software, etc.), direction (Unidirectional →, Bidirectional ↔, Broadcast ⇉), source entity, destination entity, protocol, data items, data rate, physical characteristics, status, and linked requirements.</p>
+
+<!-- USE CASES -->
+<h2 id="usecases">Use Cases & Scenarios</h2>
+<p>Structure operational scenarios with: name, type (Operational, Maintenance, Emergency, etc.), actors, trigger, preconditions, main flow (numbered steps), alternative flows, postconditions, priority, status, and derived requirements.</p>
+
+<!-- TRACEABILITY -->
+<h2 id="traceability">Traceability</h2>
+<p>The Trace view has two modes:</p>
+<ul>
+<li><strong>🌳 Hierarchy Tree</strong> — Visual parent-child tree across 4 levels (Stakeholder Need → System → Subsystem → Component). Orphan requirements (no parent) are flagged with warnings.</li>
+<li><strong>⊞ Traceability Matrix</strong> — Cross-module matrix showing each requirement's linkages to Risks, Decisions, Stakeholders, Interfaces, and Use Cases.</li>
+</ul>
+
+<div class="screenshot">
+<img src="images/08-traceability.svg" alt="Traceability matrix"/>
+<div class="caption">Cross-Module Traceability Matrix — Requirement linkages across all 6 modules with orphan detection</div>
+</div>
+
+<!-- SEARCH -->
+<h2 id="search">Global Search (⌘K)</h2>
+<p>Press <kbd>⌘K</kbd> (Mac) or <kbd>Ctrl+K</kbd> (Windows/Linux) to open the command-palette search. It searches across all 7 modules (requirements, risks, decisions, stakeholders, interfaces, use cases, glossary) in real-time. Results are grouped by module with clickable rows that navigate directly to the item.</p>
+
+<!-- GLOSSARY -->
+<h2 id="glossary">Glossary</h2>
+<p>The Glossary (accessible via the <kbd>📖 Glossary</kbd> button) lets you define project-specific terms to ensure consistency. This supports INCOSE rules R4 (Defined Terms) and R36 (Consistent Terms). Terms are searchable, sortable, and included in JSON exports and PDF reports.</p>
+
+<!-- V&V -->
+<h2 id="vv">V&V Planning</h2>
+<p>The V&V view (accessible via the <kbd>✓ V&V</kbd> button) shows verification method distribution across all requirements. It displays a dashboard of Test, Analysis, Inspection, and Demonstration method counts, and extracts measurable success criteria from requirement text.</p>
+
+<!-- IMPORT -->
+<h2 id="import">Import (Excel, CSV, JSON)</h2>
+
+<h3>Excel Import (.xlsx / .xls)</h3>
+<p>Click <kbd>File → Import</kbd> or drag and drop an Excel file. ReqRight uses SheetJS to parse spreadsheets and presents a column mapping modal:</p>
+<ol>
+<li><strong>Sheet selection</strong> — If your workbook has multiple sheets, select which one to import via the tab bar</li>
+<li><strong>Column mapping</strong> — Auto-detects common header names (Statement, Type, Level, Priority, Status, Verification, Rationale, Source, Parent). Adjust mappings via dropdown selectors</li>
+<li><strong>Preview</strong> — Shows first 5 rows before importing</li>
+<li><strong>Import</strong> — Click the import button to create requirements from each row</li>
+</ol>
+
+<div class="screenshot">
+<img src="images/06-excel-import.svg" alt="Excel import"/>
+<div class="caption">Excel Import — Column mapping modal with auto-detection, multi-sheet support, and preview</div>
+</div>
+
+<h3>CSV / TSV Import</h3>
+<p>CSV and TSV files use the same column mapping interface. ReqRight auto-detects the delimiter.</p>
+
+<h3>JSON Import</h3>
+<p>Load a previously exported ReqRight JSON file to restore an entire project including all 6 modules, glossary, comments, version history, and rule weights.</p>
+
+<h3>Bulk Text Import</h3>
+<p>Paste a document via <kbd>File → Import</kbd> and ReqRight extracts all "shall" statements, auto-classifying by type and level.</p>
+
+<!-- EXPORT -->
+<h2 id="export">Export & Reports</h2>
+
+<h3>Export Formats</h3>
+<table>
+<tr><th>Format</th><th>Contents</th><th>Use Case</th></tr>
+<tr><td><strong>JSON</strong></td><td>All 6 modules, glossary, comments, history, rule weights</td><td>Save/restore projects with full fidelity</td></tr>
+<tr><td><strong>CSV</strong></td><td>Requirements only</td><td>Spreadsheet import, database ingestion</td></tr>
+<tr><td><strong>ReqIF</strong></td><td>Requirements in OMG ReqIF XML</td><td>IBM DOORS, Polarion, Jama</td></tr>
+<tr><td><strong>PDF</strong></td><td>Configurable multi-section report</td><td>Reviews, audits, documentation</td></tr>
+</table>
+
+<h3>PDF Report Generator</h3>
+<p>The PDF report wizard has two steps:</p>
+<ol>
+<li><strong>Select Sections</strong> — Choose from 12 available sections (cover page, TOC, requirements, risks, decisions, stakeholders, interfaces, use cases, traceability, V&V, glossary, quality summary)</li>
+<li><strong>Choose Layout</strong> — Three pre-defined ordering:
+  <ul>
+  <li><strong>ISO/INCOSE Standard</strong> — Stakeholders → Use Cases → Requirements → Interfaces → Risks → Decisions</li>
+  <li><strong>NASA-style Hybrid</strong> — Requirements-first, then operational context</li>
+  <li><strong>Management-first</strong> — Summary and quality stats for leadership</li>
+  </ul>
+</li>
+</ol>
+
+<!-- AUTOSAVE -->
+<h2 id="autosave">Auto-Save & Storage</h2>
+<p>ReqRight automatically saves your project to the browser's localStorage on every change. This means your data persists between sessions — even if you close the browser tab. However, clearing browser data will erase your project.</p>
+
+<div class="warn">⚠ Always export to JSON regularly as a backup. LocalStorage has size limits (~5-10MB depending on browser) and can be cleared by the browser.</div>
+
+<!-- SHORTCUTS -->
+<h2 id="shortcuts">Keyboard Shortcuts</h2>
+<table>
+<tr><th>Shortcut</th><th>Action</th></tr>
+<tr><td><kbd>⌘K</kbd> / <kbd>Ctrl+K</kbd></td><td>Open global search</td></tr>
+<tr><td><kbd>Ctrl+N</kbd></td><td>New requirement</td></tr>
+<tr><td><kbd>Ctrl+S</kbd></td><td>Save project (JSON export)</td></tr>
+<tr><td><kbd>Ctrl+Z</kbd></td><td>Undo</td></tr>
+<tr><td><kbd>Ctrl+Y</kbd></td><td>Redo</td></tr>
+<tr><td><kbd>Escape</kbd></td><td>Close modal / search / templates</td></tr>
+</table>
+
+<!-- RULES REF -->
+<h2 id="rules-ref">42 INCOSE Rules Reference</h2>
+<p>ReqRight implements all 42 rules from the INCOSE Guide to Writing Requirements v4, grouped into 14 categories. Rules that cannot be fully automated are marked as manual review (⚠).</p>
+
+<div class="card">
+<h4>Rule Categories</h4>
+<table>
+<tr><th>Category</th><th>Rules</th><th>Focus</th></tr>
+<tr><td>Accuracy</td><td>R1–R9</td><td>Structured statements, active voice, vague terms, escape clauses</td></tr>
+<tr><td>Concision</td><td>R10–R11</td><td>Superfluous infinitives, separate clauses</td></tr>
+<tr><td>Non-Ambiguity</td><td>R12–R17</td><td>Grammar, spelling, punctuation, logical expressions, oblique /</td></tr>
+<tr><td>Singularity</td><td>R18–R23</td><td>Single thought, combinators, purpose phrases, parentheses</td></tr>
+<tr><td>Completeness</td><td>R24–R25</td><td>Pronouns, self-contained headings</td></tr>
+<tr><td>Realism</td><td>R26</td><td>Avoid absolutes</td></tr>
+<tr><td>Conditions</td><td>R27–R28</td><td>Explicit conditions, AND/OR</td></tr>
+<tr><td>Uniqueness</td><td>R29–R30</td><td>Classification, no duplicates</td></tr>
+<tr><td>Abstraction</td><td>R31</td><td>Solution-free (no implementation details)</td></tr>
+<tr><td>Quantifiers</td><td>R32</td><td>Use "each" instead of "all/any/every"</td></tr>
+<tr><td>Tolerance</td><td>R33</td><td>Define ranges with ± tolerance</td></tr>
+<tr><td>Quantification</td><td>R34–R35</td><td>Measurable targets, explicit timing</td></tr>
+<tr><td>Uniformity</td><td>R36–R40</td><td>Consistent terms, acronyms, abbreviations, style</td></tr>
+<tr><td>Modularity</td><td>R41–R42</td><td>Group related requirements, follow templates</td></tr>
+</table>
+</div>
+
+<!-- FAQ -->
+<h2 id="faq">FAQ</h2>
+
+<h3>Where is my data stored?</h3>
+<p>All data is stored in your browser's localStorage. Nothing is sent to any server. Export to JSON for backup.</p>
+
+<h3>Can multiple people collaborate?</h3>
+<p>ReqRight is a single-user tool. For collaboration, export and share JSON files. The Comments & Review system supports different reviewer names but works within one browser session.</p>
+
+<h3>What happens if I clear my browser data?</h3>
+<p>Your project will be lost. Always maintain JSON backups via <kbd>Ctrl+S</kbd> or <kbd>File → Save</kbd>.</p>
+
+<h3>Is the AI engine sending data to the cloud?</h3>
+<p>No. The AI Improve feature is entirely rule-based and runs offline in JavaScript. No LLM or external API is used.</p>
+
+<h3>Can I import from IBM DOORS?</h3>
+<p>Export your DOORS data as CSV or ReqIF, then import into ReqRight. Column mapping handles different header formats.</p>
+
+<h3>What browsers are supported?</h3>
+<p>Chrome, Firefox, Edge, and Safari (latest versions). ReqRight uses modern JavaScript features and may not work in older browsers.</p>
+
+<h3>How do I report a bug?</h3>
+<p>Open an issue on <a href="https://github.com/ssaleem74/reqright/issues">GitHub</a> with steps to reproduce.</p>
+
+<div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);text-align:center;color:var(--dim);font-size:12px;">
+<p>ReqRight v2.6.0 · User Guide<br>
+Based on INCOSE® GtWR v4 · ISO/IEC/IEEE 29148 · 15288<br>
+Independent educational project · <a href="https://github.com/ssaleem74/reqright">GitHub</a></p>
+</div>
+
+</main>
+</div>
+</body>
+</html>

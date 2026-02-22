@@ -1,0 +1,123 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif">
+<rect width="1200" height="720" fill="#06080f"/>
+
+<!-- Header -->
+<rect x="0" y="0" width="1200" height="42" fill="#0f1628" stroke="#1c2744" stroke-width="1"/>
+<text x="20" y="27" font-size="15" font-weight="700" fill="#38bdf8">RR</text>
+<text x="42" y="27" font-size="13" font-weight="600" fill="#e2e8f0">ReqRight</text>
+<rect x="0" y="42" width="1200" height="36" fill="#0a0f1c" stroke="#1c2744" stroke-width="1"/>
+
+<!-- Simplified sidebar -->
+<rect x="16" y="86" width="200" height="620" rx="10" fill="#141c32" stroke="#1c2744" stroke-width="1"/>
+<rect x="16" y="118" width="200" height="42" fill="#0c4a6e22"/>
+<rect x="16" y="118" width="3" height="42" fill="#38bdf8"/>
+<text x="28" y="136" font-size="10" font-weight="600" fill="#38bdf8" font-style="monospace">REQ-001</text>
+<text x="160" y="136" font-size="9" font-weight="700" fill="#10b981">94%</text>
+<text x="28" y="152" font-size="9" fill="#6b7fa0">The AegisGuard_System shall...</text>
+
+<text x="28" y="178" font-size="10" font-weight="600" fill="#a0aec0" font-style="monospace">REQ-002</text>
+<text x="160" y="178" font-size="9" font-weight="700" fill="#10b981">88%</text>
+<text x="184" y="178" font-size="8" fill="#8b5cf6">💬2</text>
+
+<text x="28" y="204" font-size="10" font-weight="600" fill="#a0aec0" font-style="monospace">REQ-003</text>
+<text x="160" y="204" font-size="9" font-weight="700" fill="#f59e0b">72%</text>
+
+<text x="28" y="230" font-size="10" font-weight="600" fill="#a0aec0" font-style="monospace">REQ-004</text>
+<text x="160" y="230" font-size="9" font-weight="700" fill="#10b981">91%</text>
+<text x="184" y="230" font-size="8" fill="#8b5cf6">💬3</text>
+
+<!-- CENTER: Comments & Review panel (expanded) -->
+<rect x="228" y="86" width="520" height="316" rx="10" fill="#141c32" stroke="#1c2744" stroke-width="1"/>
+<!-- Header -->
+<rect x="228" y="86" width="520" height="40" rx="10" fill="#141c32"/>
+<rect x="228" y="116" width="520" height="10" fill="#141c32"/>
+<text x="248" y="112" font-size="13" font-weight="600" fill="#38bdf8">▾ 💬 Comments &amp; Review</text>
+<rect x="434" y="98" width="22" height="18" rx="8" fill="#38bdf822"/>
+<text x="440" y="111" font-size="10" fill="#38bdf8">2</text>
+<!-- Reviewer name -->
+<text x="600" y="112" font-size="10" fill="#6b7fa0">Reviewer:</text>
+<rect x="658" y="96" width="78" height="22" rx="4" fill="#0f1628" stroke="#1c2744" stroke-width="0.5"/>
+<text x="666" y="112" font-size="10" fill="#e2e8f0">Sarah Chen</text>
+
+<!-- Comment thread -->
+<!-- Comment 1: Review note -->
+<rect x="244" y="132" width="488" height="60" rx="8" fill="#0f1628" stroke="#1c2744" stroke-width="0.5"/>
+<text x="260" y="150" font-size="10" fill="#8b5cf6">📝 Review Note</text>
+<text x="348" y="150" font-size="9" fill="#6b7fa0">— Sarah Chen · Feb 15, 10:30 AM</text>
+<text x="700" y="150" font-size="9" fill="#6b7fa0" cursor="pointer">✕</text>
+<text x="260" y="174" font-size="11" fill="#e2e8f0">Core requirement — verified against ISO 62443 security standards.</text>
+
+<!-- Comment 2: Approval -->
+<rect x="244" y="200" width="488" height="60" rx="8" fill="#10b98108" stroke="#10b98133" stroke-width="0.5"/>
+<text x="260" y="218" font-size="10" fill="#10b981">✅ Approved</text>
+<text x="338" y="218" font-size="9" fill="#6b7fa0">— David Park · Feb 16, 2:15 PM</text>
+<text x="700" y="218" font-size="9" fill="#6b7fa0" cursor="pointer">✕</text>
+<text x="260" y="242" font-size="11" fill="#e2e8f0">Requirement approved after security architecture review.</text>
+
+<!-- Add comment form -->
+<rect x="244" y="270" width="488" height="70" rx="8" fill="#0a0f1c" stroke="#1c2744" stroke-width="0.5"/>
+<rect x="256" y="282" width="340" height="28" rx="4" fill="#0f1628" stroke="#1c2744" stroke-width="0.5"/>
+<text x="268" y="300" font-size="11" fill="#6b7fa0">Add a comment...</text>
+<!-- Action buttons -->
+<rect x="604" y="282" width="28" height="28" rx="4" fill="#0f1628" stroke="#38bdf844" stroke-width="0.5"/>
+<text x="612" y="300" font-size="11" fill="#38bdf8">💬</text>
+<rect x="636" y="282" width="28" height="28" rx="4" fill="#0f1628" stroke="#8b5cf644" stroke-width="0.5"/>
+<text x="644" y="300" font-size="11" fill="#8b5cf6">📝</text>
+<rect x="668" y="282" width="28" height="28" rx="4" fill="#0f1628" stroke="#10b98144" stroke-width="0.5"/>
+<text x="676" y="300" font-size="11" fill="#10b981">✅</text>
+<rect x="700" y="282" width="28" height="28" rx="4" fill="#0f1628" stroke="#ef444444" stroke-width="0.5"/>
+<text x="708" y="300" font-size="11" fill="#ef4444">❌</text>
+<text x="256" y="352" font-size="9" fill="#6b7fa0">💬 Comment · 📝 Review · ✅ Approve (→ Approved) · ❌ Reject (→ Under Review)</text>
+
+<!-- VERSION HISTORY panel (expanded) -->
+<rect x="228" y="412" width="520" height="294" rx="10" fill="#141c32" stroke="#1c2744" stroke-width="1"/>
+<rect x="228" y="412" width="520" height="40" rx="10" fill="#141c32"/>
+<rect x="228" y="442" width="520" height="10" fill="#141c32"/>
+<text x="248" y="438" font-size="13" font-weight="600" fill="#8b5cf6">▾ 🕐 Version History</text>
+<rect x="432" y="424" width="22" height="18" rx="8" fill="#8b5cf622"/>
+<text x="438" y="437" font-size="10" fill="#8b5cf6">3</text>
+<text x="600" y="438" font-size="10" fill="#6b7fa0">Created: Feb 10, 2026</text>
+
+<!-- Timeline entries -->
+<!-- Entry 1 (newest) -->
+<rect x="264" y="462" width="4" height="64" rx="2" fill="#38bdf8"/>
+<circle cx="266" cy="468" r="5" fill="#38bdf8"/>
+<text x="282" y="472" font-size="10" font-weight="600" fill="#38bdf8">Status</text>
+<text x="326" y="472" font-size="9" fill="#6b7fa0">— David Park · Feb 16, 2:15 PM</text>
+<text x="282" y="492" font-size="11" fill="#e2e8f0"><tspan fill="#ef4444" text-decoration="line-through">Under Review</tspan> → <tspan fill="#10b981">Approved</tspan></text>
+
+<!-- Entry 2 -->
+<rect x="264" y="534" width="4" height="64" rx="2" fill="#38bdf8"/>
+<circle cx="266" cy="540" r="5" fill="#38bdf8"/>
+<text x="282" y="544" font-size="10" font-weight="600" fill="#38bdf8">Status</text>
+<text x="326" y="544" font-size="9" fill="#6b7fa0">— Sarah Chen · Feb 12, 11:20 AM</text>
+<text x="282" y="564" font-size="11" fill="#e2e8f0"><tspan fill="#ef4444" text-decoration="line-through">Draft</tspan> → <tspan fill="#10b981">Under Review</tspan></text>
+
+<!-- Entry 3 (AI change) -->
+<rect x="264" y="606" width="4" height="64" rx="2" fill="#8b5cf6"/>
+<circle cx="266" cy="612" r="5" fill="#8b5cf6"/>
+<text x="282" y="616" font-size="10" font-weight="600" fill="#8b5cf6">Statement</text>
+<text x="342" y="616" font-size="9" fill="#6b7fa0">— Sarah Chen · Feb 10, 9:00 AM</text>
+<text x="282" y="636" font-size="11" fill="#e2e8f0"><tspan fill="#ef4444" text-decoration="line-through">The system shall detect intrusion…</tspan></text>
+<text x="282" y="656" font-size="11" fill="#10b981">→ The AegisGuard_System shall detect each…</text>
+
+<!-- RIGHT QUALITY PANEL -->
+<rect x="762" y="86" width="422" height="260" rx="10" fill="#141c32" stroke="#1c2744" stroke-width="1"/>
+<text x="890" y="118" font-size="10" font-weight="600" fill="#a0aec0" text-anchor="middle" letter-spacing="0.5">INCOSE Quality Score</text>
+<!-- Large score -->
+<text x="890" y="186" font-size="60" font-weight="700" fill="#10b981" text-anchor="middle" font-style="monospace">94</text>
+<text x="890" y="212" font-size="15" font-weight="700" fill="#a0aec0" text-anchor="middle">Grade: A</text>
+<!-- Stats -->
+<text x="836" y="240" font-size="11" fill="#10b981">✓ 25 Passed</text>
+<text x="916" y="240" font-size="11" fill="#ef4444">✕ 0 Failed</text>
+<text x="996" y="240" font-size="11" fill="#f59e0b">⚠ 2 Review</text>
+
+<!-- AI Improve button -->
+<rect x="762" y="360" width="422" height="44" rx="10" fill="#141c32" stroke="#1c2744" stroke-width="1"/>
+<rect x="782" y="368" width="382" height="28" rx="6" fill="#0f1628" stroke="#1c2744" stroke-width="0.5"/>
+<text x="916" y="386" font-size="12" fill="#a0aec0" text-anchor="middle">⚡ AI Improve — No violations to fix</text>
+
+<!-- Footer -->
+<rect x="0" y="700" width="1200" height="20" fill="#06080f"/>
+<text x="20" y="714" font-size="9" fill="#4a5370">ReqRight v2.6.0 · Based on INCOSE® GtWR v4 · ISO/IEC/IEEE 29148 · 15288</text>
+</svg>

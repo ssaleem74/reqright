@@ -71,6 +71,26 @@ open reqright.html
 
 ---
 
+## Screenshots
+
+| Dashboard | Author / Editor |
+|:---------:|:---------------:|
+| ![Dashboard](images/01-dashboard.svg) | ![Author](images/02-author-editor.svg) |
+
+| Templates Library | Custom Rule Weights |
+|:-----------------:|:-------------------:|
+| ![Templates](images/03-templates.svg) | ![Rules](images/04-rules-weights.svg) |
+
+| Risk Register | Excel Import |
+|:-------------:|:------------:|
+| ![Risks](images/05-risk-register.svg) | ![Excel](images/06-excel-import.svg) |
+
+| Comments & Version History | Traceability Matrix |
+|:--------------------------:|:-------------------:|
+| ![Comments](images/07-comments-history.svg) | ![Trace](images/08-traceability.svg) |
+
+---
+
 ## Modules in Detail
 
 ### 📝 Requirements Management (Author · Register · Trace · V&V · Rules · Glossary)
@@ -146,9 +166,23 @@ Reports include cover page, dynamic table of contents, cross-module traceability
 
 ---
 
-## Test Data
+## Documentation
 
-A complete example project is included: **AegisGuard Pro Smart Home Security System** with 29 requirements, 10 risks, 8 decisions, 8 stakeholders, 6 interfaces, and 6 use cases pre-populated across all modules — including sample comments, review history, and custom rule weights. Load it from `SmartHome_Security_System_TestData.json`.
+📖 **[User Guide](user-guide.html)** — Comprehensive guide covering all features, modules, and workflows.
+
+---
+
+## Example Projects
+
+Three complete example projects are included to demonstrate different industry contexts:
+
+| Project | Domain | Requirements | Risks | Modules |
+|---------|--------|:------------:|:-----:|:-------:|
+| [AegisGuard Smart Home Security](SmartHome_Security_System_TestData.json) | Consumer IoT | 29 | 10 | All 6 |
+| [SkyNav X200 UAV Flight Control](example-aerospace-uav.json) | Aerospace/Defence | 12 | 3 | All 6 |
+| [VitaMonitor Pro Patient Monitor](example-medical-device.json) | Medical Device | 10 | 3 | All 6 |
+
+Each project includes realistic requirements, risks, decisions, stakeholders, interfaces, use cases, glossary entries, sample comments, and Safety-Critical rule weight presets. Load any of these via **File → Load** to explore all features.
 
 ---
 

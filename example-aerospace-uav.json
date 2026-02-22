@@ -1,0 +1,454 @@
+{
+  "project": "SkyNav X200 — UAV Flight Control System",
+  "version": "2.6.0",
+  "standard": "INCOSE GtWR v4",
+  "exportDate": "2026-02-22T06:13:50.588Z",
+  "requirements": [
+    {
+      "id": "REQ-001",
+      "text": "The Flight_Controller shall process each inertial measurement unit update within 10 ± 1 ms of sensor data acquisition.",
+      "type": "Performance",
+      "level": "System Requirement",
+      "priority": "Critical",
+      "verification": "Test",
+      "rationale": "DO-178C DAL-A timing requirement for flight-critical loop.",
+      "parent": "",
+      "status": "Approved",
+      "source": "SRS-FC-001",
+      "risk": "High",
+      "comments": [
+        {
+          "id": 1,
+          "text": "Verified against DO-178C objectives.",
+          "author": "Chief Engineer",
+          "timestamp": "2026-01-15T10:00:00Z",
+          "type": "approval"
+        }
+      ],
+      "history": []
+    },
+    {
+      "id": "REQ-002",
+      "text": "The Navigation_System shall compute the aircraft position with an accuracy of ±2.5 m CEP under GPS-available conditions.",
+      "type": "Performance",
+      "level": "System Requirement",
+      "priority": "Critical",
+      "verification": "Test",
+      "rationale": "Required for BVLOS operations per STANAG 4586.",
+      "parent": "",
+      "status": "Approved",
+      "source": "ConOps §3.2",
+      "risk": "High",
+      "comments": [],
+      "history": []
+    },
+    {
+      "id": "REQ-003",
+      "text": "When GPS signal is lost, the Navigation_System shall switch to inertial-only navigation within 50 ms of signal loss detection.",
+      "type": "Functional",
+      "level": "System Requirement",
+      "priority": "Critical",
+      "verification": "Test",
+      "rationale": "Seamless navigation continuity during GPS-denied operations.",
+      "parent": "REQ-002",
+      "status": "Approved",
+      "source": "ConOps §3.2.1",
+      "risk": "Critical",
+      "comments": [],
+      "history": []
+    },
+    {
+      "id": "REQ-004",
+      "text": "The Flight_Controller shall maintain stable flight within ±2° of commanded attitude in wind conditions up to 25 ± 2 knots.",
+      "type": "Performance",
+      "level": "System Requirement",
+      "priority": "Critical",
+      "verification": "Test",
+      "rationale": "Operational envelope includes moderate wind conditions per MIL-STD-1797.",
+      "parent": "",
+      "status": "Reviewed",
+      "source": "SRS-FC-002",
+      "risk": "High",
+      "comments": [],
+      "history": []
+    },
+    {
+      "id": "REQ-005",
+      "text": "The Autopilot_Module shall execute each waypoint transition within 500 ± 50 m of the planned flight path.",
+      "type": "Performance",
+      "level": "Subsystem Requirement",
+      "priority": "High",
+      "verification": "Test",
+      "rationale": "Airspace compliance for controlled corridor operations.",
+      "parent": "REQ-002",
+      "status": "Reviewed",
+      "source": "ConOps §4.1",
+      "risk": "Medium",
+      "comments": [],
+      "history": []
+    },
+    {
+      "id": "REQ-006",
+      "text": "The Communication_Link shall transmit telemetry data to the Ground_Station at a rate of 10 Hz with a maximum latency of 200 ± 20 ms.",
+      "type": "Interface",
+      "level": "System Requirement",
+      "priority": "High",
+      "verification": "Test",
+      "rationale": "Real-time situational awareness for remote pilot.",
+      "parent": "",
+      "status": "Approved",
+      "source": "ICD-GCS-001",
+      "risk": "Medium",
+      "comments": [],
+      "history": []
+    },
+    {
+      "id": "REQ-007",
+      "text": "The Flight_Controller shall detect each engine failure within 100 ms of occurrence and initiate the emergency landing sequence.",
+      "type": "Safety",
+      "level": "System Requirement",
+      "priority": "Critical",
+      "verification": "Demonstration",
+      "rationale": "ARP 4754A safety objective for catastrophic failure condition.",
+      "parent": "",
+      "status": "Approved",
+      "source": "SSA-001",
+      "risk": "Critical",
+      "comments": [
+        {
+          "id": 2,
+          "text": "Tested across 50 failure injection scenarios.",
+          "author": "Safety Lead",
+          "timestamp": "2026-01-20T14:00:00Z",
+          "type": "review"
+        }
+      ],
+      "history": []
+    },
+    {
+      "id": "REQ-008",
+      "text": "The Power_Distribution_Unit shall provide redundant power paths to the Flight_Controller with automatic failover within 5 ± 1 ms.",
+      "type": "Reliability",
+      "level": "Subsystem Requirement",
+      "priority": "Critical",
+      "verification": "Test",
+      "rationale": "Single-point failure elimination per ARP 4761.",
+      "parent": "REQ-007",
+      "status": "Reviewed",
+      "source": "SSA-002",
+      "risk": "High",
+      "comments": [],
+      "history": []
+    },
+    {
+      "id": "REQ-009",
+      "text": "The Encryption_Module shall encrypt each command-and-control link using AES-256 with key rotation every 3600 ± 60 seconds.",
+      "type": "Security",
+      "level": "System Requirement",
+      "priority": "High",
+      "verification": "Test",
+      "rationale": "STANAG 4586 C2 link protection requirement.",
+      "parent": "",
+      "status": "Draft",
+      "source": "CyberSec-001",
+      "risk": "Medium",
+      "comments": [],
+      "history": []
+    },
+    {
+      "id": "REQ-010",
+      "text": "The Flight_Controller shall log each flight parameter at a minimum rate of 50 Hz to the non-volatile Flight_Data_Recorder.",
+      "type": "Functional",
+      "level": "System Requirement",
+      "priority": "High",
+      "verification": "Test",
+      "rationale": "Post-flight analysis and incident investigation capability.",
+      "parent": "",
+      "status": "Draft",
+      "source": "Ops §5.3",
+      "risk": "Low",
+      "comments": [],
+      "history": []
+    },
+    {
+      "id": "REQ-011",
+      "text": "The Obstacle_Detection_System shall identify each obstacle larger than 0.5 m at a range of 30 ± 3 m during forward flight.",
+      "type": "Safety",
+      "level": "System Requirement",
+      "priority": "Critical",
+      "verification": "Test",
+      "rationale": "Detect and avoid capability for BVLOS operations.",
+      "parent": "",
+      "status": "Reviewed",
+      "source": "ConOps §3.4",
+      "risk": "High",
+      "comments": [],
+      "history": []
+    },
+    {
+      "id": "REQ-012",
+      "text": "The Airframe shall withstand a load factor of 3.5g without structural deformation per MIL-STD-1530.",
+      "type": "Environmental",
+      "level": "System Requirement",
+      "priority": "Critical",
+      "verification": "Analysis",
+      "rationale": "Structural integrity during maximum manoeuvre loading.",
+      "parent": "",
+      "status": "Approved",
+      "source": "Struct-001",
+      "risk": "Medium",
+      "comments": [],
+      "history": []
+    }
+  ],
+  "decisions": [
+    {
+      "id": "DEC-001",
+      "title": "Triple-redundant IMU architecture",
+      "desc": "Selected triple-redundant IMU with majority voting over dual-redundant with cross-checking.",
+      "category": "Architectural",
+      "status": "Approved",
+      "date": "2026-01-05",
+      "maker": "Chief Systems Architect",
+      "rationale": "ARP 4754A DAL-A requires tolerance to dual simultaneous failures.",
+      "affectedReqs": [
+        "REQ-001",
+        "REQ-007"
+      ]
+    },
+    {
+      "id": "DEC-002",
+      "title": "DO-178C DAL-A for flight control software",
+      "desc": "Flight control software classified as DAL-A (catastrophic failure condition).",
+      "category": "Safety",
+      "status": "Approved",
+      "date": "2026-01-03",
+      "maker": "Safety Board",
+      "rationale": "Engine-out scenario classified as catastrophic per FHA.",
+      "affectedReqs": [
+        "REQ-001",
+        "REQ-007",
+        "REQ-008"
+      ]
+    }
+  ],
+  "risks": [
+    {
+      "id": "RSK-001",
+      "title": "GPS spoofing attack on navigation",
+      "desc": "Adversarial GPS spoofing could cause position errors beyond acceptable limits.",
+      "category": "Security",
+      "likelihood": "3 - Possible",
+      "impact": "5 - Severe",
+      "status": "Mitigated",
+      "mitigation": "Integrated INS cross-check with spoofing detection algorithm.",
+      "linkedReqs": [
+        "REQ-002",
+        "REQ-003"
+      ]
+    },
+    {
+      "id": "RSK-002",
+      "title": "IMU calibration drift over flight duration",
+      "desc": "Inertial sensor drift may exceed position accuracy requirements during extended BVLOS flights.",
+      "category": "Technical",
+      "likelihood": "4 - Likely",
+      "impact": "4 - Major",
+      "status": "Open",
+      "mitigation": "Periodic GPS correction when available; investigate enhanced INS.",
+      "linkedReqs": [
+        "REQ-001",
+        "REQ-002"
+      ]
+    },
+    {
+      "id": "RSK-003",
+      "title": "C2 link loss in urban canyon",
+      "desc": "Command and control link may be lost due to multipath and obstruction in dense urban environments.",
+      "category": "Technical",
+      "likelihood": "3 - Possible",
+      "impact": "4 - Major",
+      "status": "Open",
+      "mitigation": "Autonomous return-to-home procedure with geofence compliance.",
+      "linkedReqs": [
+        "REQ-006",
+        "REQ-007"
+      ]
+    }
+  ],
+  "stakeholders": [
+    {
+      "id": "STK-001",
+      "name": "Remote Pilot",
+      "role": "Operator",
+      "org": "Flight Operations",
+      "category": "Internal",
+      "influence": "Critical",
+      "concerns": "Real-time situational awareness, reliable C2 link, emergency override",
+      "expectations": "Intuitive GCS interface, sub-second command response"
+    },
+    {
+      "id": "STK-002",
+      "name": "Civil Aviation Authority",
+      "role": "Regulator",
+      "org": "National Aviation Authority",
+      "category": "Regulatory",
+      "influence": "Critical",
+      "concerns": "Airworthiness, detect-and-avoid, airspace integration",
+      "expectations": "Full DO-178C/DO-254 compliance evidence"
+    },
+    {
+      "id": "STK-003",
+      "name": "Airframe Maintenance Crew",
+      "role": "Maintainer",
+      "org": "MRO Department",
+      "category": "Internal",
+      "influence": "Medium",
+      "concerns": "Diagnostic access, LRU replaceability, maintenance intervals",
+      "expectations": "Built-in test capability, modular design"
+    }
+  ],
+  "interfaces": [
+    {
+      "id": "IFC-001",
+      "name": "IMU Data Bus",
+      "type": "Data",
+      "direction": "Unidirectional →",
+      "source": "IMU Assembly",
+      "destination": "Flight Controller",
+      "protocol": "SPI",
+      "dataRate": "1000 Hz",
+      "status": "Agreed",
+      "linkedReqs": [
+        "REQ-001"
+      ]
+    },
+    {
+      "id": "IFC-002",
+      "name": "C2 Datalink",
+      "type": "Data",
+      "direction": "Bidirectional ↔",
+      "source": "Ground Control Station",
+      "destination": "Airborne Radio",
+      "protocol": "Custom TDMA",
+      "dataRate": "10 Hz telemetry, 50 Hz commands",
+      "status": "Defined",
+      "linkedReqs": [
+        "REQ-006",
+        "REQ-009"
+      ]
+    }
+  ],
+  "useCases": [
+    {
+      "id": "UC-001",
+      "name": "BVLOS Corridor Flight",
+      "type": "Operational",
+      "actors": [
+        "Remote Pilot",
+        "ATC"
+      ],
+      "trigger": "Flight plan approved and uploaded",
+      "preconditions": "Pre-flight checks complete, GPS lock acquired, C2 link established",
+      "mainFlow": "1. Pilot initiates auto-takeoff\n2. System climbs to cruise altitude\n3. Autopilot follows waypoint route\n4. System transmits telemetry at 10 Hz\n5. Pilot monitors and can override\n6. System executes auto-landing at destination",
+      "postconditions": "Aircraft on ground, flight data recorded",
+      "priority": "Critical",
+      "status": "Validated",
+      "derivedReqs": [
+        "REQ-002",
+        "REQ-005",
+        "REQ-006",
+        "REQ-010"
+      ]
+    },
+    {
+      "id": "UC-002",
+      "name": "Engine Failure Emergency",
+      "type": "Emergency",
+      "actors": [
+        "Flight Controller",
+        "Remote Pilot"
+      ],
+      "trigger": "Engine RPM drops below 2000 for > 100ms",
+      "preconditions": "Aircraft airborne",
+      "mainFlow": "1. Flight Controller detects engine failure\n2. System alerts Remote Pilot\n3. Autopilot initiates emergency descent profile\n4. System identifies nearest safe landing zone\n5. System executes autorotation/glide landing\n6. System transmits emergency beacon",
+      "postconditions": "Aircraft landed, emergency services notified",
+      "priority": "Critical",
+      "status": "Validated",
+      "derivedReqs": [
+        "REQ-007",
+        "REQ-008"
+      ]
+    }
+  ],
+  "glossary": [
+    {
+      "term": "BVLOS",
+      "def": "Beyond Visual Line of Sight — operations where the remote pilot cannot see the aircraft directly"
+    },
+    {
+      "term": "DAL",
+      "def": "Design Assurance Level — DO-178C/DO-254 classification (A=Catastrophic through E=No Effect)"
+    },
+    {
+      "term": "CEP",
+      "def": "Circular Error Probable — radius of circle containing 50% of position fixes"
+    },
+    {
+      "term": "IMU",
+      "def": "Inertial Measurement Unit — accelerometers + gyroscopes for attitude/position estimation"
+    },
+    {
+      "term": "C2",
+      "def": "Command and Control — datalink between ground station and aircraft"
+    },
+    {
+      "term": "LRU",
+      "def": "Line Replaceable Unit — modular component replaceable at the flight line level"
+    }
+  ],
+  "ruleWeights": {
+    "R1": 3,
+    "R2": 3,
+    "R3": 2,
+    "R4": 1,
+    "R5": 2,
+    "R6": 3,
+    "R7": 3,
+    "R8": 3,
+    "R9": 3,
+    "R10": 2,
+    "R11": 1,
+    "R12": 1,
+    "R13": 1,
+    "R14": 2,
+    "R15": 2,
+    "R16": 3,
+    "R17": 2,
+    "R18": 3,
+    "R19": 2,
+    "R20": 2,
+    "R21": 1,
+    "R22": 1,
+    "R23": 1,
+    "R24": 3,
+    "R25": 1,
+    "R26": 3,
+    "R27": 2,
+    "R28": 1,
+    "R29": 1,
+    "R30": 1,
+    "R31": 3,
+    "R32": 2,
+    "R33": 3,
+    "R34": 3,
+    "R35": 2,
+    "R36": 1,
+    "R37": 1,
+    "R38": 1,
+    "R39": 1,
+    "R40": 1,
+    "R41": 1,
+    "R42": 1
+  }
+}

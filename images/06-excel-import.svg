@@ -1,0 +1,136 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif">
+<rect width="1200" height="720" fill="#06080f" opacity="0.92"/>
+
+<!-- Modal -->
+<rect x="140" y="40" width="920" height="640" rx="14" fill="#0f1628" stroke="#1c2744" stroke-width="1"/>
+
+<!-- Header -->
+<rect x="140" y="40" width="920" height="56" rx="14" fill="#141c32"/>
+<rect x="140" y="82" width="920" height="14" fill="#141c32"/>
+<text x="168" y="72" font-size="17" font-weight="700" fill="#e2e8f0">📥 Import Excel — Column Mapping</text>
+<rect x="972" y="54" width="70" height="28" rx="6" fill="#0f1628" stroke="#1c2744" stroke-width="0.5"/>
+<text x="993" y="72" font-size="11" fill="#a0aec0">Cancel</text>
+
+<!-- Sheet tabs -->
+<rect x="168" y="106" width="880" height="36" rx="0" fill="#0a0f1c"/>
+<rect x="168" y="106" width="180" height="36" rx="0" fill="#141c32" stroke="#38bdf8" stroke-width="0 0 2 0"/>
+<text x="214" y="128" font-size="11" font-weight="600" fill="#38bdf8">📄 System Requirements</text>
+<rect x="348" y="106" width="160" height="36" rx="0" fill="transparent"/>
+<text x="386" y="128" font-size="11" fill="#a0aec0">📄 Stakeholder Needs</text>
+<text x="540" y="128" font-size="10" fill="#6b7fa0">2 sheets detected</text>
+
+<!-- Column mapping section -->
+<text x="168" y="166" font-size="13" font-weight="600" fill="#e2e8f0">Map Excel Columns → ReqRight Fields</text>
+<text x="168" y="184" font-size="11" fill="#6b7fa0">Auto-detected common headers. Adjust mappings as needed.</text>
+
+<!-- Mapping grid -->
+<rect x="168" y="196" width="430" height="30" rx="0" fill="#0f1628"/>
+<text x="182" y="216" font-size="10" font-weight="600" fill="#6b7fa0">EXCEL COLUMN</text>
+<text x="400" y="216" font-size="10" font-weight="600" fill="#6b7fa0">→ REQRIGHT FIELD</text>
+
+<!-- Mapping rows -->
+<rect x="168" y="228" width="430" height="32" rx="0" fill="transparent" stroke="#1c2744" stroke-width="0 0 0.5 0"/>
+<text x="182" y="248" font-size="11" fill="#e2e8f0">Requirement Statement</text>
+<text x="357" y="248" font-size="11" fill="#10b981">✓ auto</text>
+<rect x="400" y="234" width="180" height="24" rx="4" fill="#0f1628" stroke="#10b98144" stroke-width="0.5"/>
+<text x="412" y="250" font-size="11" fill="#10b981">Statement</text>
+
+<rect x="168" y="260" width="430" height="32" rx="0" fill="transparent" stroke="#1c2744" stroke-width="0 0 0.5 0"/>
+<text x="182" y="280" font-size="11" fill="#e2e8f0">Type</text>
+<text x="357" y="280" font-size="11" fill="#10b981">✓ auto</text>
+<rect x="400" y="266" width="180" height="24" rx="4" fill="#0f1628" stroke="#10b98144" stroke-width="0.5"/>
+<text x="412" y="282" font-size="11" fill="#10b981">Type</text>
+
+<rect x="168" y="292" width="430" height="32" rx="0" fill="transparent" stroke="#1c2744" stroke-width="0 0 0.5 0"/>
+<text x="182" y="312" font-size="11" fill="#e2e8f0">Requirement Level</text>
+<text x="357" y="312" font-size="11" fill="#10b981">✓ auto</text>
+<rect x="400" y="298" width="180" height="24" rx="4" fill="#0f1628" stroke="#10b98144" stroke-width="0.5"/>
+<text x="412" y="314" font-size="11" fill="#10b981">Level</text>
+
+<rect x="168" y="324" width="430" height="32" rx="0" fill="transparent" stroke="#1c2744" stroke-width="0 0 0.5 0"/>
+<text x="182" y="344" font-size="11" fill="#e2e8f0">Priority</text>
+<text x="357" y="344" font-size="11" fill="#10b981">✓ auto</text>
+<rect x="400" y="330" width="180" height="24" rx="4" fill="#0f1628" stroke="#10b98144" stroke-width="0.5"/>
+<text x="412" y="346" font-size="11" fill="#10b981">Priority</text>
+
+<rect x="168" y="356" width="430" height="32" rx="0" fill="transparent" stroke="#1c2744" stroke-width="0 0 0.5 0"/>
+<text x="182" y="376" font-size="11" fill="#e2e8f0">V&amp;V Method</text>
+<text x="357" y="376" font-size="11" fill="#10b981">✓ auto</text>
+<rect x="400" y="362" width="180" height="24" rx="4" fill="#0f1628" stroke="#10b98144" stroke-width="0.5"/>
+<text x="412" y="378" font-size="11" fill="#10b981">Verification</text>
+
+<rect x="168" y="388" width="430" height="32" rx="0" fill="transparent" stroke="#1c2744" stroke-width="0 0 0.5 0"/>
+<text x="182" y="408" font-size="11" fill="#e2e8f0">Notes</text>
+<rect x="400" y="394" width="180" height="24" rx="4" fill="#0f1628" stroke="#f59e0b44" stroke-width="0.5"/>
+<text x="412" y="410" font-size="11" fill="#f59e0b">Rationale ▾</text>
+
+<rect x="168" y="420" width="430" height="32" rx="0" fill="transparent" stroke="#1c2744" stroke-width="0 0 0.5 0"/>
+<text x="182" y="440" font-size="11" fill="#e2e8f0">Source Document</text>
+<text x="357" y="440" font-size="11" fill="#10b981">✓ auto</text>
+<rect x="400" y="426" width="180" height="24" rx="4" fill="#0f1628" stroke="#10b98144" stroke-width="0.5"/>
+<text x="412" y="442" font-size="11" fill="#10b981">Source</text>
+
+<!-- Preview section -->
+<text x="616" y="166" font-size="13" font-weight="600" fill="#e2e8f0">Preview (first 5 rows)</text>
+<text x="616" y="184" font-size="11" fill="#6b7fa0">15 rows will be imported from "System Requirements"</text>
+
+<!-- Preview table -->
+<rect x="616" y="196" width="432" height="260" rx="6" fill="#0a0f1c" stroke="#1c2744" stroke-width="0.5"/>
+
+<!-- Table header -->
+<rect x="616" y="196" width="432" height="26" rx="6" fill="#0f1628"/>
+<text x="626" y="214" font-size="8" font-weight="600" fill="#6b7fa0">#</text>
+<text x="646" y="214" font-size="8" font-weight="600" fill="#6b7fa0">Statement</text>
+<text x="860" y="214" font-size="8" font-weight="600" fill="#6b7fa0">Type</text>
+<text x="930" y="214" font-size="8" font-weight="600" fill="#6b7fa0">Priority</text>
+<text x="1000" y="214" font-size="8" font-weight="600" fill="#6b7fa0">V&amp;V</text>
+
+<!-- Preview rows -->
+<text x="626" y="240" font-size="9" fill="#6b7fa0">1</text>
+<text x="646" y="240" font-size="9" fill="#e2e8f0">The AegisGuard_System shall detect...</text>
+<text x="860" y="240" font-size="9" fill="#a0aec0">Functional</text>
+<text x="930" y="240" font-size="9" fill="#a0aec0">Critical</text>
+<text x="1000" y="240" font-size="9" fill="#a0aec0">Test</text>
+
+<line x1="626" y1="248" x2="1038" y2="248" stroke="#1c2744" stroke-width="0.3"/>
+<text x="626" y="266" font-size="9" fill="#6b7fa0">2</text>
+<text x="646" y="266" font-size="9" fill="#e2e8f0">The Sensor_Hub shall process each...</text>
+<text x="860" y="266" font-size="9" fill="#a0aec0">Performance</text>
+<text x="930" y="266" font-size="9" fill="#a0aec0">Critical</text>
+<text x="1000" y="266" font-size="9" fill="#a0aec0">Test</text>
+
+<line x1="626" y1="274" x2="1038" y2="274" stroke="#1c2744" stroke-width="0.3"/>
+<text x="626" y="292" font-size="9" fill="#6b7fa0">3</text>
+<text x="646" y="292" font-size="9" fill="#e2e8f0">The Central_Hub shall send alerts to...</text>
+<text x="860" y="292" font-size="9" fill="#a0aec0">Functional</text>
+<text x="930" y="292" font-size="9" fill="#a0aec0">High</text>
+<text x="1000" y="292" font-size="9" fill="#a0aec0">Demo</text>
+
+<line x1="626" y1="300" x2="1038" y2="300" stroke="#1c2744" stroke-width="0.3"/>
+<text x="626" y="318" font-size="9" fill="#6b7fa0">4</text>
+<text x="646" y="318" font-size="9" fill="#e2e8f0">The Encryption_Module shall encrypt...</text>
+<text x="860" y="318" font-size="9" fill="#a0aec0">Security</text>
+<text x="930" y="318" font-size="9" fill="#a0aec0">Critical</text>
+<text x="1000" y="318" font-size="9" fill="#a0aec0">Test</text>
+
+<line x1="626" y1="326" x2="1038" y2="326" stroke="#1c2744" stroke-width="0.3"/>
+<text x="626" y="344" font-size="9" fill="#6b7fa0">5</text>
+<text x="646" y="344" font-size="9" fill="#e2e8f0">The Video_Subsystem shall record at...</text>
+<text x="860" y="344" font-size="9" fill="#a0aec0">Performance</text>
+<text x="930" y="344" font-size="9" fill="#a0aec0">High</text>
+<text x="1000" y="344" font-size="9" fill="#a0aec0">Test</text>
+
+<text x="830" y="420" font-size="10" fill="#6b7fa0" text-anchor="middle">... and 10 more rows</text>
+
+<!-- Summary -->
+<rect x="168" y="475" width="880" height="56" rx="8" fill="#10b98111" stroke="#10b98133" stroke-width="1"/>
+<text x="192" y="500" font-size="13" font-weight="600" fill="#10b981">✓ Ready to import</text>
+<text x="192" y="518" font-size="11" fill="#a0aec0">15 requirements from "System Requirements" · 7 of 7 columns mapped · Auto-detected 6 columns</text>
+
+<!-- Action buttons -->
+<rect x="168" y="546" width="880" height="50" rx="0" fill="transparent"/>
+<rect x="168" y="546" width="130" height="38" rx="6" fill="#0f1628" stroke="#1c2744" stroke-width="0.5"/>
+<text x="195" y="570" font-size="11" fill="#a0aec0">Import as Merge</text>
+<rect x="860" y="546" width="188" height="38" rx="6" fill="#38bdf8"/>
+<text x="895" y="570" font-size="13" font-weight="700" fill="#06080f">Import 15 Requirements</text>
+</svg>

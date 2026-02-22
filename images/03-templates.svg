@@ -1,0 +1,147 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 720" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif">
+<rect width="1200" height="720" fill="#06080f" opacity="0.92"/>
+<!-- Dimmed background app -->
+<rect x="0" y="0" width="1200" height="720" fill="#06080f" opacity="0.6"/>
+
+<!-- Modal -->
+<rect x="150" y="30" width="900" height="660" rx="14" fill="#0f1628" stroke="#1c2744" stroke-width="1"/>
+
+<!-- Header -->
+<rect x="150" y="30" width="900" height="60" rx="14" fill="#141c32"/>
+<rect x="150" y="76" width="900" height="14" fill="#141c32"/>
+<text x="178" y="62" font-size="18" font-weight="700" fill="#e2e8f0">📋 Requirement Templates Library</text>
+<text x="178" y="80" font-size="12" fill="#a0aec0">Click any template to insert it as a new requirement. Replace [placeholders] with your specific values.</text>
+<line x1="150" y1="90" x2="1050" y2="90" stroke="#1c2744" stroke-width="1"/>
+
+<!-- Functional category -->
+<rect x="168" y="102" width="4" height="18" rx="2" fill="#38bdf8"/>
+<text x="180" y="116" font-size="13" font-weight="700" fill="#38bdf8">Functional</text>
+<text x="260" y="116" font-size="10" fill="#6b7fa0">6 templates</text>
+
+<!-- Template cards grid - row 1 -->
+<rect x="168" y="126" width="430" height="72" rx="8" fill="transparent" stroke="#1c2744" stroke-width="1"/>
+<text x="182" y="146" font-size="12" font-weight="600" fill="#e2e8f0">Data Processing</text>
+<rect x="500" y="134" width="55" height="16" rx="6" fill="#38bdf822"/>
+<text x="508" y="146" font-size="8" fill="#38bdf8">Functional</text>
+<rect x="560" y="134" width="30" height="16" rx="6" fill="#a0aec022"/>
+<text x="565" y="146" font-size="8" fill="#a0aec0">System</text>
+<text x="182" y="166" font-size="10" fill="#a0aec0">The </text>
+<text x="199" y="166" font-size="9" font-weight="600" fill="#38bdf8" style="background:#0c4a6e">[System_Name]</text>
+<text x="282" y="166" font-size="10" fill="#a0aec0"> shall process </text>
+<text x="367" y="166" font-size="9" font-weight="600" fill="#38bdf8">[data_type]</text>
+<text x="425" y="166" font-size="10" fill="#a0aec0"> within </text>
+<text x="467" y="166" font-size="9" font-weight="600" fill="#38bdf8">[time_value]</text>
+<text x="182" y="184" font-size="9" font-weight="600" fill="#38bdf8">[time_unit]</text>
+<text x="230" y="184" font-size="10" fill="#a0aec0"> of receipt.</text>
+
+<rect x="610" y="126" width="420" height="72" rx="8" fill="transparent" stroke="#1c2744" stroke-width="1"/>
+<text x="624" y="146" font-size="12" font-weight="600" fill="#e2e8f0">User Authentication</text>
+<rect x="940" y="134" width="55" height="16" rx="6" fill="#38bdf822"/>
+<text x="948" y="146" font-size="8" fill="#38bdf8">Functional</text>
+<text x="624" y="166" font-size="10" fill="#a0aec0">The </text>
+<text x="641" y="166" font-size="9" font-weight="600" fill="#38bdf8">[System_Name]</text>
+<text x="724" y="166" font-size="10" fill="#a0aec0"> shall authenticate the user</text>
+<text x="624" y="184" font-size="10" fill="#a0aec0">identity using </text>
+<text x="706" y="184" font-size="9" font-weight="600" fill="#38bdf8">[authentication_method]</text>
+<text x="834" y="184" font-size="10" fill="#a0aec0"> before...</text>
+
+<!-- Performance category -->
+<rect x="168" y="212" width="4" height="18" rx="2" fill="#f59e0b"/>
+<text x="180" y="226" font-size="13" font-weight="700" fill="#f59e0b">Performance</text>
+<text x="272" y="226" font-size="10" fill="#6b7fa0">5 templates</text>
+
+<rect x="168" y="236" width="430" height="72" rx="8" fill="transparent" stroke="#1c2744" stroke-width="1"/>
+<text x="182" y="256" font-size="12" font-weight="600" fill="#e2e8f0">Response Time</text>
+<rect x="504" y="244" width="62" height="16" rx="6" fill="#f59e0b22"/>
+<text x="510" y="256" font-size="8" fill="#f59e0b">Performance</text>
+<text x="182" y="276" font-size="10" fill="#a0aec0">The </text>
+<text x="199" y="276" font-size="9" font-weight="600" fill="#38bdf8">[System_Name]</text>
+<text x="282" y="276" font-size="10" fill="#a0aec0"> shall respond to </text>
+<text x="389" y="276" font-size="9" font-weight="600" fill="#38bdf8">[user_action]</text>
+<text x="182" y="294" font-size="10" fill="#a0aec0">within </text>
+<text x="218" y="294" font-size="9" font-weight="600" fill="#38bdf8">[time_value] [time_unit]</text>
+<text x="348" y="294" font-size="10" fill="#a0aec0"> under </text>
+<text x="386" y="294" font-size="9" font-weight="600" fill="#38bdf8">[load_condition]</text>
+<text x="476" y="294" font-size="10" fill="#a0aec0">.</text>
+
+<rect x="610" y="236" width="420" height="72" rx="8" fill="transparent" stroke="#1c2744" stroke-width="1"/>
+<text x="624" y="256" font-size="12" font-weight="600" fill="#e2e8f0">Throughput</text>
+<rect x="940" y="244" width="62" height="16" rx="6" fill="#f59e0b22"/>
+<text x="946" y="256" font-size="8" fill="#f59e0b">Performance</text>
+<text x="624" y="276" font-size="10" fill="#a0aec0">The </text>
+<text x="641" y="276" font-size="9" font-weight="600" fill="#38bdf8">[System_Name]</text>
+<text x="724" y="276" font-size="10" fill="#a0aec0"> shall process a minimum</text>
+<text x="624" y="294" font-size="10" fill="#a0aec0">of </text>
+<text x="637" y="294" font-size="9" font-weight="600" fill="#38bdf8">[quantity] [item_type]</text>
+<text x="744" y="294" font-size="10" fill="#a0aec0"> per </text>
+<text x="767" y="294" font-size="9" font-weight="600" fill="#38bdf8">[time_unit]</text>
+<text x="820" y="294" font-size="10" fill="#a0aec0">...</text>
+
+<!-- Safety category -->
+<rect x="168" y="322" width="4" height="18" rx="2" fill="#ef4444"/>
+<text x="180" y="336" font-size="13" font-weight="700" fill="#ef4444">Safety</text>
+<text x="224" y="336" font-size="10" fill="#6b7fa0">4 templates</text>
+
+<rect x="168" y="346" width="430" height="72" rx="8" fill="transparent" stroke="#1c2744" stroke-width="1"/>
+<text x="182" y="366" font-size="12" font-weight="600" fill="#e2e8f0">Fault Detection</text>
+<rect x="524" y="354" width="38" height="16" rx="6" fill="#ef444422"/>
+<text x="530" y="366" font-size="8" fill="#ef4444">Safety</text>
+<text x="182" y="386" font-size="10" fill="#a0aec0">The </text>
+<text x="199" y="386" font-size="9" font-weight="600" fill="#38bdf8">[System_Name]</text>
+<text x="282" y="386" font-size="10" fill="#a0aec0"> shall detect </text>
+<text x="355" y="386" font-size="9" font-weight="600" fill="#38bdf8">[fault_type]</text>
+<text x="420" y="386" font-size="10" fill="#a0aec0"> within</text>
+<text x="182" y="404" font-size="9" font-weight="600" fill="#38bdf8">[time_value] [time_unit]</text>
+<text x="312" y="404" font-size="10" fill="#a0aec0"> of occurrence.</text>
+
+<rect x="610" y="346" width="420" height="72" rx="8" fill="transparent" stroke="#1c2744" stroke-width="1"/>
+<text x="624" y="366" font-size="12" font-weight="600" fill="#e2e8f0">Safe State</text>
+<rect x="940" y="354" width="38" height="16" rx="6" fill="#ef444422"/>
+<text x="946" y="366" font-size="8" fill="#ef4444">Safety</text>
+<text x="624" y="386" font-size="10" fill="#a0aec0">The </text>
+<text x="641" y="386" font-size="9" font-weight="600" fill="#38bdf8">[System_Name]</text>
+<text x="724" y="386" font-size="10" fill="#a0aec0"> shall transition to a safe</text>
+<text x="624" y="404" font-size="10" fill="#a0aec0">state within </text>
+<text x="697" y="404" font-size="9" font-weight="600" fill="#38bdf8">[time_value] [time_unit]</text>
+<text x="827" y="404" font-size="10" fill="#a0aec0"> upon...</text>
+
+<!-- Security category -->
+<rect x="168" y="432" width="4" height="18" rx="2" fill="#ec4899"/>
+<text x="180" y="446" font-size="13" font-weight="700" fill="#ec4899">Security</text>
+<text x="240" y="446" font-size="10" fill="#6b7fa0">4 templates</text>
+
+<rect x="168" y="456" width="430" height="72" rx="8" fill="transparent" stroke="#1c2744" stroke-width="1"/>
+<text x="182" y="476" font-size="12" font-weight="600" fill="#e2e8f0">Encryption</text>
+<rect x="519" y="464" width="47" height="16" rx="6" fill="#ec489922"/>
+<text x="525" y="476" font-size="8" fill="#ec4899">Security</text>
+<text x="182" y="496" font-size="10" fill="#a0aec0">The </text>
+<text x="199" y="496" font-size="9" font-weight="600" fill="#38bdf8">[System_Name]</text>
+<text x="282" y="496" font-size="10" fill="#a0aec0"> shall encrypt </text>
+<text x="365" y="496" font-size="9" font-weight="600" fill="#38bdf8">[data_type]</text>
+<text x="425" y="496" font-size="10" fill="#a0aec0"> using</text>
+<text x="182" y="514" font-size="9" font-weight="600" fill="#38bdf8">[encryption_standard]</text>
+<text x="304" y="514" font-size="10" fill="#a0aec0"> with min key length </text>
+<text x="430" y="514" font-size="9" font-weight="600" fill="#38bdf8">[key_length]</text>
+<text x="496" y="514" font-size="10" fill="#a0aec0"> bits.</text>
+
+<rect x="610" y="456" width="420" height="72" rx="8" fill="transparent" stroke="#1c2744" stroke-width="1"/>
+<text x="624" y="476" font-size="12" font-weight="600" fill="#e2e8f0">Access Control</text>
+<rect x="940" y="464" width="47" height="16" rx="6" fill="#ec489922"/>
+<text x="946" y="476" font-size="8" fill="#ec4899">Security</text>
+<text x="624" y="496" font-size="10" fill="#a0aec0">The </text>
+<text x="641" y="496" font-size="9" font-weight="600" fill="#38bdf8">[System_Name]</text>
+<text x="724" y="496" font-size="10" fill="#a0aec0"> shall restrict access to</text>
+<text x="624" y="514" font-size="9" font-weight="600" fill="#38bdf8">[resource]</text>
+<text x="685" y="514" font-size="10" fill="#a0aec0"> to users with </text>
+<text x="776" y="514" font-size="9" font-weight="600" fill="#38bdf8">[role/permission]</text>
+<text x="866" y="514" font-size="10" fill="#a0aec0">...</text>
+
+<!-- More categories indicator -->
+<text x="600" y="564" font-size="11" fill="#6b7fa0" text-anchor="middle">+ 5 more categories: Reliability · Environmental · Maintainability · Interface · Regulatory</text>
+
+<!-- Footer -->
+<line x1="150" y1="580" x2="1050" y2="580" stroke="#1c2744" stroke-width="1"/>
+<text x="178" y="602" font-size="10" fill="#6b7fa0">36 templates across 9 categories · Click to insert</text>
+<rect x="946" y="588" width="80" height="28" rx="6" fill="#0f1628" stroke="#1c2744" stroke-width="0.5"/>
+<text x="970" y="606" font-size="11" fill="#a0aec0">Close</text>
+</svg>
