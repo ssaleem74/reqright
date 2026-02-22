@@ -1,9 +1,0 @@
-ID,Text,Type,Level,Priority,Status,Verification,Rationale
-REQ-001,The system shall authenticate users within 2 seconds.,Security,System Requirement,High,Draft,Test,User experience requirement
-REQ-002,The system shall encrypt all data at rest using AES-256.,Security,System Requirement,Critical,Reviewed,Inspection,Compliance requirement
-REQ-003,The system shall process transactions within 500 ms.,Performance,System Requirement,High,Draft,Test,Performance SLA
-REQ-004,The system shall support 10000 concurrent users.,Performance,System Requirement,Medium,Draft,Test,Scalability requirement
-REQ-005,The system shall log all user actions.,Functional,System Requirement,Medium,Approved,Inspection,Audit compliance
-REQ-006,The database shall backup every 24 hours.,Reliability,Subsystem Requirement,High,Draft,Test,Data protection
-REQ-007,The API shall respond with JSON format.,Interface,System Requirement,Low,Draft,Test,Integration standard
-REQ-008,The UI shall display error messages within 1 second.,Functional,Component Requirement,Medium,Draft,Test,User feedback
