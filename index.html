@@ -340,32 +340,113 @@ footer a:hover{color:var(--cyan);}
 </section>
 
 <!-- ═══ SCREENSHOTS ═══ -->
-<section class="screenshots" style="padding:80px 0;border-top:1px solid var(--rule);">
+<section class="screenshots" id="screenshots" style="padding:100px 0;border-top:1px solid var(--rule);">
   <div class="container">
     <div class="reveal">
       <div class="section-label">See It In Action</div>
       <h2 class="section-title">Professional-grade.<br>Zero complexity.</h2>
     </div>
-    <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:48px;">
-      <div class="reveal reveal-d1" style="border:1px solid var(--rule);border-radius:12px;overflow:hidden;background:var(--panel);">
-        <img src="images/01-dashboard.svg" alt="Dashboard" style="width:100%;display:block;"/>
-        <div style="padding:12px 16px;font-size:12px;color:var(--mid);">Dashboard — Quality metrics, status overview, cross-module summary</div>
+
+    <!-- Carousel -->
+    <div class="carousel reveal reveal-d1" style="margin-top:48px;position:relative;">
+      <!-- Main image -->
+      <div id="carousel-frame" style="border:1px solid var(--ruleHi);border-radius:14px;overflow:hidden;background:var(--panel);position:relative;">
+        <img id="carousel-img" src="images/01-dashboard.svg" alt="Dashboard" style="width:100%;display:block;transition:opacity .35s ease;"/>
+        <!-- Overlay arrows -->
+        <button onclick="carouselNav(-1)" style="position:absolute;top:50%;left:12px;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(11,14,20,.75);border:1px solid var(--rule);color:var(--chalk);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;backdrop-filter:blur(8px);" onmouseover="this.style.background='rgba(56,189,248,.2)';this.style.borderColor='var(--cyan)'" onmouseout="this.style.background='rgba(11,14,20,.75)';this.style.borderColor='var(--rule)'">‹</button>
+        <button onclick="carouselNav(1)" style="position:absolute;top:50%;right:12px;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;background:rgba(11,14,20,.75);border:1px solid var(--rule);color:var(--chalk);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;backdrop-filter:blur(8px);" onmouseover="this.style.background='rgba(56,189,248,.2)';this.style.borderColor='var(--cyan)'" onmouseout="this.style.background='rgba(11,14,20,.75)';this.style.borderColor='var(--rule)'">›</button>
+        <!-- Slide counter -->
+        <div style="position:absolute;top:14px;right:16px;background:rgba(11,14,20,.7);padding:4px 12px;border-radius:20px;font-size:11px;color:var(--mid);backdrop-filter:blur(8px);border:1px solid var(--rule);">
+          <span id="carousel-counter" style="font-weight:600;color:var(--cyan);">1</span><span style="color:var(--dim);"> / 8</span>
+        </div>
       </div>
-      <div class="reveal reveal-d2" style="border:1px solid var(--rule);border-radius:12px;overflow:hidden;background:var(--panel);">
-        <img src="images/02-author-editor.svg" alt="Author Editor" style="width:100%;display:block;"/>
-        <div style="padding:12px 16px;font-size:12px;color:var(--mid);">Author — 3-panel editor with real-time 42-rule quality analysis</div>
+
+      <!-- Caption area -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:16px;padding:0 4px;">
+        <div>
+          <div id="carousel-title" style="font-size:16px;font-weight:700;color:var(--chalk);margin-bottom:4px;">Dashboard</div>
+          <div id="carousel-desc" style="font-size:13px;color:var(--mid);line-height:1.5;">Project overview with quality metrics, requirement status breakdown, type distribution, and cross-module summary counts. See comments, changes, and quality scores at a glance.</div>
+        </div>
       </div>
-      <div class="reveal reveal-d3" style="border:1px solid var(--rule);border-radius:12px;overflow:hidden;background:var(--panel);">
-        <img src="images/05-risk-register.svg" alt="Risk Register" style="width:100%;display:block;"/>
-        <div style="padding:12px 16px;font-size:12px;color:var(--mid);">Risk Register — 5×5 likelihood × impact matrix with severity tracking</div>
-      </div>
-      <div class="reveal reveal-d4" style="border:1px solid var(--rule);border-radius:12px;overflow:hidden;background:var(--panel);">
-        <img src="images/04-rules-weights.svg" alt="Custom Rule Weights" style="width:100%;display:block;"/>
-        <div style="padding:12px 16px;font-size:12px;color:var(--mid);">Custom Rule Weights — 5 presets, per-rule weight controls</div>
-      </div>
+
+      <!-- Thumbnail strip -->
+      <div id="carousel-thumbs" style="display:flex;gap:8px;margin-top:20px;overflow-x:auto;padding:4px 0;scroll-behavior:smooth;"></div>
     </div>
   </div>
 </section>
+
+<script>
+(function(){
+  const slides = [
+    {img:'images/01-dashboard.svg', title:'Dashboard', desc:'Project overview with quality metrics, requirement status breakdown, type distribution, and cross-module summary counts. See comments, changes, and quality scores at a glance.'},
+    {img:'images/02-author-editor.svg', title:'Author / Editor', desc:'Three-panel layout: requirement sidebar with search & filters, centre editor with statement, attributes, and INCOSE patterns, and a real-time 42-rule quality analysis panel.'},
+    {img:'images/03-templates.svg', title:'Templates Library', desc:'36 pre-built requirement templates across 9 categories (Functional, Performance, Safety, Security, etc.). Click to insert with pre-filled type, level, and verification method. Placeholders highlighted for quick editing.'},
+    {img:'images/04-rules-weights.svg', title:'Custom Rule Weights', desc:'Configure the importance of each of the 42 INCOSE rules with 5 weight levels (Off → Critical). Five built-in presets: Equal, Safety-Critical, Performance, Compliance-Strict, and Minimal.'},
+    {img:'images/05-risk-register.svg', title:'Risk Register', desc:'5×5 likelihood × impact scoring matrix with colour-coded severity levels. Track risks with categories, mitigations, status, and linked requirements. Visual heat map shows risk distribution.'},
+    {img:'images/06-excel-import.svg', title:'Excel Import', desc:'Import requirements from .xlsx/.xls spreadsheets with intelligent column mapping. Auto-detects common header names, supports multi-sheet workbooks, and previews data before import.'},
+    {img:'images/07-comments-history.svg', title:'Comments & Version History', desc:'Collaborative review workflow with 4 comment types (Comment, Review, Approve, Reject). Auto-status updates on approval. Full version history with colour-coded diffs showing who changed what and when.'},
+    {img:'images/08-traceability.svg', title:'Traceability Matrix', desc:'Cross-module traceability showing each requirement\'s linkages to Risks, Decisions, Stakeholders, Interfaces, and Use Cases. Orphan detection warns about requirements missing parent traces.'}
+  ];
+  let cur = 0;
+  const img = document.getElementById('carousel-img');
+  const title = document.getElementById('carousel-title');
+  const desc = document.getElementById('carousel-desc');
+  const counter = document.getElementById('carousel-counter');
+  const thumbs = document.getElementById('carousel-thumbs');
+  let autoTimer;
+
+  // Build thumbnails
+  slides.forEach((s, i) => {
+    const t = document.createElement('div');
+    t.style.cssText = 'flex:0 0 120px;height:68px;border-radius:8px;overflow:hidden;cursor:pointer;border:2px solid '+(i===0?'var(--cyan)':'var(--rule)')+';transition:all .2s;opacity:'+(i===0?'1':'.5')+';background:var(--panel);';
+    t.innerHTML = '<img src="'+s.img+'" style="width:100%;height:100%;object-fit:cover;display:block;"/>';
+    t.onclick = function(){ goTo(i); resetAuto(); };
+    t.onmouseover = function(){ if(i!==cur) this.style.opacity='0.8'; };
+    t.onmouseout = function(){ if(i!==cur) this.style.opacity='0.5'; };
+    thumbs.appendChild(t);
+  });
+
+  function goTo(i) {
+    cur = i;
+    img.style.opacity = '0';
+    setTimeout(() => {
+      img.src = slides[i].img;
+      img.alt = slides[i].title;
+      img.style.opacity = '1';
+    }, 180);
+    title.textContent = slides[i].title;
+    desc.textContent = slides[i].desc;
+    counter.textContent = i + 1;
+    // Update thumbnail highlights
+    Array.from(thumbs.children).forEach((t, j) => {
+      t.style.borderColor = j === i ? 'var(--cyan)' : 'var(--rule)';
+      t.style.opacity = j === i ? '1' : '0.5';
+    });
+    // Scroll active thumb into view
+    thumbs.children[i].scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+  }
+
+  window.carouselNav = function(dir) {
+    goTo((cur + dir + slides.length) % slides.length);
+    resetAuto();
+  };
+
+  function resetAuto() {
+    clearInterval(autoTimer);
+    autoTimer = setInterval(() => goTo((cur + 1) % slides.length), 6000);
+  }
+
+  // Auto-advance every 6s
+  resetAuto();
+
+  // Keyboard nav
+  document.addEventListener('keydown', (e) => {
+    if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+    if(e.key === 'ArrowLeft') { carouselNav(-1); }
+    if(e.key === 'ArrowRight') { carouselNav(1); }
+  });
+})();
+</script>
 
 <!-- ═══ HOW IT WORKS ═══ -->
 <section class="how" id="how">
